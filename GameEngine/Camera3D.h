@@ -11,7 +11,7 @@ namespace GameEngine
     ~Camera3D();
 
     void Init(float _fov, int _screenWidth, int _screenHeight);
-    void Update(glm::vec2 _mousePos);
+    void Update();
 
     //setters
     void SetPosition(const glm::vec3& _newPosition)
@@ -45,6 +45,10 @@ namespace GameEngine
     {
       return m_viewMatrix;
     }
+    glm::mat4 GetMVP()
+    {
+      return m_MVP;
+    }
     float GetScale()
     {
       return m_scale;
@@ -54,7 +58,7 @@ namespace GameEngine
   private:
     glm::mat4 m_projectionMatrix; // The projection matrix
     glm::mat4 m_viewMatrix; // Camera matrix
-
+    glm::mat4 m_MVP;
     glm::vec3 m_position;
 
 
@@ -72,5 +76,4 @@ namespace GameEngine
 
     float mouseSpeed = 0.005f;
   };
-
 }

@@ -1,4 +1,5 @@
 #include "Camera3D.h"
+#include <SDL\SDL_mouse.h>
 
 namespace GameEngine
 {
@@ -27,20 +28,17 @@ namespace GameEngine
     m_fieldOfView = _fov;
     //projection matrix
     m_projectionMatrix = glm::perspective(glm::radians(m_fieldOfView), GetAspectRatio(), 0.1f, 100.0f);
-
-    // Camera matrix
-    m_viewMatrix = glm::lookAt(
-      m_position, // Camera is at (4,3,3), in World Space
-      glm::vec3(0.0f, 0.0f, 0.0f), // and looks at the origin (0.0f, 0.0f, 0.0f)
-      glm::vec3(0.0f, -1.0f, 0.0f)  // Head is up (set to 0,-1,0 to look upside-down)
-      );
+    SDL_SetRelativeMouseMode(SDL_bool::SDL_TRUE);
   }
-  void Camera3D::Update(glm::vec2 _mousePos)
+  void Camera3D::Update()
   {
     if (m_needsMatrixUpdate)
     {
-      horizontalAngle += mouseSpeed * float(m_screenWidth / 2 - _mousePos.x);
-      verticalAngle += mouseSpeed * float(m_screenHeight / 2 - _mousePos.y);
+      int x, y;
+      SDL_GetMouseState(&x, &y);
+
+      horizontalAngle += mouseSpeed * float(m_screenWidth / 2 - x);
+      verticalAngle += mouseSpeed * float(m_screenHeight / 2 - y);
 
       // Direction : Spherical coordinates to Cartesian coordinates conversion
       glm::vec3 direction(
@@ -59,6 +57,7 @@ namespace GameEngine
 
       //Camera Translation
       glm::vec3 translate(-m_position.x + m_screenWidth / 2, -m_position.y + m_screenHeight / 2, -m_position.z);
+      //View matrix is translated
       m_viewMatrix = glm::lookAt(
         translate,           // Camera is here
         translate + direction, // and looks here : at the same position, plus "direction"
@@ -69,8 +68,11 @@ namespace GameEngine
       glm::vec3 scale(m_scale, m_scale, m_scale);
       //multiply the camera matrix by the scale matrix
       m_viewMatrix = glm::scale(glm::mat4(1.0f), scale) * m_viewMatrix;
-      m_projectionMatrix = glm::perspective(glm::radians(m_fieldOfView), GetAspectRatio(), 0.1f, 100.0f);
 
+      glm::mat4 modelMatrix(1.0f);
+
+      m_MVP = m_projectionMatrix * m_viewMatrix * modelMatrix;
+      
       m_needsMatrixUpdate = false;
     }
   }
