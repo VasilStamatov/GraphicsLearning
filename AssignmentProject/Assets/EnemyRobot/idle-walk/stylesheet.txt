@@ -1,0 +1,77 @@
+.sprite {
+    background-image: url(spritesheet.png);
+    background-repeat: no-repeat;
+    display: block;
+}
+
+.sprite-github {
+    width: 30px;
+    height: 30px;
+    background-position: -5px -5px;
+}
+
+.sprite-gmail {
+    width: 30px;
+    height: 30px;
+    background-position: -45px -5px;
+}
+
+.sprite-idle_1 {
+    width: 460px;
+    height: 352px;
+    background-position: -85px -5px;
+}
+
+.sprite-idle_2 {
+    width: 460px;
+    height: 352px;
+    background-position: -555px -5px;
+}
+
+.sprite-idle_3 {
+    width: 460px;
+    height: 352px;
+    background-position: -1025px -5px;
+}
+
+.sprite-idle_4 {
+    width: 460px;
+    height: 352px;
+    background-position: -1495px -5px;
+}
+
+.sprite-idle_5 {
+    width: 460px;
+    height: 352px;
+    background-position: -1965px -5px;
+}
+
+.sprite-idle_6 {
+    width: 460px;
+    height: 352px;
+    background-position: -2435px -5px;
+}
+
+.sprite-linkedin {
+    width: 30px;
+    height: 30px;
+    background-position: -2905px -5px;
+}
+
+.sprite-stackoverflow {
+    width: 30px;
+    height: 30px;
+    background-position: -2945px -5px;
+}
+
+.sprite-tumblr {
+    width: 30px;
+    height: 30px;
+    background-position: -2985px -5px;
+}
+
+.sprite-twitter {
+    width: 30px;
+    height: 30px;
+    background-position: -3025px -5px;
+}

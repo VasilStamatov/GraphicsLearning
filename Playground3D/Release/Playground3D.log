@@ -1,0 +1,5 @@
+﻿  Main.cpp
+  GLM: perspective function taking degrees as a parameter is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
+  Generating code
+  Finished generating code
+  Playground3D.vcxproj -> C:\Users\Vasil\Documents\Visual Studio 2013\Projects\AssignmentProject\Release\Playground3D.exe

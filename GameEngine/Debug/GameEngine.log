@@ -1,0 +1,40 @@
+﻿  Window.cpp
+  Timing.cpp
+c:\users\vasil\documents\visual studio 2013\projects\assignmentproject\gameengine\timing.cpp(49): warning C4244: 'initializing' : conversion from 'Uint32' to 'float', possible loss of data
+c:\users\vasil\documents\visual studio 2013\projects\assignmentproject\gameengine\timing.cpp(51): warning C4244: 'initializing' : conversion from 'Uint32' to 'float', possible loss of data
+  SpriteBatch.cpp
+  ScreenList.cpp
+  ResourceManager.cpp
+  ParticleEngine2D.cpp
+  ParticleBatch2D.cpp
+  InputManager.cpp
+  ImageLoader.cpp
+  IOManager.cpp
+  IMainGame.cpp
+  GameEngineErrors.cpp
+  GameEngine.cpp
+  GUI.cpp
+  GLSLProgram.cpp
+  DebugRenderer.cpp
+  Camera2D.cpp
+  AudioEngine.cpp
+  Generating Code...
+  Compiling...
+  SpriteFont.cpp
+  Sprite.cpp
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  TextureCache.cpp
+SDL2_ttf.lib(SDL2_ttf.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in SDL2.lib(SDL2.dll); second definition ignored
+SDL2_ttf.lib(SDL2_ttf.dll) : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+SDL2_mixer.lib(SDL2_mixer.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in SDL2.lib(SDL2.dll); second definition ignored
+SDL2_mixer.lib(SDL2_mixer.dll) : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+opengl32.lib(OPENGL32.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in SDL2.lib(SDL2.dll); second definition ignored
+opengl32.lib(OPENGL32.dll) : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+glew32.lib(glew32.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in SDL2.lib(SDL2.dll); second definition ignored
+glew32.lib(glew32.dll) : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+CEGUIBase-0_d.lib(CEGUIBase-0_d.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in SDL2.lib(SDL2.dll); second definition ignored
+CEGUIBase-0_d.lib(CEGUIBase-0_d.dll) : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+CEGUIOpenGLRenderer-0_d.lib(CEGUIOpenGLRenderer-0_d.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in SDL2.lib(SDL2.dll); second definition ignored
+CEGUIOpenGLRenderer-0_d.lib(CEGUIOpenGLRenderer-0_d.dll) : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+  GameEngine.vcxproj -> C:\Users\Vasil\Documents\Visual Studio 2013\Projects\AssignmentProject\Debug\GameEngine.lib
