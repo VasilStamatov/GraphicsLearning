@@ -3,17 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDLTemplate", "SDLTemplate\SDLTemplate.vcxproj", "{F7615657-FA52-4F29-87D8-B57B7BABEA24}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2B8EFB2C-29F6-4E8E-878D-1658A3164F95} = {2B8EFB2C-29F6-4E8E-878D-1658A3164F95}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameEngine", "GameEngine\GameEngine.vcxproj", "{2B8EFB2C-29F6-4E8E-878D-1658A3164F95}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZombieApocalypse", "ZombieApocalypse\ZombieApocalypse.vcxproj", "{B1DB99F9-7D8F-43E6-8089-C1834ED1A535}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2B8EFB2C-29F6-4E8E-878D-1658A3164F95} = {2B8EFB2C-29F6-4E8E-878D-1658A3164F95}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssignmentProject", "AssignmentProject\AssignmentProject.vcxproj", "{C235C38D-ECE3-4859-8432-22CC9B9FF976}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -21,6 +11,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssignmentProject", "Assign
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Playground3D", "Playground3D\Playground3D.vcxproj", "{8D10E32F-B8E4-4CD8-B3AD-FB89506EAC9E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2B8EFB2C-29F6-4E8E-878D-1658A3164F95} = {2B8EFB2C-29F6-4E8E-878D-1658A3164F95}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,18 +21,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F7615657-FA52-4F29-87D8-B57B7BABEA24}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F7615657-FA52-4F29-87D8-B57B7BABEA24}.Debug|Win32.Build.0 = Debug|Win32
-		{F7615657-FA52-4F29-87D8-B57B7BABEA24}.Release|Win32.ActiveCfg = Release|Win32
-		{F7615657-FA52-4F29-87D8-B57B7BABEA24}.Release|Win32.Build.0 = Release|Win32
 		{2B8EFB2C-29F6-4E8E-878D-1658A3164F95}.Debug|Win32.ActiveCfg = Debug|Win32
 		{2B8EFB2C-29F6-4E8E-878D-1658A3164F95}.Debug|Win32.Build.0 = Debug|Win32
 		{2B8EFB2C-29F6-4E8E-878D-1658A3164F95}.Release|Win32.ActiveCfg = Release|Win32
 		{2B8EFB2C-29F6-4E8E-878D-1658A3164F95}.Release|Win32.Build.0 = Release|Win32
-		{B1DB99F9-7D8F-43E6-8089-C1834ED1A535}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B1DB99F9-7D8F-43E6-8089-C1834ED1A535}.Debug|Win32.Build.0 = Debug|Win32
-		{B1DB99F9-7D8F-43E6-8089-C1834ED1A535}.Release|Win32.ActiveCfg = Release|Win32
-		{B1DB99F9-7D8F-43E6-8089-C1834ED1A535}.Release|Win32.Build.0 = Release|Win32
 		{C235C38D-ECE3-4859-8432-22CC9B9FF976}.Debug|Win32.ActiveCfg = Debug|Win32
 		{C235C38D-ECE3-4859-8432-22CC9B9FF976}.Debug|Win32.Build.0 = Debug|Win32
 		{C235C38D-ECE3-4859-8432-22CC9B9FF976}.Release|Win32.ActiveCfg = Release|Win32
