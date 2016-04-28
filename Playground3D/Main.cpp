@@ -58,8 +58,15 @@ int main(int argc, char** argv)
   glBindVertexArray(VertexArrayID);
 
   GameEngine::GLSLProgram shaderProgram;
+
+  GameEngine::Shader shaders[] = 
+  {
+    { GL_VERTEX_SHADER, "Shaders/SimpleTransform.vert", "Vertex Shader" },
+    { GL_FRAGMENT_SHADER, "Shaders/SingleColor.frag", "Fragment Shader" },
+    { GL_NONE, "", "" }
+  };
   
-  shaderProgram.CompileShaders("Shaders/SimpleTransform.vert", "Shaders/SingleColor.frag");
+  shaderProgram.CompileShaders(shaders);
   shaderProgram.AddAttribute("vertexPosition_modelSpace");
   shaderProgram.AddAttribute("vertexUV");
   shaderProgram.LinkShaders();

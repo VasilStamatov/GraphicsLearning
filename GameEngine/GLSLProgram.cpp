@@ -8,7 +8,7 @@
 namespace GameEngine
 {
   //inoitialize all the variables to 0
-  GLSLProgram::GLSLProgram() : m_numAttributes(0), m_programID(0), m_vertexShaderID(0), m_fragmentShaderID(0)
+  GLSLProgram::GLSLProgram() : m_numAttributes(0), m_programID(0), m_shaders(0)
   {
 
   }
@@ -19,48 +19,81 @@ namespace GameEngine
   }
 
   //Compiles the shaders into a form that your GPU can understand
-  void GLSLProgram::CompileShaders(const std::string& _vertexShaderFilePath, const std::string& _fragmentShaderFilepath)
-  {
-    std::string vertSource;
-    std::string fragSource;
-
-    //Read the files to the buffers ( 2 strings )
-    IOManager::ReadFileToBuffer(_vertexShaderFilePath, vertSource);
-    IOManager::ReadFileToBuffer(_fragmentShaderFilepath, fragSource);
-
-    //Compile the shaders by using the strings in their c-string forms
-    CompileShadersFromSource(vertSource.c_str(), fragSource.c_str());
-  }
-
-  void GLSLProgram::CompileShadersFromSource(const char* _vertexSource, const char* _fragmentSource)
+  void GLSLProgram::CompileShaders(Shader* _shaders)
   {
     /* vertext and fragment shaders are successfully compiled
     * now it's time to link them together into a program.
     * get a program object */
     m_programID = glCreateProgram();
-    //Create the vertex shader object, and store its ID
-    m_vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-    if (m_vertexShaderID == 0)
+
+    m_shaders = _shaders;
+
+    //Iterate until the last shader is Compiled
+    while (m_shaders->type != GL_NONE)
     {
-      FatalError("Vertex shader failed to be created!");
+      m_shaders->shaderID = glCreateShader(m_shaders->type);
+
+      if (m_shaders->shaderID == 0)
+      {
+        FatalError(m_shaders->name + " failed to be created!");
+      }
+
+      std::string shaderSource;
+
+      IOManager::ReadFileToBuffer(m_shaders->filePath, shaderSource);
+
+      CompileShader(shaderSource.c_str(), m_shaders->name, m_shaders->shaderID);
+
+      glAttachShader(m_programID, m_shaders->shaderID);
+
+      m_shaders++;
     }
-    //Create the fragment shader object, and store its ID
-    m_fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-    if (m_fragmentShaderID == 0)
-    {
-      FatalError("Fragment shader failed to be created!");
-    }
-    //Compile each shader
-    CompileShader(_vertexSource, "Vertex Shader", m_vertexShaderID);
-    CompileShader(_fragmentSource, "Fragment Shader", m_fragmentShaderID);
+    //Set back to starting pos
+    m_shaders = _shaders;
   }
 
+  void GLSLProgram::CompileShadersFromSource(const char* _vertexSource, const char* _fragmentSource)
+  {
+    //Create the vertex shader object, and store its ID
+
+    Shader shader[]
+    {
+      { GL_VERTEX_SHADER, "", "Vertex Shader" },
+      { GL_FRAGMENT_SHADER, "", "Fragment Shader" },
+      { GL_NONE, "", "" }
+    };
+
+    m_shaders = shader;
+
+    m_shaders->shaderID = glCreateShader(m_shaders->type);
+
+    if (m_shaders->shaderID == 0)
+    {
+      FatalError(m_shaders->name + " failed to be created!");
+    }
+
+    CompileShader(_vertexSource, m_shaders->name, m_shaders->shaderID);
+
+    glAttachShader(m_programID, m_shaders->shaderID);
+
+    m_shaders++;
+
+    m_shaders->shaderID = glCreateShader(m_shaders->type);
+
+    if (m_shaders->shaderID == 0)
+    {
+      FatalError(m_shaders->name + " failed to be created!");
+    }
+
+    CompileShader(_fragmentSource, m_shaders->name, m_shaders->shaderID);
+
+    glAttachShader(m_programID, m_shaders->shaderID);
+
+    //Set back to starting pos
+    m_shaders = shader;
+  }
   void GLSLProgram::LinkShaders()
   {
-    //Attach our shaders to the program
-    glAttachShader(m_programID, m_vertexShaderID);
-    glAttachShader(m_programID, m_fragmentShaderID);
-
     //link our program
     glLinkProgram(m_programID);
 
@@ -77,24 +110,34 @@ namespace GameEngine
       //we don't need this program anymore
       glDeleteProgram(m_programID);
       //dont leak shaders either
-      glDeleteShader(m_fragmentShaderID);
-      glDeleteShader(m_vertexShaderID);
+
+      while (m_shaders->type != GL_NONE)
+      {
+        glDeleteShader(m_shaders->shaderID);
+        m_shaders->shaderID = 0;
+        m_shaders++;
+      }
 
       //print the error log and quit
       std::printf("%s\n", &errorLog[0]);
       FatalError("Shaders failed to link!");
     }
     //Always detach shaders after a successful link.
-    glDetachShader(m_programID, m_vertexShaderID);
-    glDetachShader(m_programID, m_fragmentShaderID);
-    glDeleteShader(m_vertexShaderID);
-    glDeleteShader(m_fragmentShaderID);
+    while (m_shaders->type != GL_NONE)
+    {
+      glDetachShader(m_programID, m_shaders->shaderID);
+      glDeleteShader(m_shaders->shaderID);
+      m_shaders++;
+    }
   }
 
   //Adds an attribute to our shader. SHould be called between compiling and linking.
   void GLSLProgram::AddAttribute(const std::string& attributeName)
   {
     glBindAttribLocation(m_programID, m_numAttributes++, attributeName.c_str());
+    //Remember: binding attribute's locations isn't needed in the new versions of GLSL where the layout locations are specified,
+    //all that's needed are enough glEnablings in the loop in Use()
+    //m_numAttributes++;
   }
 
   GLint GLSLProgram::GetUniformLocation(const std::string& _uniformName)
@@ -109,7 +152,73 @@ namespace GameEngine
     //return it if successful
     return location;
   }
+  GLuint GLSLProgram::GetUniformBlockIndex(const std::string& _uniformBlockName)
+  {
+    GLuint index = glGetUniformBlockIndex(m_programID, _uniformBlockName.c_str());
 
+    //error check
+    if (index == GL_INVALID_INDEX)
+    {
+      FatalError("Uniform block " + _uniformBlockName + " not found in shader!");
+    }
+    //return if successful
+    return index;
+  }
+  void GLSLProgram::GetUniformBlockDataSize(GLuint _index, GLint* _params)
+  {
+    glGetActiveUniformBlockiv(m_programID, _index, GL_UNIFORM_BLOCK_DATA_SIZE, _params);
+  }
+  void GLSLProgram::BindBufferRange(GLenum _target, GLuint _index, GLuint _buffer, GLintptr _offset, GLsizeiptr _size)
+  {
+    glBindBufferRange(_target, _index, _buffer, _offset, _size);
+    if (glGetError() == GL_INVALID_VALUE)
+    {
+      FatalError("Unable to bind the buffer, check the redbook for possible causes (p.64)!");
+    }
+  }
+  void GLSLProgram::BlockUniformBinding(GLuint _uniformBlockIndex, GLuint _uniformBlockBinding)
+  {
+    glUniformBlockBinding(m_programID, _uniformBlockIndex, _uniformBlockBinding);
+  }
+  void GLSLProgram::GetActiveUniformsIndexValues(GLsizei _numUniforms, GLuint * _uniformIndices, GLenum _pname, GLint * _attribute)
+  {
+    glGetActiveUniformsiv(m_programID, _numUniforms, _uniformIndices, _pname, _attribute);
+  }
+  void GLSLProgram::GetUniformIndices(GLsizei _uniformCount, const char ** _uniformNames, GLuint * _uniformIndices)
+  {
+    glGetUniformIndices(m_programID, _uniformCount, _uniformNames, _uniformIndices);
+  }
+  GLint GLSLProgram::GetSubroutineUniformLocation(GLenum _shaderType, const std::string& _name)
+  {
+    GLint location = glGetSubroutineUniformLocation(m_programID, _shaderType, _name.c_str());
+    //error check
+    if (location == GL_INVALID_INDEX)
+    {
+      FatalError("Uniform subroutine" + _name + " not found in shader!");
+    }
+    //return it if successful
+    return location;
+  }
+  GLuint GLSLProgram::GetSubroutineIndex(GLenum _shaderType, const std::string& _name)
+  {
+    GLuint index = glGetSubroutineIndex(m_programID, _shaderType, _name.c_str());
+    //error check
+    if (index == GL_INVALID_INDEX)
+    {
+      FatalError("Subroutine index " + _name + " not found in subroutine uniform!");
+    }
+    //return if successful
+    return index;
+  }
+  void GLSLProgram::UniformSubroutinesuiv(GLenum _shaderType, GLsizei _numSubrUniforms, const GLuint * _indices)
+  {
+    glUniformSubroutinesuiv(_shaderType, _numSubrUniforms, _indices);
+
+    if (glGetError() == GL_INVALID_VALUE)
+    {
+      FatalError("Invalid value generated for index!! Go see p.80 of OGL-R");
+    }
+  }
   //enable the shader
   void GLSLProgram::Use()
   {
@@ -149,7 +258,7 @@ namespace GameEngine
     //check for errors
     GLint success = 0;
     glGetShaderiv(_id, GL_COMPILE_STATUS, &success);
-    
+
     if (success == GL_FALSE)
     {
       GLint maxLength = 0;
