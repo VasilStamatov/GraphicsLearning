@@ -8,18 +8,17 @@
 namespace GameEngine
 {
   //inoitialize all the variables to 0
-  GLSLProgram::GLSLProgram() : m_numAttributes(0), m_programID(0), m_shaders(0)
+  GLSLProgram::GLSLProgram() : m_numAttributes(0), m_programID(0)
   {
 
   }
-
 
   GLSLProgram::~GLSLProgram()
   {
   }
 
   //Compiles the shaders into a form that your GPU can understand
-  void GLSLProgram::CompileShaders(Shader* _shaders)
+  void GLSLProgram::CompileShaders(const std::vector<Shader>& _shaders)
   {
     /* vertext and fragment shaders are successfully compiled
     * now it's time to link them together into a program.
@@ -29,69 +28,50 @@ namespace GameEngine
     m_shaders = _shaders;
 
     //Iterate until the last shader is Compiled
-    while (m_shaders->type != GL_NONE)
+    for (Shader shader : m_shaders)
     {
-      m_shaders->shaderID = glCreateShader(m_shaders->type);
+      shader.shaderID = glCreateShader(shader.type);
 
-      if (m_shaders->shaderID == 0)
+      if (shader.shaderID == 0)
       {
-        FatalError(m_shaders->name + " failed to be created!");
+        FatalError(shader.name + " failed to be created!");
       }
 
       std::string shaderSource;
 
-      IOManager::ReadFileToBuffer(m_shaders->filePath, shaderSource);
+      IOManager::ReadFileToBuffer(shader.filePath, shaderSource);
 
-      CompileShader(shaderSource.c_str(), m_shaders->name, m_shaders->shaderID);
+      CompileShader(shaderSource.c_str(), shader.name, shader.shaderID);
 
-      glAttachShader(m_programID, m_shaders->shaderID);
-
-      m_shaders++;
+      glAttachShader(m_programID, shader.shaderID);
     }
-    //Set back to starting pos
-    m_shaders = _shaders;
   }
 
   void GLSLProgram::CompileShadersFromSource(const char* _vertexSource, const char* _fragmentSource)
   {
     //Create the vertex shader object, and store its ID
 
-    Shader shader[]
+    m_shaders = 
     {
       { GL_VERTEX_SHADER, "", "Vertex Shader" },
       { GL_FRAGMENT_SHADER, "", "Fragment Shader" },
-      { GL_NONE, "", "" }
     };
 
-    m_shaders = shader;
-
-    m_shaders->shaderID = glCreateShader(m_shaders->type);
-
-    if (m_shaders->shaderID == 0)
+    for (Shader shader : m_shaders)
     {
-      FatalError(m_shaders->name + " failed to be created!");
+      shader.shaderID = glCreateShader(shader.type);
+
+      if (shader.shaderID == 0)
+      {
+        FatalError(shader.name + " failed to be created!");
+      }
+
+      CompileShader(_vertexSource, shader.name, shader.shaderID);
+
+      glAttachShader(m_programID, shader.shaderID);
     }
-
-    CompileShader(_vertexSource, m_shaders->name, m_shaders->shaderID);
-
-    glAttachShader(m_programID, m_shaders->shaderID);
-
-    m_shaders++;
-
-    m_shaders->shaderID = glCreateShader(m_shaders->type);
-
-    if (m_shaders->shaderID == 0)
-    {
-      FatalError(m_shaders->name + " failed to be created!");
-    }
-
-    CompileShader(_fragmentSource, m_shaders->name, m_shaders->shaderID);
-
-    glAttachShader(m_programID, m_shaders->shaderID);
-
-    //Set back to starting pos
-    m_shaders = shader;
   }
+
   void GLSLProgram::LinkShaders()
   {
     //link our program
@@ -111,11 +91,10 @@ namespace GameEngine
       glDeleteProgram(m_programID);
       //dont leak shaders either
 
-      while (m_shaders->type != GL_NONE)
+      for (Shader shader : m_shaders)
       {
-        glDeleteShader(m_shaders->shaderID);
-        m_shaders->shaderID = 0;
-        m_shaders++;
+        glDeleteShader(shader.shaderID);
+        shader.shaderID = 0;
       }
 
       //print the error log and quit
@@ -123,11 +102,10 @@ namespace GameEngine
       FatalError("Shaders failed to link!");
     }
     //Always detach shaders after a successful link.
-    while (m_shaders->type != GL_NONE)
+    for (Shader shader : m_shaders)
     {
-      glDetachShader(m_programID, m_shaders->shaderID);
-      glDeleteShader(m_shaders->shaderID);
-      m_shaders++;
+      glDetachShader(m_programID, shader.shaderID);
+      glDeleteShader(shader.shaderID);
     }
   }
 
@@ -152,6 +130,7 @@ namespace GameEngine
     //return it if successful
     return location;
   }
+
   GLuint GLSLProgram::GetUniformBlockIndex(const std::string& _uniformBlockName)
   {
     GLuint index = glGetUniformBlockIndex(m_programID, _uniformBlockName.c_str());
@@ -164,10 +143,12 @@ namespace GameEngine
     //return if successful
     return index;
   }
+
   void GLSLProgram::GetUniformBlockDataSize(GLuint _index, GLint* _params)
   {
     glGetActiveUniformBlockiv(m_programID, _index, GL_UNIFORM_BLOCK_DATA_SIZE, _params);
   }
+
   void GLSLProgram::BindBufferRange(GLenum _target, GLuint _index, GLuint _buffer, GLintptr _offset, GLsizeiptr _size)
   {
     glBindBufferRange(_target, _index, _buffer, _offset, _size);
@@ -176,18 +157,22 @@ namespace GameEngine
       FatalError("Unable to bind the buffer, check the redbook for possible causes (p.64)!");
     }
   }
+
   void GLSLProgram::BlockUniformBinding(GLuint _uniformBlockIndex, GLuint _uniformBlockBinding)
   {
     glUniformBlockBinding(m_programID, _uniformBlockIndex, _uniformBlockBinding);
   }
+
   void GLSLProgram::GetActiveUniformsIndexValues(GLsizei _numUniforms, GLuint * _uniformIndices, GLenum _pname, GLint * _attribute)
   {
     glGetActiveUniformsiv(m_programID, _numUniforms, _uniformIndices, _pname, _attribute);
   }
+
   void GLSLProgram::GetUniformIndices(GLsizei _uniformCount, const char ** _uniformNames, GLuint * _uniformIndices)
   {
     glGetUniformIndices(m_programID, _uniformCount, _uniformNames, _uniformIndices);
   }
+
   GLint GLSLProgram::GetSubroutineUniformLocation(GLenum _shaderType, const std::string& _name)
   {
     GLint location = glGetSubroutineUniformLocation(m_programID, _shaderType, _name.c_str());
@@ -199,6 +184,7 @@ namespace GameEngine
     //return it if successful
     return location;
   }
+
   GLuint GLSLProgram::GetSubroutineIndex(GLenum _shaderType, const std::string& _name)
   {
     GLuint index = glGetSubroutineIndex(m_programID, _shaderType, _name.c_str());
@@ -210,6 +196,7 @@ namespace GameEngine
     //return if successful
     return index;
   }
+
   void GLSLProgram::UniformSubroutinesuiv(GLenum _shaderType, GLsizei _numSubrUniforms, const GLuint * _indices)
   {
     glUniformSubroutinesuiv(_shaderType, _numSubrUniforms, _indices);
@@ -219,6 +206,7 @@ namespace GameEngine
       FatalError("Invalid value generated for index!! Go see p.80 of OGL-R");
     }
   }
+
   //enable the shader
   void GLSLProgram::Use()
   {

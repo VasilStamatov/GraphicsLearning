@@ -2,6 +2,7 @@
 
 #include <string>
 #include <GL/glew.h>
+#include <vector>
 
 namespace GameEngine
 {
@@ -36,7 +37,7 @@ namespace GameEngine
 
     /// Compiles the passed shaders
     /// \param[in] _shaders The shaders passed to the main program in order to be compiled
-    void CompileShaders(Shader* _shaders);
+    void CompileShaders(const std::vector<Shader>& _shaders);
 
     /// Compiling vertex and fragment shaders from source
     /// \param[in] _vertexSource, _fragmentSource the source code of the vertex and fragment shader
@@ -129,8 +130,8 @@ namespace GameEngine
     void CompileShader(const char* _source, const std::string& _name, GLuint _id);
     /// The program ID of the whole shader program
     GLuint m_programID;
-    /// An array containing all the shaders of 1 GLSL program object
-    Shader* m_shaders;
+    /// A vector containing all the shaders of 1 GLSL program object
+    std::vector<Shader> m_shaders;
   };
 }
 

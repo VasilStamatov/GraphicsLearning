@@ -59,11 +59,10 @@ int main(int argc, char** argv)
 
   GameEngine::GLSLProgram shaderProgram;
 
-  GameEngine::Shader shaders[] = 
+  std::vector<GameEngine::Shader> shaders =
   {
     { GL_VERTEX_SHADER, "Shaders/SimpleTransform.vert", "Vertex Shader" },
     { GL_FRAGMENT_SHADER, "Shaders/SingleColor.frag", "Fragment Shader" },
-    { GL_NONE, "", "" }
   };
   
   shaderProgram.CompileShaders(shaders);

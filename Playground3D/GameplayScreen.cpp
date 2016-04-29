@@ -36,11 +36,10 @@ void GameplayScreen::OnEntry()
 {
   m_camera.Init(45.0f, m_window->GetScreenWidth(), m_window->GetScreenHeight());
 
-  GameEngine::Shader shaders[] =
+  std::vector<GameEngine::Shader> shaders =
   {
     { GL_VERTEX_SHADER, "Shaders/SimpleTransform.vert", "Vertex Shader" },
     { GL_FRAGMENT_SHADER, "Shaders/SingleColor.frag", "Fragment Shader" },
-    { GL_NONE, "", "" }
   };
 
   m_shaderProgram.CompileShaders(shaders);
