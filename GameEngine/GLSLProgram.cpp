@@ -118,6 +118,18 @@ namespace GameEngine
     //m_numAttributes++;
   }
 
+  GLint GLSLProgram::GetAttribLoc(const std::string& _attributeName)
+  {
+    GLint location = glGetAttribLocation(m_programID, _attributeName.c_str());
+    //error check
+    if (location == GL_INVALID_INDEX)
+    {
+      FatalError("Attribute " + _attributeName + " not found in shader!");
+    }
+    //return it if successful
+    return location;
+  }
+
   GLint GLSLProgram::GetUniformLocation(const std::string& _uniformName)
   {
     //get the uniform location

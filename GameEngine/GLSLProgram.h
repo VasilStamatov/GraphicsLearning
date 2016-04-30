@@ -50,6 +50,11 @@ namespace GameEngine
     /// \param[in] attributeName The name of the added attribute
     void AddAttribute(const std::string& attributeName);
 
+    /// Gets the location of a specific attribute in the shader program
+    /// \param[in] _attributeName The name of the searched attribute
+    /// \return the GLint location of the specified attribute
+    GLint GetAttribLoc(const std::string& _attributeName);
+
     /// Get the uniform location
     /// \param[in] _uniformName The name of the requested uniform
     /// \return output is the GLint location of the uniform in the shader
