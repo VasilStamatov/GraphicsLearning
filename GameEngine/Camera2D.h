@@ -30,7 +30,6 @@ namespace GameEngine
     void OffsetScale(float _offset) { m_scale += _offset; if (m_scale < 0.001f) m_scale = 0.001f; m_needsMatrixUpdate = true; }
 
     //setters
-
     void SetPosition(const glm::vec2& _newPosition)
     {
       m_position = _newPosition;
@@ -70,9 +69,9 @@ namespace GameEngine
 
     float m_scale;
 
-    glm::vec2 m_position;
-    glm::mat4 m_cameraMatrix;
-    glm::mat4 m_orthoMatrix;
+    glm::vec2 m_position; ///< camera position
+    glm::mat4 m_cameraMatrix; ///< view matrix
+    glm::mat4 m_orthoMatrix; ///< ortho matrix
 
   };
 

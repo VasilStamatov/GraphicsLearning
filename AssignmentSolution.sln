@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Playground3D", "Playground3
 		{2B8EFB2C-29F6-4E8E-878D-1658A3164F95} = {2B8EFB2C-29F6-4E8E-878D-1658A3164F95}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinsockTest", "WinsockTest\WinsockTest.vcxproj", "{7D53F3AD-40C3-4642-9B97-F482F55324AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -33,6 +35,10 @@ Global
 		{8D10E32F-B8E4-4CD8-B3AD-FB89506EAC9E}.Debug|Win32.Build.0 = Debug|Win32
 		{8D10E32F-B8E4-4CD8-B3AD-FB89506EAC9E}.Release|Win32.ActiveCfg = Release|Win32
 		{8D10E32F-B8E4-4CD8-B3AD-FB89506EAC9E}.Release|Win32.Build.0 = Release|Win32
+		{7D53F3AD-40C3-4642-9B97-F482F55324AE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7D53F3AD-40C3-4642-9B97-F482F55324AE}.Debug|Win32.Build.0 = Debug|Win32
+		{7D53F3AD-40C3-4642-9B97-F482F55324AE}.Release|Win32.ActiveCfg = Release|Win32
+		{7D53F3AD-40C3-4642-9B97-F482F55324AE}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

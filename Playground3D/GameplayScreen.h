@@ -4,6 +4,7 @@
 #include <GameEngine/Camera3D.h>
 #include <GameEngine/Window.h>
 #include <GameEngine\GLSLProgram.h>
+#include <GameEngine\GLTexture.h>
 
 // Our custom gameplay screen that inherits from the IGameScreen
 
@@ -34,7 +35,10 @@ private:
 
   GLuint VertexArrayID;
   GLuint vertexBuffer;
+  GLuint uvBuffer;
 
+  GameEngine::GLTexture m_texture;
+  glm::mat4 MVP;
   //the texturing program for sprites and lights
   GameEngine::GLSLProgram m_shaderProgram;
   //the cameras

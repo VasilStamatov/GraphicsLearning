@@ -53,8 +53,8 @@ namespace GameEngine
 
     m_shaders = 
     {
-      { GL_VERTEX_SHADER, "", "Vertex Shader" },
-      { GL_FRAGMENT_SHADER, "", "Fragment Shader" },
+      { GL_VERTEX_SHADER, _vertexSource, "Vertex Shader" },
+      { GL_FRAGMENT_SHADER, _fragmentSource, "Fragment Shader" },
     };
 
     for (Shader shader : m_shaders)
@@ -66,7 +66,7 @@ namespace GameEngine
         FatalError(shader.name + " failed to be created!");
       }
 
-      CompileShader(_vertexSource, shader.name, shader.shaderID);
+      CompileShader(shader.filePath.c_str(), shader.name, shader.shaderID);
 
       glAttachShader(m_programID, shader.shaderID);
     }

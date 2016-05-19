@@ -47,7 +47,12 @@ void GameOverScreen::OnEntry()
   m_camera.SetScale(32.0f);
 
   //compile the texture shader
-  m_textureProgram.CompileShaders("Shaders/textureShading.vert", "Shaders/textureShading.frag");
+  std::vector<GameEngine::Shader> textureShaders =
+  {
+    { GL_VERTEX_SHADER, "Shaders/textureShading.vert", "Texture Vertex Shader" },
+    { GL_FRAGMENT_SHADER, "Shaders/textureShading.frag", "Texture Fragment Shader" },
+  };
+  m_textureProgram.CompileShaders(textureShaders);
   m_textureProgram.AddAttribute("vertexPosition");
   m_textureProgram.AddAttribute("vertexColor");
   m_textureProgram.AddAttribute("vertexUV");

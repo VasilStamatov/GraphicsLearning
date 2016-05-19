@@ -27,7 +27,7 @@ namespace GameEngine
     m_screenHeight = _screenHeight;
     m_fieldOfView = _fov;
     //projection matrix
-    m_projectionMatrix = glm::perspective(glm::radians(m_fieldOfView), GetAspectRatio(), 0.1f, 100.0f);
+    m_projectionMatrix = glm::perspective(m_fieldOfView, GetAspectRatio(), 0.1f, 100.0f);
     SDL_SetRelativeMouseMode(SDL_bool::SDL_TRUE);
   }
   void Camera3D::Update()

@@ -84,13 +84,23 @@ void EditorScreen::OnEntry()
 
   // shader initialization
   //compile the texture shader
-  m_textureProgram.CompileShaders("Shaders/textureShading.vert", "Shaders/textureShading.frag");
+  std::vector<GameEngine::Shader> textureShaders =
+  {
+    { GL_VERTEX_SHADER, "Shaders/textureShading.vert", "Texture Vertex Shader" },
+    { GL_FRAGMENT_SHADER, "Shaders/textureShading.frag", "Texture Fragment Shader" },
+  };
+  m_textureProgram.CompileShaders(textureShaders);
   m_textureProgram.AddAttribute("vertexPosition");
   m_textureProgram.AddAttribute("vertexColor");
   m_textureProgram.AddAttribute("vertexUV");
   m_textureProgram.LinkShaders();
   // Compile our light shader
-  m_lightProgram.CompileShaders("Shaders/lightShading.vert", "Shaders/lightShading.frag");
+  std::vector<GameEngine::Shader> lightingShaders =
+  {
+    { GL_VERTEX_SHADER, "Shaders/lightShading.vert", "Lighting Vertex Shader" },
+    { GL_FRAGMENT_SHADER, "Shaders/lightShading.frag", "Lighting Fragment Shader" },
+  };
+  m_lightProgram.CompileShaders(lightingShaders);
   m_lightProgram.AddAttribute("vertexPosition");
   m_lightProgram.AddAttribute("vertexColor");
   m_lightProgram.AddAttribute("vertexUV");
