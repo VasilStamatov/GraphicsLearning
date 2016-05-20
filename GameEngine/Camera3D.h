@@ -13,19 +13,19 @@ namespace GameEngine
     Camera3D();
     ~Camera3D();
 
-    /* \brief The init function for the camera
+    /** \brief The init function for the camera
      * \param _fov - the field of view (for the frustum)
      * \param _screenWidth - the width of the sdl screen
      * \param _screenHeight - the height of the sdl screen
      */
     void Init(float _fov, int _screenWidth, int _screenHeight);
 
-    /* \brief The per-frame function for the camera
+    /** \brief The per-frame function for the camera
      * \param _fps - the current fps on which the game is runnign (for deltaTime)
      */
     void Update(float _fps);
 
-    /* \brief Gets the aspect ratio of the screen
+    /** \brief Gets the aspect ratio of the screen
      * \return the division of SW / SH
      */
     float GetAspectRatio() const
@@ -33,7 +33,7 @@ namespace GameEngine
       return (float)m_screenWidth / (float)m_screenHeight;
     }
 
-    /* \brief Gets the projection matrix of the camera
+    /** \brief Gets the projection matrix of the camera
      * \return the projection matrix
      */
     glm::mat4 GetProjectionMatrix()
@@ -41,7 +41,7 @@ namespace GameEngine
       return m_projectionMatrix;
     }
 
-    /* \brief Gets the view matrix of the camera
+    /** \brief Gets the view matrix of the camera
      * \return the view matrix
      */
     glm::mat4 GetViewMatrix()
@@ -49,7 +49,7 @@ namespace GameEngine
       return m_viewMatrix;
     }
 
-    /* \brief Gets the position vec3 of the camera
+    /** \brief Gets the position vec3 of the camera
      * \return the position vec3
      */
     glm::vec3 GetPosition() const { return m_position; }
