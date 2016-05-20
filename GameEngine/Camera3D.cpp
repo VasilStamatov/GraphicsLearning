@@ -1,17 +1,14 @@
 #include "Camera3D.h"
 #include <SDL\SDL_mouse.h>
-
+#include <SDL\SDL_events.h>
 namespace GameEngine
 {
   Camera3D::Camera3D() :
-    m_position(0.0f, 0.0f, 3.0f),
+    m_position(0, 0, 5),
     m_projectionMatrix(1.0f),
     m_viewMatrix(1.0f),
-    m_scale(1.0f),
-    m_fieldOfView(45.0f),
-    m_screenWidth(500.0f),
-    m_screenHeight(500.0f),
-    m_needsMatrixUpdate(true)
+    m_screenWidth(500),
+    m_screenHeight(500)
   {
 
   }
@@ -25,55 +22,79 @@ namespace GameEngine
   {
     m_screenWidth = _screenWidth;
     m_screenHeight = _screenHeight;
-    m_fieldOfView = _fov;
+    initialFoV = _fov;
     //projection matrix
-    m_projectionMatrix = glm::perspective(m_fieldOfView, GetAspectRatio(), 0.1f, 100.0f);
-    SDL_SetRelativeMouseMode(SDL_bool::SDL_TRUE);
+    m_projectionMatrix = glm::perspective(initialFoV, GetAspectRatio(), 0.1f, 100.0f);
+
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+    ;
   }
-  void Camera3D::Update()
+
+  void Camera3D::Update(float _fps)
   {
-    if (m_needsMatrixUpdate)
+    float deltaTime = 1.0f / _fps;
+
+    glm::vec3 direction(
+      cos(verticalAngle) * sin(horizontalAngle),
+      sin(verticalAngle),
+      cos(verticalAngle) * cos(horizontalAngle)
+      );
+
+    // Right vector
+    glm::vec3 right = glm::vec3(
+      sin(horizontalAngle - glm::radians(90.0f)),
+      0.0f,
+      cos(horizontalAngle - glm::radians(90.0f))
+      );
+    // Up vector : perpendicular to both direction and right
+    glm::vec3 up = glm::cross(right, direction);
+
+    SDL_Event evnt;
+    while (SDL_PollEvent(&evnt))
     {
-      int x, y;
-      SDL_GetMouseState(&x, &y);
-
-      horizontalAngle += mouseSpeed * float(m_screenWidth / 2 - x);
-      verticalAngle += mouseSpeed * float(m_screenHeight / 2 - y);
-
-      // Direction : Spherical coordinates to Cartesian coordinates conversion
-      glm::vec3 direction(
-        cos(verticalAngle) * sin(horizontalAngle),
-        sin(verticalAngle),
-        cos(verticalAngle) * cos(horizontalAngle)
-        );
-      // Right vector
-      glm::vec3 right = glm::vec3(
-        sin(horizontalAngle - 3.14f / 2.0f),
-        0,
-        cos(horizontalAngle - 3.14f / 2.0f)
-        );
-      // Up vector
-      glm::vec3 up = glm::cross(right, direction);
-
-      //Camera Translation
-      glm::vec3 translate(-m_position.x + m_screenWidth / 2, -m_position.y + m_screenHeight / 2, -m_position.z);
-      //View matrix is translated
-      m_viewMatrix = glm::lookAt(
-        translate,           // Camera is here
-        translate + direction, // and looks here : at the same position, plus "direction"
-        up                  // Head is up (set to 0,-1,0 to look upside-down)
-        );
-
-      //Camera Scale
-      glm::vec3 scale(m_scale, m_scale, m_scale);
-      //multiply the camera matrix by the scale matrix
-      m_viewMatrix = glm::scale(glm::mat4(1.0f), scale) * m_viewMatrix;
-
-      glm::mat4 modelMatrix(1.0f);
-
-      m_MVP = m_projectionMatrix * m_viewMatrix * modelMatrix;
-      
-      m_needsMatrixUpdate = false;
+      switch (evnt.type)
+      {
+      case SDL_MOUSEMOTION:
+        // Compute new orientation
+        horizontalAngle -= mouseSpeed * deltaTime * evnt.motion.xrel;
+        verticalAngle -= mouseSpeed * deltaTime * evnt.motion.yrel;
+        break;
+      case SDL_KEYDOWN:
+        inputManager.PressKey(evnt.key.keysym.sym);
+        break;
+      case SDL_KEYUP:
+        inputManager.ReleaseKey(evnt.key.keysym.sym);
+        break;
+      case SDL_MOUSEBUTTONDOWN:
+        inputManager.PressKey(evnt.button.button);
+        break;
+      case SDL_MOUSEBUTTONUP:
+        inputManager.ReleaseKey(evnt.button.button);
+        break;
+      case SDL_MOUSEWHEEL:
+        initialFoV -= 5 * evnt.wheel.y;
+        printf("FOV angle: %f \n", initialFoV);
+      default:
+        break;
+      }
     }
+    if (inputManager.IsKeyDown(SDLK_w))
+    {
+      m_position += direction * deltaTime * speed;
+    }
+    if (inputManager.IsKeyDown(SDLK_a))
+    {
+      m_position -= right * deltaTime * speed;
+    }
+    if (inputManager.IsKeyDown(SDLK_s))
+    {
+      m_position -= direction * deltaTime * speed;
+    }
+    if (inputManager.IsKeyDown(SDLK_d))
+    {
+      m_position += right * deltaTime * speed;
+    }
+    m_viewMatrix = glm::lookAt(m_position, m_position + direction, up);
+    m_projectionMatrix = glm::perspective(initialFoV, GetAspectRatio(), 0.1f, 100.0f);
   }
 }

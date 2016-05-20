@@ -256,6 +256,10 @@ int main(int argc, char** argv)
   //      quit = true;
   //      break;
   //    }
+  //    case SDL_KEYDOWN:
+  //      int x, y;
+  //      SDL_GetMouseState(&x, &y);
+  //      printf("x,y coords: {%d, %d}\n", x, y);
   //    default:
   //      break;
   //    }

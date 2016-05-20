@@ -1,10 +1,10 @@
 #pragma once
 
 #include <GameEngine/IGameScreen.h>
-#include <GameEngine/Camera3D.h>
 #include <GameEngine/Window.h>
 #include <GameEngine\GLSLProgram.h>
 #include <GameEngine\GLTexture.h>
+#include <GameEngine\Camera3D.h>
 
 // Our custom gameplay screen that inherits from the IGameScreen
 
@@ -37,8 +37,13 @@ private:
   GLuint vertexBuffer;
   GLuint uvBuffer;
 
-  GameEngine::GLTexture m_texture;
+  glm::mat4 viewMatrix;
+  glm::mat4 projectionMatrix;
+  // Model matrix : an identity matrix (model will be at the origin)
+  glm::mat4 modelMatrix = glm::mat4(1.0f);
   glm::mat4 MVP;
+
+  GameEngine::GLTexture m_texture;
   //the texturing program for sprites and lights
   GameEngine::GLSLProgram m_shaderProgram;
   //the cameras

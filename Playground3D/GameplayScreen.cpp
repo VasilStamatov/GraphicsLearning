@@ -38,7 +38,7 @@ void GameplayScreen::OnEntry()
   glGenVertexArrays(1, &VertexArrayID);
   glBindVertexArray(VertexArrayID);
 
-  //m_camera.Init(45.0f, m_window->GetScreenWidth(), m_window->GetScreenHeight());
+  m_camera.Init(45.0f, m_window->GetScreenWidth(), m_window->GetScreenHeight());
 
   std::vector<GameEngine::Shader> shaders =
   {
@@ -51,22 +51,11 @@ void GameplayScreen::OnEntry()
   m_shaderProgram.AddAttribute("vertexUV");
   m_shaderProgram.LinkShaders();
 
-  glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+  glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
 
   // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-  glm::mat4 Projection = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-
-  // Camera matrix
-  glm::mat4 View = glm::lookAt(
-    glm::vec3(4, 3, -3), // Camera is at (4,3,3), in World Space
-    glm::vec3(0, 0, 0), // and looks at the origin
-    glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
-    );
-  // Model matrix : an identity matrix (model will be at the origin)
-  glm::mat4 Model = glm::mat4(1.0f);
-  // Our ModelViewProjection : multiplication of our 3 matrices
-  MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
-
+  projectionMatrix = m_camera.GetProjectionMatrix();
+  modelMatrix = glm::mat4(1.0f);
   static const GLfloat g_vertex_buffer_data[] = {
     -1.0f, -1.0f, -1.0f, // triangle 1 : begin
     -1.0f, -1.0f, 1.0f,
@@ -158,7 +147,8 @@ void GameplayScreen::OnEntry()
   glEnable(GL_DEPTH_TEST);
   // Accept fragment if it closer to the camera than the former one
   glDepthFunc(GL_LESS);
-
+  // Cull triangles which normal is not towards the camera
+  glEnable(GL_CULL_FACE);
 }
 
 void GameplayScreen::OnExit()
@@ -168,7 +158,10 @@ void GameplayScreen::OnExit()
 
 void GameplayScreen::Update()
 {
-  //m_camera.Update();
+  m_camera.Update(m_game->GetFPS());
+  viewMatrix = m_camera.GetViewMatrix();
+  projectionMatrix = m_camera.GetProjectionMatrix();
+  MVP = projectionMatrix * viewMatrix * modelMatrix;
   CheckInput();
 }
 void GameplayScreen::Draw()
@@ -178,13 +171,15 @@ void GameplayScreen::Draw()
 
   m_shaderProgram.Use();
 
-  //glm::mat4 MVP = m_camera.GetMVP();
-
-  GLuint matrixID = m_shaderProgram.GetUniformLocation("MVP");
+  GLuint MVPMatrixID = m_shaderProgram.GetUniformLocation("MVP");
 
   GLuint textureID = m_shaderProgram.GetUniformLocation("textureSampler");
 
-  glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);
+
+  glUniformMatrix4fv(MVPMatrixID, 1, GL_FALSE, &MVP[0][0]);
+  //glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, &projectionMatrix[0][0]);
+  //glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMatrix[0][0]);
+
 
   //Bind the texture in texture unit 0
   glActiveTexture(GL_TEXTURE0);
@@ -229,33 +224,5 @@ void GameplayScreen::CheckInput()
   while (SDL_PollEvent(&evnt))
   {
     m_game->OnSDLEvent(evnt);
-
-    if (m_game->inputManager.IsKeyDown(SDLK_a))
-    {
-      m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(-CAMERA_MOVEMENT, 0.0f, 0.0f));
-    }
-    if (m_game->inputManager.IsKeyDown(SDLK_d))
-    {
-      m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(CAMERA_MOVEMENT, 0.0f, 0.0f));
-    }
-    if (m_game->inputManager.IsKeyDown(SDLK_w))
-    {
-      m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(0.0f, CAMERA_MOVEMENT, 0.0f));
-    }
-    if (m_game->inputManager.IsKeyDown(SDLK_s))
-    {
-      m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(0.0f, -CAMERA_MOVEMENT, 0.0f));
-    }
-    if (m_game->inputManager.IsKeyDown(SDLK_q))
-    {
-      m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(0.0f, 0.0f, CAMERA_MOVEMENT));
-    }
-    if (m_game->inputManager.IsKeyDown(SDLK_e))
-    {
-      m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(0.0f, 0.0f, -CAMERA_MOVEMENT));
-    }
-    int x, y;
-    SDL_GetMouseState(&x, &y);
-    printf("x: %d, y: %d \n", x, y);
   }
 }

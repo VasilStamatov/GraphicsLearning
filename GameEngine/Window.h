@@ -21,7 +21,7 @@ namespace GameEngine
     //Getters
     int GetScreenWidth() { return m_screenWidth; };
     int GetScreenHeight() { return m_screenHeight; };
-
+    SDL_Window* GetWindow() { return m_sdlWindow; }
   private:
     SDL_Window* m_sdlWindow;
     int m_screenWidth, m_screenHeight;
