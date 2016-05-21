@@ -32,7 +32,11 @@ namespace GameEngine
 
   void Camera3D::Update(float _fps)
   {
-    float deltaTime = 1.0f / _fps;
+    float deltaTime = 1.0f;
+    if (_fps != 0.0f)
+    {
+      deltaTime = 1.0f / _fps;
+    }
 
     glm::vec3 direction(
       cos(verticalAngle) * sin(horizontalAngle),
@@ -58,6 +62,25 @@ namespace GameEngine
         // Compute new orientation
         horizontalAngle -= mouseSpeed * deltaTime * evnt.motion.xrel;
         verticalAngle -= mouseSpeed * deltaTime * evnt.motion.yrel;
+
+        // Restrict the verticle angle rotations (looking up and down) so you don't make air-rolls
+        if (verticalAngle < -glm::radians(90.0f))
+        {
+          verticalAngle = -glm::radians(90.0f);
+        }
+        else if (verticalAngle > glm::radians(90.0f))
+        {
+          verticalAngle = glm::radians(90.0f);
+        }
+        // Keep the horizontal rotation range always between 0 and 360 degrees (but in radians ofc) so it doesn't go too high or low
+        if (horizontalAngle < 0.0f)
+        {
+          horizontalAngle += glm::radians(360.0f);
+        }
+        else if (horizontalAngle > glm::radians(360.0f))
+        {
+          horizontalAngle -= glm::radians(360.0f);
+        }
         break;
       case SDL_KEYDOWN:
         inputManager.PressKey(evnt.key.keysym.sym);

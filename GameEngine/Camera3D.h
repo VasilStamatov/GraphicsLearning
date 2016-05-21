@@ -63,7 +63,7 @@ namespace GameEngine
     glm::vec3 m_position; ///< camera position
 
     /// horizontal angle : toward -Z
-    float horizontalAngle = 3.14f;
+    float horizontalAngle = glm::radians(180.0f);
 
     /// vertical angle : 0, look at the horizon
     float verticalAngle = 0.0f;
