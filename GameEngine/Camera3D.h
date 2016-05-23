@@ -7,7 +7,8 @@
 
 namespace GameEngine
 {
-  enum class MoveState { FORWARD, BACKWARD, LEFT, RIGHT };
+  /** The movement states of the camera */
+  enum class MoveState { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN };
 
   class Camera3D
   {
@@ -41,6 +42,8 @@ namespace GameEngine
     * - BACKWARD - translates towards the -z axis by speed * deltaTime
     * - LEFT - translates towards the -x axis by speed * deltaTime
     * - RIGHT - - translates towards the +x axis by speed * deltaTime
+    * - UP - translates towards the +y axis by speed * deltaTime
+    * - DOWN - - translates towards the -y axis by speed * deltaTime
     * \param _fps - the current fps
     */
     void Move(const MoveState& _ms, float _fps);

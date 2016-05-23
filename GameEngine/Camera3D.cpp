@@ -71,6 +71,12 @@ namespace GameEngine
     case MoveState::RIGHT:
       m_position += m_right * deltaTime * m_speed;
       break;
+    case MoveState::UP:
+      m_position += m_up * deltaTime * m_speed;
+      break;
+    case MoveState::DOWN:
+      m_position -= m_up * deltaTime * m_speed;
+      break;
     default:
       break;
     }

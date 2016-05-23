@@ -235,6 +235,14 @@ void GameplayScreen::CheckInput()
   {
     m_camera.Move(GameEngine::MoveState::RIGHT, m_game->GetFPS());
   }
+  if (m_game->inputManager.IsKeyDown(SDLK_r))
+  {
+    m_camera.Move(GameEngine::MoveState::UP, m_game->GetFPS());
+  }
+  if (m_game->inputManager.IsKeyDown(SDLK_f))
+  {
+    m_camera.Move(GameEngine::MoveState::DOWN, m_game->GetFPS());
+  }
   if (m_game->inputManager.IsKeyDown(SDLK_q))
   {
     m_camera.IncreaseMouseSensitivity(0.01f);
