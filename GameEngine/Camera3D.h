@@ -24,8 +24,7 @@ namespace GameEngine
      */
     void Init(float _fov, int _screenWidth, int _screenHeight, const SDL_bool& _relativeMM = SDL_FALSE);
 
-    /** \brief The per-frame function for the camera which updates the view matrix if needed
-     */
+    /** \brief The per-frame function for the camera which updates the view matrix if needed */
     void Update();
 
     /** \brief Sets the camera position to a specific one
@@ -124,9 +123,9 @@ namespace GameEngine
     float m_verticalAngle = 0.0f;
 
     //axis vectors
-    glm::vec3 m_direction;
-    glm::vec3 m_right;
-    glm::vec3 m_up;
+    glm::vec3 m_direction; //The direction the player is facing
+    glm::vec3 m_right; // the axis to the right of the player of where he's facing
+    glm::vec3 m_up; //the axis up from the player of where he's facing
 
     //Is true if a value of the projection matrix is changed
     bool m_needsMatrixUpdate = true;
