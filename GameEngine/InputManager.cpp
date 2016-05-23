@@ -38,6 +38,17 @@ namespace GameEngine
     m_mouseCoords.x = _x;
     m_mouseCoords.y = _y;
   }
+  void InputManager::SetRelativeMouseMotion(float _xrel, float _yrel)
+  {
+    m_relativeMouseMotion.x = _xrel;
+    m_relativeMouseMotion.y = _yrel;
+  }
+  void InputManager::SetMouseWheel(float _xVal, float _yVal)
+  {
+    m_mouseWheel.x = _xVal;
+    m_mouseWheel.y = _yVal;
+  }
+
   bool InputManager::IsKeyDown(unsigned int _keyID)
   {
     // We dont want to use the associative array approach here

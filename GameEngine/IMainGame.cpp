@@ -70,6 +70,7 @@ namespace GameEngine
       break;
     case SDL_MOUSEMOTION:
       inputManager.SetMouseCoords((float)_evnt.motion.x, (float)_evnt.motion.y);
+      inputManager.SetRelativeMouseMotion((float)_evnt.motion.xrel, (float)_evnt.motion.yrel);
       break;
     case SDL_KEYDOWN:
       inputManager.PressKey(_evnt.key.keysym.sym);
@@ -83,6 +84,8 @@ namespace GameEngine
     case SDL_MOUSEBUTTONUP:
       inputManager.ReleaseKey(_evnt.button.button);
       break;
+    case SDL_MOUSEWHEEL:
+      inputManager.SetMouseWheel(_evnt.wheel.x, _evnt.wheel.y);
     }
   }
 

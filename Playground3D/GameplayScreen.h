@@ -37,12 +37,6 @@ private:
   GLuint vertexBuffer;
   GLuint uvBuffer;
 
-  glm::mat4 viewMatrix;
-  glm::mat4 projectionMatrix;
-  // Model matrix : an identity matrix (model will be at the origin)
-  glm::mat4 modelMatrix = glm::mat4(1.0f);
-  glm::mat4 MVP;
-
   GameEngine::GLTexture m_texture;
   //the texturing program for sprites and lights
   GameEngine::GLSLProgram m_shaderProgram;

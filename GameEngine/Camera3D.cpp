@@ -10,7 +10,21 @@ namespace GameEngine
     m_screenWidth(500),
     m_screenHeight(500)
   {
+    //camera direction
+    m_direction = glm::vec3(
+      cos(m_verticalAngle) * sin(m_horizontalAngle),
+      sin(m_verticalAngle),
+      cos(m_verticalAngle) * cos(m_horizontalAngle)
+      );
 
+    // Right vector
+    m_right = glm::vec3(
+      sin(m_horizontalAngle - glm::radians(90.0f)),
+      0.0f,
+      cos(m_horizontalAngle - glm::radians(90.0f))
+      );
+    // Up vector : perpendicular to both direction and right
+    m_up = glm::cross(m_right, m_direction);
   }
 
 
@@ -18,19 +32,52 @@ namespace GameEngine
   {
   }
 
-  void Camera3D::Init(float _fov, int _screenWidth, int _screenHeight)
+  void Camera3D::Init(float _fov, int _screenWidth, int _screenHeight, const SDL_bool& _relativeMM)
   {
     m_screenWidth = _screenWidth;
     m_screenHeight = _screenHeight;
-    initialFoV = _fov;
+    m_initialFoV = _fov;
     //projection matrix
-    m_projectionMatrix = glm::perspective(initialFoV, GetAspectRatio(), 0.1f, 100.0f);
+    m_projectionMatrix = glm::perspective(m_initialFoV, GetAspectRatio(), 0.1f, 100.0f);
 
-    SDL_SetRelativeMouseMode(SDL_TRUE);
-    ;
+    SDL_SetRelativeMouseMode(_relativeMM);
   }
 
-  void Camera3D::Update(float _fps)
+  void Camera3D::Update()
+  {
+    if (m_needsMatrixUpdate)
+    {
+      m_viewMatrix = glm::lookAt(m_position, m_position + m_direction, m_up);
+    }
+  }
+  void Camera3D::Move(const MoveState& _ms, float _fps)
+  {
+    float deltaTime = 1.0f;
+    if (_fps != 0.0f)
+    {
+      deltaTime = 1.0f / _fps;
+    }
+    switch (_ms)
+    {
+    case MoveState::FORWARD:
+      m_position += m_direction * deltaTime * m_speed;
+      break;
+    case MoveState::BACKWARD:
+      m_position -= m_direction * deltaTime * m_speed;
+      break;
+    case MoveState::LEFT:
+      m_position -= m_right * deltaTime * m_speed;
+      break;
+    case MoveState::RIGHT:
+      m_position += m_right * deltaTime * m_speed;
+      break;
+    default:
+      break;
+    }
+    m_needsMatrixUpdate = true;
+  }
+
+  void Camera3D::Rotate(float _xrel, float _yrel, float _fps)
   {
     float deltaTime = 1.0f;
     if (_fps != 0.0f)
@@ -38,86 +85,43 @@ namespace GameEngine
       deltaTime = 1.0f / _fps;
     }
 
-    glm::vec3 direction(
-      cos(verticalAngle) * sin(horizontalAngle),
-      sin(verticalAngle),
-      cos(verticalAngle) * cos(horizontalAngle)
-      );
+    m_horizontalAngle -= m_mouseSpeed * deltaTime * _xrel;
+
+    m_verticalAngle -= m_mouseSpeed * deltaTime * _yrel;
+
+    // Restrict the verticle angle rotations (looking up and down) so you don't make air-rolls
+    if (m_verticalAngle < -glm::radians(90.0f))
+    {
+      m_verticalAngle = -glm::radians(90.0f);
+    }
+    else if (m_verticalAngle > glm::radians(90.0f))
+    {
+      m_verticalAngle = glm::radians(90.0f);
+    }
+    // Keep the horizontal rotation range always between 0 and 360 degrees (but in radians ofc) so it doesn't go too high or low
+    if (m_horizontalAngle < 0.0f)
+    {
+      m_horizontalAngle += glm::radians(360.0f);
+    }
+    else if (m_horizontalAngle > glm::radians(360.0f))
+    {
+      m_horizontalAngle -= glm::radians(360.0f);
+    }
+
+    m_direction = glm::vec3(
+      cos(m_verticalAngle) * sin(m_horizontalAngle),
+      sin(m_verticalAngle),
+      cos(m_verticalAngle) * cos(m_horizontalAngle));
 
     // Right vector
-    glm::vec3 right = glm::vec3(
-      sin(horizontalAngle - glm::radians(90.0f)),
+    m_right = glm::vec3(
+      sin(m_horizontalAngle - glm::radians(90.0f)),
       0.0f,
-      cos(horizontalAngle - glm::radians(90.0f))
+      cos(m_horizontalAngle - glm::radians(90.0f))
       );
     // Up vector : perpendicular to both direction and right
-    glm::vec3 up = glm::cross(right, direction);
+    m_up = glm::cross(m_right, m_direction);
 
-    SDL_Event evnt;
-    while (SDL_PollEvent(&evnt))
-    {
-      switch (evnt.type)
-      {
-      case SDL_MOUSEMOTION:
-        // Compute new orientation
-        horizontalAngle -= mouseSpeed * deltaTime * evnt.motion.xrel;
-        verticalAngle -= mouseSpeed * deltaTime * evnt.motion.yrel;
-
-        // Restrict the verticle angle rotations (looking up and down) so you don't make air-rolls
-        if (verticalAngle < -glm::radians(90.0f))
-        {
-          verticalAngle = -glm::radians(90.0f);
-        }
-        else if (verticalAngle > glm::radians(90.0f))
-        {
-          verticalAngle = glm::radians(90.0f);
-        }
-        // Keep the horizontal rotation range always between 0 and 360 degrees (but in radians ofc) so it doesn't go too high or low
-        if (horizontalAngle < 0.0f)
-        {
-          horizontalAngle += glm::radians(360.0f);
-        }
-        else if (horizontalAngle > glm::radians(360.0f))
-        {
-          horizontalAngle -= glm::radians(360.0f);
-        }
-        break;
-      case SDL_KEYDOWN:
-        inputManager.PressKey(evnt.key.keysym.sym);
-        break;
-      case SDL_KEYUP:
-        inputManager.ReleaseKey(evnt.key.keysym.sym);
-        break;
-      case SDL_MOUSEBUTTONDOWN:
-        inputManager.PressKey(evnt.button.button);
-        break;
-      case SDL_MOUSEBUTTONUP:
-        inputManager.ReleaseKey(evnt.button.button);
-        break;
-      case SDL_MOUSEWHEEL:
-        initialFoV -= 5 * evnt.wheel.y;
-        printf("FOV angle: %f \n", initialFoV);
-      default:
-        break;
-      }
-    }
-    if (inputManager.IsKeyDown(SDLK_w))
-    {
-      m_position += direction * deltaTime * speed;
-    }
-    if (inputManager.IsKeyDown(SDLK_a))
-    {
-      m_position -= right * deltaTime * speed;
-    }
-    if (inputManager.IsKeyDown(SDLK_s))
-    {
-      m_position -= direction * deltaTime * speed;
-    }
-    if (inputManager.IsKeyDown(SDLK_d))
-    {
-      m_position += right * deltaTime * speed;
-    }
-    m_viewMatrix = glm::lookAt(m_position, m_position + direction, up);
-    m_projectionMatrix = glm::perspective(initialFoV, GetAspectRatio(), 0.1f, 100.0f);
+    m_needsMatrixUpdate = true;
   }
 }

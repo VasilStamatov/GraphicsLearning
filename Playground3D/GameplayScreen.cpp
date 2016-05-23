@@ -38,7 +38,7 @@ void GameplayScreen::OnEntry()
   glGenVertexArrays(1, &VertexArrayID);
   glBindVertexArray(VertexArrayID);
 
-  m_camera.Init(45.0f, m_window->GetScreenWidth(), m_window->GetScreenHeight());
+  m_camera.Init(45.0f, m_window->GetScreenWidth(), m_window->GetScreenHeight(), SDL_TRUE);
 
   std::vector<GameEngine::Shader> shaders =
   {
@@ -53,9 +53,6 @@ void GameplayScreen::OnEntry()
 
   glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
 
-  // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-  projectionMatrix = m_camera.GetProjectionMatrix();
-  modelMatrix = glm::mat4(1.0f);
   static const GLfloat g_vertex_buffer_data[] = {
     -1.0f, -1.0f, -1.0f, // triangle 1 : begin
     -1.0f, -1.0f, 1.0f,
@@ -158,10 +155,8 @@ void GameplayScreen::OnExit()
 
 void GameplayScreen::Update()
 {
-  m_camera.Update(m_game->GetFPS());
-  viewMatrix = m_camera.GetViewMatrix();
-  projectionMatrix = m_camera.GetProjectionMatrix();
-  MVP = projectionMatrix * viewMatrix * modelMatrix;
+  m_camera.Update();
+
   CheckInput();
 }
 void GameplayScreen::Draw()
@@ -171,15 +166,14 @@ void GameplayScreen::Draw()
 
   m_shaderProgram.Use();
 
-  GLuint MVPMatrixID = m_shaderProgram.GetUniformLocation("MVP");
+  GLuint viewMatrixID = m_shaderProgram.GetUniformLocation("viewMatrix");
+  GLuint projMatrixID = m_shaderProgram.GetUniformLocation("projMatrix");
 
   GLuint textureID = m_shaderProgram.GetUniformLocation("textureSampler");
 
 
-  glUniformMatrix4fv(MVPMatrixID, 1, GL_FALSE, &MVP[0][0]);
-  //glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, &projectionMatrix[0][0]);
-  //glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMatrix[0][0]);
-
+  glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, &m_camera.GetViewMatrix()[0][0]);
+  glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, &m_camera.GetProjectionMatrix()[0][0]);
 
   //Bind the texture in texture unit 0
   glActiveTexture(GL_TEXTURE0);
@@ -218,11 +212,45 @@ void GameplayScreen::Draw()
 
 void GameplayScreen::CheckInput()
 {
-  const float CAMERA_MOVEMENT = 0.1f;
   //handle user inputs
   SDL_Event evnt;
   while (SDL_PollEvent(&evnt))
   {
     m_game->OnSDLEvent(evnt);
+  }
+
+  if (m_game->inputManager.IsKeyDown(SDLK_w))
+  {
+    m_camera.Move(GameEngine::MoveState::FORWARD, m_game->GetFPS());
+  }
+  if (m_game->inputManager.IsKeyDown(SDLK_a))
+  {
+    m_camera.Move(GameEngine::MoveState::LEFT, m_game->GetFPS());
+  }
+  if (m_game->inputManager.IsKeyDown(SDLK_s))
+  {
+    m_camera.Move(GameEngine::MoveState::BACKWARD, m_game->GetFPS());
+  }
+  if (m_game->inputManager.IsKeyDown(SDLK_d))
+  {
+    m_camera.Move(GameEngine::MoveState::RIGHT, m_game->GetFPS());
+  }
+  if (m_game->inputManager.IsKeyDown(SDLK_q))
+  {
+    m_camera.IncreaseMouseSensitivity(0.01f);
+  }
+  if (m_game->inputManager.IsKeyDown(SDLK_e))
+  {
+    m_camera.IncreaseMouseSensitivity(-0.01f);
+  }
+  if (m_game->inputManager.GetRelativeMouseMotion().x != 0.0f || m_game->inputManager.GetRelativeMouseMotion().y != 0.0f)
+  {
+    m_camera.Rotate(m_game->inputManager.GetRelativeMouseMotion().x, m_game->inputManager.GetRelativeMouseMotion().y, m_game->GetFPS());
+    m_game->inputManager.SetRelativeMouseMotion(0.0f, 0.0f);
+  }
+  if (m_game->inputManager.GetMouseWheelValue().y != 0)
+  {
+    m_camera.ChangeFoV(5.0f * m_game->inputManager.GetMouseWheelValue().y);
+    m_game->inputManager.SetMouseWheel(0.0f, 0.0f);
   }
 }

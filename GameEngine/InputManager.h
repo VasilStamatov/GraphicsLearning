@@ -18,6 +18,8 @@ namespace GameEngine
     void PressKey(unsigned int _keyID);
     void ReleaseKey(unsigned int _keyID);
     void SetMouseCoords(float _x, float _y);
+    void SetRelativeMouseMotion(float _xrel, float _yrel);
+    void SetMouseWheel(float _wheelVal, float _yVal);
 
     ///return true if the key is held down
     bool IsKeyDown(unsigned int _keyID);  
@@ -27,6 +29,10 @@ namespace GameEngine
 
     //getters
     glm::vec2 GetMouseCoords() const { return m_mouseCoords; }
+    glm::vec2 GetRelativeMouseMotion() const { return m_relativeMouseMotion; }
+    glm::vec2 GetMouseWheelValue() const { return m_mouseWheel;  }
+
+
   private:
     bool wasKeyDown(unsigned int _keyID);
 
@@ -34,6 +40,8 @@ namespace GameEngine
     std::unordered_map<unsigned int, bool> m_previousKeyMap;
 
     glm::vec2 m_mouseCoords;
+    glm::vec2 m_relativeMouseMotion;
+    glm::vec2 m_mouseWheel;
   };
 }
 
