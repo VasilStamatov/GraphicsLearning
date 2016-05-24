@@ -48,6 +48,7 @@ namespace GameEngine
     if (m_needsMatrixUpdate)
     {
       m_viewMatrix = glm::lookAt(m_position, m_position + m_direction, m_up);
+      m_needsMatrixUpdate = false;
     }
   }
   void Camera3D::Move(const MoveState& _ms, float _fps)
