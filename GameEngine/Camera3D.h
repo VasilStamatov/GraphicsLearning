@@ -60,6 +60,15 @@ namespace GameEngine
     void ChangeFoV(float _value)
     {
       m_initialFoV -= _value;
+      if (m_initialFoV < 1.0f)
+      {
+        m_initialFoV = 1.0f;
+      }
+      else if (m_initialFoV > 60.0f)
+      {
+        m_initialFoV = 60.0f;
+      }
+      printf("fov: %f \n", m_initialFoV);
       m_projectionMatrix = glm::perspective(m_initialFoV, GetAspectRatio(), 0.1f, 100.0f);
     }
 
@@ -107,6 +116,11 @@ namespace GameEngine
      * \return the position vec3
      */
     glm::vec3 GetPosition() const { return m_position; }
+    
+    /** \brief Gets the direction (always facing forward) vec3 of the camera
+      * \return the direction vec3
+      */
+    glm::vec3 GetDirection() const { return m_direction; }
 
   private:
     InputManager m_inputManager; ///< Handles events
@@ -117,10 +131,10 @@ namespace GameEngine
     glm::vec3 m_position; ///< camera position
 
     /// horizontal angle : toward -Z
-    float m_horizontalAngle = glm::radians(180.0f);
+    float m_horizontalAngle = glm::radians(180.0f); //yaw
 
     /// vertical angle : 0, look at the horizon
-    float m_verticalAngle = 0.0f;
+    float m_verticalAngle = 0.0f; //pitch
 
     //axis vectors
     glm::vec3 m_direction; //The direction the player is facing
@@ -133,9 +147,9 @@ namespace GameEngine
     /// Initial Field of View
     float m_initialFoV = 45.0f;
 
-    float m_speed = 3.0f; ///< speed of 3 units / second
+    float m_speed = 4.0f; ///< speed of 3 units / second
 
-    float m_mouseSpeed = 0.1f; ///< mouse speed/sensitivity
+    float m_mouseSpeed = 0.5f; ///< mouse speed/sensitivity
 
     int m_screenWidth; ///< The width of the sdl screen
     int m_screenHeight; ///< The height of the sdl screen

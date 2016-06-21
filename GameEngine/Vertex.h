@@ -1,13 +1,10 @@
 #pragma once
 #include <GL/glew.h>
+#include <glm\vec3.hpp>
+#include <glm\vec2.hpp>
+
 namespace GameEngine
 {
-  //the position struct
-  struct Position
-  {
-    float x;
-    float y;
-  };
   //color struct
   struct ColorRGBA8
   {
@@ -19,43 +16,54 @@ namespace GameEngine
     GLubyte b;
     GLubyte a;
   };
-  //UV struct
-  struct UV
-  {
-    float u;
-    float v;
-  };
 
   //The vertex definition
   struct Vertex
   {
-    //This is the position struct. When you store a struct or class
-    //inside of another struct or class, it is called composition. This is
-    //layed out exactly the same in memory as if we had a float position[2],
-    //but doing it this way makes more sense.
-    Position position;
+    //vertex position
+    glm::vec3 m_position;
 
-    //4 bytes for r g b a color.
-    ColorRGBA8 color;
-    //UV texture coordinates.
-    UV uv;
+    //vertex normal
+    glm::vec3 m_normal;
 
-    void SetPosition(float _x, float _y)
+    //vertex texture coordinates
+    glm::vec2 m_uv;
+
+    //vertex color
+    ColorRGBA8 m_color;
+
+    void SetPosition(const glm::vec3& _position)
     {
-      position.x = _x;
-      position.y = _y;
+      m_position = _position;
     }
-    void SetColor(GLubyte _r, GLubyte _g, GLubyte _b, GLubyte _a)
+    void SetPosition(float _x, float _y, float _z)
     {
-      color.r = _r;
-      color.g = _g;
-      color.b = _b;
-      color.a = _a;
+      m_position = glm::vec3(_x, _y, _z);
     }
-    void SetUV(float _u, float _v)
+
+    void SetNormal(const glm::vec3& _normal)
     {
-      uv.u = _u;
-      uv.v = _v;
+      m_normal = _normal;
+    }
+    void SetNormal(float _x, float _y, float _z)
+    {
+      m_normal = glm::vec3(_x, _y, _z);
+    }
+
+    void SetUV(const glm::vec2& _uv)
+    {
+      m_uv = _uv;
+    }
+    void SetUV(float _x, float _y)
+    {
+      m_uv = glm::vec2(_x, _y);
+    }
+    void SetColor(const GLubyte& _r, const GLubyte& _g, const GLubyte& _b, const GLubyte& _a)
+    {
+      m_color.r = _r;
+      m_color.g = _g;
+      m_color.b = _b;
+      m_color.a = _a;
     }
   };
 }

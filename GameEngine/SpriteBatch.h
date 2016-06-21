@@ -87,7 +87,6 @@ namespace GameEngine
     static bool CompareBackToFront(Glyph* a, Glyph* b);
     static bool CompareTexture(Glyph* a, Glyph* b);
 
-
     GLuint m_vbo;
     GLuint m_vao;
 

@@ -2,6 +2,7 @@
 #include "ScreenIndices.h"
 #include <GameEngine\IMainGame.h>
 #include <GameEngine\ResourceManager.h>
+#include <glm/gtc/type_ptr.hpp>
 
 GameplayScreen::GameplayScreen(GameEngine::Window* _window) : m_window(_window)
 {
@@ -35,117 +36,162 @@ void GameplayScreen::Destroy()
 
 void GameplayScreen::OnEntry()
 {
-  glGenVertexArrays(1, &VertexArrayID);
-  glBindVertexArray(VertexArrayID);
-
   m_camera.Init(45.0f, m_window->GetScreenWidth(), m_window->GetScreenHeight(), SDL_TRUE);
 
-  std::vector<GameEngine::Shader> shaders =
+  std::vector<GameEngine::Shader> lightShaders =
   {
-    { GL_VERTEX_SHADER, "Shaders/SimpleTransform.vert", "Vertex Shader" },
-    { GL_FRAGMENT_SHADER, "Shaders/SingleColor.frag", "Fragment Shader" },
+    { GL_VERTEX_SHADER, "Shaders/Lighting.vert", "Lighting Vertex Shader" },
+    { GL_FRAGMENT_SHADER, "Shaders/Lighting.frag", "Lighting Fragment Shader" },
   };
 
-  m_shaderProgram.CompileShaders(shaders);
-  m_shaderProgram.AddAttribute("vertexPosition_modelSpace");
-  m_shaderProgram.AddAttribute("vertexUV");
-  m_shaderProgram.LinkShaders();
-
-  glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
-
-  static const GLfloat g_vertex_buffer_data[] = {
-    -1.0f, -1.0f, -1.0f, // triangle 1 : begin
-    -1.0f, -1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f, // triangle 1 : end
-    1.0f, 1.0f, -1.0f, // triangle 2 : begin
-    -1.0f, -1.0f, -1.0f,
-    -1.0f, 1.0f, -1.0f, // triangle 2 : end
-    1.0f, -1.0f, 1.0f,
-    -1.0f, -1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-    1.0f, 1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f, -1.0f,
-    -1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f, -1.0f,
-    1.0f, -1.0f, 1.0f,
-    -1.0f, -1.0f, 1.0f,
-    -1.0f, -1.0f, -1.0f,
-    -1.0f, 1.0f, 1.0f,
-    -1.0f, -1.0f, 1.0f,
-    1.0f, -1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, -1.0f, -1.0f,
-    1.0f, 1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, -1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, -1.0f,
-    -1.0f, 1.0f, -1.0f,
-    1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f, -1.0f,
-    -1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f,
-    1.0f, -1.0f, 1.0f
-  };
-  static const GLfloat g_uv_buffer_data[] = {
-    0.000059f, 1.0f - 0.000004f,
-    0.000103f, 1.0f - 0.336048f,
-    0.335973f, 1.0f - 0.335903f,
-    1.000023f, 1.0f - 0.000013f,
-    0.667979f, 1.0f - 0.335851f,
-    0.999958f, 1.0f - 0.336064f,
-    0.667979f, 1.0f - 0.335851f,
-    0.336024f, 1.0f - 0.671877f,
-    0.667969f, 1.0f - 0.671889f,
-    1.000023f, 1.0f - 0.000013f,
-    0.668104f, 1.0f - 0.000013f,
-    0.667979f, 1.0f - 0.335851f,
-    0.000059f, 1.0f - 0.000004f,
-    0.335973f, 1.0f - 0.335903f,
-    0.336098f, 1.0f - 0.000071f,
-    0.667979f, 1.0f - 0.335851f,
-    0.335973f, 1.0f - 0.335903f,
-    0.336024f, 1.0f - 0.671877f,
-    1.000004f, 1.0f - 0.671847f,
-    0.999958f, 1.0f - 0.336064f,
-    0.667979f, 1.0f - 0.335851f,
-    0.668104f, 1.0f - 0.000013f,
-    0.335973f, 1.0f - 0.335903f,
-    0.667979f, 1.0f - 0.335851f,
-    0.335973f, 1.0f - 0.335903f,
-    0.668104f, 1.0f - 0.000013f,
-    0.336098f, 1.0f - 0.000071f,
-    0.000103f, 1.0f - 0.336048f,
-    0.000004f, 1.0f - 0.671870f,
-    0.336024f, 1.0f - 0.671877f,
-    0.000103f, 1.0f - 0.336048f,
-    0.336024f, 1.0f - 0.671877f,
-    0.335973f, 1.0f - 0.335903f,
-    0.667969f, 1.0f - 0.671889f,
-    1.000004f, 1.0f - 0.671847f,
-    0.667979f, 1.0f - 0.335851f
+  std::vector<GameEngine::Shader> lampShaders =
+  {
+    { GL_VERTEX_SHADER, "Shaders/Lamp.vert", "Lamp Vertex Shader" },
+    { GL_FRAGMENT_SHADER, "Shaders/Lamp.frag", "Lamp Fragment Shader" },
   };
 
-  m_texture = GameEngine::ResourceManager::GetTexture("Assets/uvtemplate.png");
+  m_lightProgram.CompileShaders(lightShaders);
+  m_lightProgram.AddAttribute("vertexPosition_modelSpace");
+  m_lightProgram.AddAttribute("normal");
+  m_lightProgram.AddAttribute("vertexUV");
+  m_lightProgram.LinkShaders();
 
-  glGenBuffers(1, &vertexBuffer);
-  glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+  m_lampProgram.CompileShaders(lampShaders);
+  m_lampProgram.AddAttribute("vertexPosition_modelSpace");
+  m_lampProgram.LinkShaders();
 
-  glGenBuffers(1, &uvBuffer);
-  glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+  gameModel.LoadModel("Assets/nanosuit/nanosuit.obj");
+
+  // Set up vertex data (and buffer(s)) and attribute pointers
+  //GLfloat vertices[] = 
+  //{
+  //  // Positions          // Normals           // Texture Coords
+  //  -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+  //  0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+  //  0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+  //  0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+  //  -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
+  //  -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+
+  //  -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+  //  0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+  //  0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+  //  0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+  //  -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+  //  -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+
+  //  -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+  //  -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+  //  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+  //  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+  //  -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+  //  -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+
+  //  0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+  //  0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+  //  0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+  //  0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+  //  0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+  //  0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+
+  //  -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+  //  0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+  //  0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+  //  0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+  //  -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+  //  -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+
+  //  -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+  //  0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+  //  0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+  //  0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+  //  -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+  //  -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
+  //};
+
+  //cubePositions = {
+  //  glm::vec3(0.0f, 0.0f, 0.0f),
+  //  glm::vec3(2.0f, 5.0f, -15.0f),
+  //  glm::vec3(-1.5f, -2.2f, -2.5f),
+  //  glm::vec3(-3.8f, -2.0f, -12.3f),
+  //  glm::vec3(2.4f, -0.4f, -3.5f),
+  //  glm::vec3(-1.7f, 3.0f, -7.5f),
+  //  glm::vec3(1.3f, -2.0f, -2.5f),
+  //  glm::vec3(1.5f, 2.0f, -2.5f),
+  //  glm::vec3(1.5f, 0.2f, -1.5f),
+  //  glm::vec3(-1.3f, 1.0f, -1.5f)
+  //};
+
+  m_pointLights.emplace_back(glm::vec3(-1.7f, 0.2f, 2.0f),
+    glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f),
+    1.0f, 0.09f, 0.032f);
+  m_pointLights.emplace_back(glm::vec3(2.3f, -3.3f, -4.0f)
+    , glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f),
+    1.0f, 0.09f, 0.032f);
+  m_pointLights.emplace_back(glm::vec3(-4.0f, 2.0f, -12.0f)
+    , glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f),
+    1.0f, 0.09f, 0.032f);
+  m_pointLights.emplace_back(glm::vec3(0.0f, 0.0f, -3.0f)
+    , glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f),
+    1.0f, 0.09f, 0.032f);
+
+  m_flashLight.Init(m_camera.GetPosition(), m_camera.GetDirection(),
+    glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f),
+    1.0f, 0.09f, 0.032f, glm::cos(glm::radians(12.5f)), glm::cos(glm::radians(15.5f)));
+
+  m_directionalLight.Init(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.5f, 0.5f, 0.5f));
+
+  //glGenVertexArrays(1, &m_containerVAO);
+
+  //glGenBuffers(1, &m_VBO);
+  //glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+  //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  //glBindVertexArray(m_containerVAO);
+  //// Position attribute
+  //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+  //glEnableVertexAttribArray(0);
+
+  //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+  //glEnableVertexAttribArray(1);
+
+  //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+  //glEnableVertexAttribArray(2);
+
+  //glBindVertexArray(0);
+
+  // Then, we set the light's VAO (VBO stays the same. After all, the vertices are the same for the light object (also a 3D cube))
+  //glGenVertexArrays(1, &m_lightVAO);
+  //glBindVertexArray(m_lightVAO);
+  //// We only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need.
+  //glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+  //// Set the vertex attributes (only position data for the lamp))
+  //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+  //glEnableVertexAttribArray(0);
+  //glBindVertexArray(0);
+
+  //m_diffuseMap = GameEngine::ResourceManager::GetTexture("Assets/container2.png");
+  //m_specularMap = GameEngine::ResourceManager::GetTexture("Assets/container2_specular.png");
+  
+  // Set texture units
+  /*m_lightProgram.Use();
+
+  GLint matDiffuseLoc = m_lightProgram.GetUniformLocation("material.diffuseMap");
+  GLint matSpecularLoc = m_lightProgram.GetUniformLocation("material.specularMap");
+
+  glUniform1i(matDiffuseLoc, 0);
+  glUniform1i(matSpecularLoc, 1);
+
+  m_lightProgram.UnUse();*/
 
   // Enable depth test
   glEnable(GL_DEPTH_TEST);
   // Accept fragment if it closer to the camera than the former one
-  glDepthFunc(GL_LESS);
+  // glDepthFunc(GL_LESS);
   // Cull triangles which normal is not towards the camera
-  glEnable(GL_CULL_FACE);
+  // glEnable(GL_CULL_FACE);
 }
 
 void GameplayScreen::OnExit()
@@ -156,6 +202,8 @@ void GameplayScreen::OnExit()
 void GameplayScreen::Update()
 {
   m_camera.Update();
+  m_flashLight.SetPosition(m_camera.GetPosition());
+  m_flashLight.SetDirection(m_camera.GetDirection());
 
   CheckInput();
 }
@@ -164,50 +212,98 @@ void GameplayScreen::Draw()
   // Clear the screen
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  m_shaderProgram.Use();
+  m_lightProgram.Use();
 
-  GLuint viewMatrixID = m_shaderProgram.GetUniformLocation("viewMatrix");
-  GLuint projMatrixID = m_shaderProgram.GetUniformLocation("projMatrix");
+  /*m_lightPos.x = 1.0f + sin(SDL_GetTicks() / 1000.0f );
+  m_lightPos.y = sin(SDL_GetTicks() / 1000.0f);*/
 
-  GLuint textureID = m_shaderProgram.GetUniformLocation("textureSampler");
+  GLint viewPosLoc = m_lightProgram.GetUniformLocation("viewPos");
+  glUniform3f(viewPosLoc, m_camera.GetPosition().x, m_camera.GetPosition().y, m_camera.GetPosition().z);
+  //Get material locations
+  GLint matShineLoc = m_lightProgram.GetUniformLocation("material.shininess");
+  //Set material properties
+  glUniform1f(matShineLoc, 32.0f);
 
+  //Directional Lights
+  m_directionalLight.UploadToShader(m_lightProgram, "dirLight");
 
-  glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, &m_camera.GetViewMatrix()[0][0]);
-  glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, &m_camera.GetProjectionMatrix()[0][0]);
+  //Point lights
+  for (GLint i = 0; i < m_pointLights.size(); i++)
+  {
+    std::string number = std::to_string(i);
 
-  //Bind the texture in texture unit 0
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, m_texture.id);
-  //Set our "myTextureSampler" sampler to user Texture Unit 0
-  glUniform1i(textureID, 0);
+    m_pointLights.at(i).UploadToShader(m_lightProgram, "pointLights[" + number + "]");
+  }
 
-  // 1rst attribute buffer : vertices
-  glEnableVertexAttribArray(0); //< done in shaderProgram.Use
+  //Spot Light (flash light)
+  m_flashLight.UploadToShader(m_lightProgram, "spotLight");
 
-  glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-  glVertexAttribPointer(
-    0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-    3,                  // size
-    GL_FLOAT,           // type
-    GL_FALSE,           // normalized?
-    0,                  // stride
-    (void*)0            // array buffer offset
-    );
-  // 2nd attribute buffer : UVs
-  glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-  glVertexAttribPointer(
-    1, //after pos 0
-    2, // size
-    GL_FLOAT,
-    GL_FALSE,
-    0,
-    (void*)0 //offset
-    );
-  // Draw the triangle !
-  glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // 3 indices starting at 0 -> 1 triangle
+  GLint modelMatrixID = m_lightProgram.GetUniformLocation("modelMatrix");
+  GLint viewMatrixID = m_lightProgram.GetUniformLocation("viewMatrix");
+  GLint projMatrixID = m_lightProgram.GetUniformLocation("projMatrix");
 
-  glDisableVertexAttribArray(0); //shaderProgram.Unuse();
-  glDisableVertexAttribArray(1); //shaderProgram.Unuse();
+  glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
+  glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
+
+  glm::mat4 model(1.0f);
+  model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
+  model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+
+  glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, glm::value_ptr(model));
+
+  gameModel.Draw(m_lightProgram);
+
+  //// Bind diffuse map
+  //glActiveTexture(GL_TEXTURE0);
+  //glBindTexture(GL_TEXTURE_2D, m_diffuseMap.id);
+  //// Bind specular map
+  //glActiveTexture(GL_TEXTURE1);
+  //glBindTexture(GL_TEXTURE_2D, m_specularMap.id);
+
+  // Draw the container (using container's vertex attributes)
+  //glBindVertexArray(m_containerVAO);
+
+  /*for (GLuint i = 0; i < 10; i++)
+  {
+    glm::mat4 modelMatrix(1.0f);
+    modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
+    GLfloat angle = 20.0f * i;
+    modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+
+    glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+  }*/
+  
+  //glBindVertexArray(0);
+
+  m_lightProgram.UnUse();
+
+  // Also draw the lamp object, again binding the appropriate shader
+  m_lampProgram.Use();
+
+  modelMatrixID = m_lampProgram.GetUniformLocation("modelMatrix");
+  viewMatrixID = m_lampProgram.GetUniformLocation("viewMatrix");
+  projMatrixID = m_lampProgram.GetUniformLocation("projMatrix");
+
+  glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
+  glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
+
+  // We now draw as many light bulbs as we have point lights.
+  //glBindVertexArray(m_lightVAO);
+
+  for (GLint i = 0; i < m_pointLights.size(); i++)
+  {
+    glm::mat4 modelMatrix(1.0f);
+    modelMatrix = glm::translate(modelMatrix, m_pointLights.at(i).GetPosition());
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.02f)); //make it smaller
+    glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    gameModel.Draw(m_lampProgram);
+    //glDrawArrays(GL_TRIANGLES, 0, 36);
+  }
+  //glBindVertexArray(0);
+
+  m_lampProgram.UnUse();
 }
 
 void GameplayScreen::CheckInput()

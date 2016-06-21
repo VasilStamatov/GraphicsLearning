@@ -9,20 +9,20 @@ namespace GameEngine
     m_depth(_depth)
   {
     //intialize the color, position and uv coordinate for the 4 vertices of the sprite
-    m_topLeft.color = _color;
-    m_topLeft.SetPosition(_destRect.x, _destRect.y + _destRect.w);
+    m_topLeft.m_color = _color;
+    m_topLeft.SetPosition(_destRect.x, _destRect.y + _destRect.w, 0.0f);
     m_topLeft.SetUV(_uvRect.x, _uvRect.y + _uvRect.w);
 
-    m_bottomLeft.color = _color;
-    m_bottomLeft.SetPosition(_destRect.x, _destRect.y);
+    m_bottomLeft.m_color = _color;
+    m_bottomLeft.SetPosition(_destRect.x, _destRect.y, 0.0f);
     m_bottomLeft.SetUV(_uvRect.x, _uvRect.y);
 
-    m_bottomRight.color = _color;
-    m_bottomRight.SetPosition(_destRect.x + _destRect.z, _destRect.y);
+    m_bottomRight.m_color = _color;
+    m_bottomRight.SetPosition(_destRect.x + _destRect.z, _destRect.y, 0.0f);
     m_bottomRight.SetUV(_uvRect.x + _uvRect.z, _uvRect.y);
 
-    m_topRight.color = _color;
-    m_topRight.SetPosition(_destRect.x + _destRect.z, _destRect.y + _destRect.w);
+    m_topRight.m_color = _color;
+    m_topRight.SetPosition(_destRect.x + _destRect.z, _destRect.y + _destRect.w, 0.0f);
     m_topRight.SetUV(_uvRect.x + _uvRect.z, _uvRect.y + _uvRect.w);
 
   }
@@ -46,20 +46,20 @@ namespace GameEngine
     tR = RotatePoint(tR, _angle) + halfDims;
 
     //intialize the color, position and uv coordinate for the 4 vertices of the sprite with the rotated points
-    m_topLeft.color = _color;
-    m_topLeft.SetPosition(_destRect.x + tL.x, _destRect.y + tL.y);
+    m_topLeft.m_color = _color;
+    m_topLeft.SetPosition(_destRect.x + tL.x, _destRect.y + tL.y, 0.0f);
     m_topLeft.SetUV(_uvRect.x, _uvRect.y + _uvRect.w);
 
-    m_bottomLeft.color = _color;
-    m_bottomLeft.SetPosition(_destRect.x + bL.x, _destRect.y + bL.y);
+    m_bottomLeft.m_color = _color;
+    m_bottomLeft.SetPosition(_destRect.x + bL.x, _destRect.y + bL.y, 0.0f);
     m_bottomLeft.SetUV(_uvRect.x, _uvRect.y);
 
-    m_bottomRight.color = _color;
-    m_bottomRight.SetPosition(_destRect.x + bR.x, _destRect.y + bR.y);
+    m_bottomRight.m_color = _color;
+    m_bottomRight.SetPosition(_destRect.x + bR.x, _destRect.y + bR.y, 0.0f);
     m_bottomRight.SetUV(_uvRect.x + _uvRect.z, _uvRect.y);
 
-    m_topRight.color = _color;
-    m_topRight.SetPosition(_destRect.x + tR.x, _destRect.y + tR.y);
+    m_topRight.m_color = _color;
+    m_topRight.SetPosition(_destRect.x + tR.x, _destRect.y + tR.y, 0.0f);
     m_topRight.SetUV(_uvRect.x + _uvRect.z, _uvRect.y + _uvRect.w);
 
   }
@@ -248,11 +248,11 @@ namespace GameEngine
     glEnableVertexAttribArray(2);
 
     //this is the position attribute pointer
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_position));
     //this is the color attribute pointer
-    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, m_color));
     //this is the UV attribute pointer
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_uv));
     //Unbind the vertex array
     glBindVertexArray(0);
   }

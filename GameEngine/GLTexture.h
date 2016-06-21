@@ -7,6 +7,7 @@ namespace GameEngine
   struct GLTexture
   {
     std::string filePath = "";
+    std::string type = "";
     GLuint id;
     int width;
     int height;

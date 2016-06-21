@@ -97,13 +97,13 @@ namespace GameEngine
     m_verticalAngle -= m_mouseSpeed * deltaTime * _yrel;
 
     // Restrict the verticle angle rotations (looking up and down) so you don't make air-rolls
-    if (m_verticalAngle < -glm::radians(90.0f))
+    if (m_verticalAngle < -glm::radians(89.0f))
     {
-      m_verticalAngle = -glm::radians(90.0f);
+      m_verticalAngle = -glm::radians(89.0f);
     }
-    else if (m_verticalAngle > glm::radians(90.0f))
+    else if (m_verticalAngle > glm::radians(89.0f))
     {
-      m_verticalAngle = glm::radians(90.0f);
+      m_verticalAngle = glm::radians(89.0f);
     }
     // Keep the horizontal rotation range always between 0 and 360 degrees (but in radians ofc) so it doesn't go too high or low
     if (m_horizontalAngle < 0.0f)
@@ -114,7 +114,7 @@ namespace GameEngine
     {
       m_horizontalAngle -= glm::radians(360.0f);
     }
-
+    // the direction the camera is facing
     m_direction = glm::vec3(
       cos(m_verticalAngle) * sin(m_horizontalAngle),
       sin(m_verticalAngle),
