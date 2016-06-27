@@ -38,272 +38,177 @@ void GameplayScreen::OnEntry()
 {
   m_camera.Init(45.0f, m_window->GetScreenWidth(), m_window->GetScreenHeight(), SDL_TRUE);
 
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  /*glEnable(GL_STENCIL_TEST);
+  glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+  glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);*/
+  //glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_REPLACE);
+  //glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_KEEP);
+  /*glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+  glFrontFace(GL_CCW);*/
+
   std::vector<GameEngine::Shader> lightShaders =
   {
-    { GL_VERTEX_SHADER, "Shaders/Lighting.vert", "Lighting Vertex Shader" },
-    { GL_FRAGMENT_SHADER, "Shaders/Lighting.frag", "Lighting Fragment Shader" },
+    { GL_VERTEX_SHADER, "Shaders/Advanced.vert", "Lighting Vertex Shader" },
+    { GL_FRAGMENT_SHADER, "Shaders/Advanced.frag", "Lighting Fragment Shader" },
   };
-
-  std::vector<GameEngine::Shader> lampShaders =
-  {
-    { GL_VERTEX_SHADER, "Shaders/Lamp.vert", "Lamp Vertex Shader" },
-    { GL_FRAGMENT_SHADER, "Shaders/Lamp.frag", "Lamp Fragment Shader" },
-  };
-
   m_lightProgram.CompileShaders(lightShaders);
   m_lightProgram.AddAttribute("vertexPosition_modelSpace");
-  m_lightProgram.AddAttribute("normal");
-  m_lightProgram.AddAttribute("vertexUV");
+  m_lightProgram.AddAttribute("UV");
   m_lightProgram.LinkShaders();
 
-  m_lampProgram.CompileShaders(lampShaders);
-  m_lampProgram.AddAttribute("vertexPosition_modelSpace");
-  m_lampProgram.LinkShaders();
+  std::vector<GameEngine::Shader> skyboxShader =
+  {
+    { GL_VERTEX_SHADER, "Shaders/Skybox.vert", "Simple Vertex Shader" },
+    { GL_FRAGMENT_SHADER, "Shaders/Skybox.frag", "Single Fragment Shader" },
+  };
 
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  m_skyboxShader.CompileShaders(skyboxShader);
+  m_skyboxShader.AddAttribute("position");
+  m_skyboxShader.LinkShaders();
 
-  gameModel.LoadModel("Assets/nanosuit/nanosuit.obj");
+#pragma region "object_initialization"
 
-  // Set up vertex data (and buffer(s)) and attribute pointers
-  //GLfloat vertices[] = 
-  //{
-  //  // Positions          // Normals           // Texture Coords
-  //  -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-  //  0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-  //  0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-  //  0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-  //  -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
-  //  -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+  GLfloat skyboxVertices[] = {
+    // Positions          
+    -1.0f, 1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f, 1.0f, -1.0f,
+    -1.0f, 1.0f, -1.0f,
 
-  //  -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-  //  0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-  //  0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-  //  0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-  //  -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-  //  -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+    -1.0f, -1.0f, 1.0f,
+    -1.0f, -1.0f, -1.0f,
+    -1.0f, 1.0f, -1.0f,
+    -1.0f, 1.0f, -1.0f,
+    -1.0f, 1.0f, 1.0f,
+    -1.0f, -1.0f, 1.0f,
 
-  //  -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-  //  -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-  //  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-  //  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-  //  -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-  //  -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
 
-  //  0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-  //  0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-  //  0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-  //  0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-  //  0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-  //  0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+    -1.0f, -1.0f, 1.0f,
+    -1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f, -1.0f, 1.0f,
+    -1.0f, -1.0f, 1.0f,
 
-  //  -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-  //  0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
-  //  0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-  //  0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-  //  -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-  //  -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+    -1.0f, 1.0f, -1.0f,
+    1.0f, 1.0f, -1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    -1.0f, 1.0f, 1.0f,
+    -1.0f, 1.0f, -1.0f,
 
-  //  -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-  //  0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-  //  0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-  //  0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-  //  -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-  //  -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
-  //};
+    -1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f, 1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f, 1.0f,
+    1.0f, -1.0f, 1.0f
+  };
 
-  //cubePositions = {
-  //  glm::vec3(0.0f, 0.0f, 0.0f),
-  //  glm::vec3(2.0f, 5.0f, -15.0f),
-  //  glm::vec3(-1.5f, -2.2f, -2.5f),
-  //  glm::vec3(-3.8f, -2.0f, -12.3f),
-  //  glm::vec3(2.4f, -0.4f, -3.5f),
-  //  glm::vec3(-1.7f, 3.0f, -7.5f),
-  //  glm::vec3(1.3f, -2.0f, -2.5f),
-  //  glm::vec3(1.5f, 2.0f, -2.5f),
-  //  glm::vec3(1.5f, 0.2f, -1.5f),
-  //  glm::vec3(-1.3f, 1.0f, -1.5f)
-  //};
 
-  m_pointLights.emplace_back(glm::vec3(-1.7f, 0.2f, 2.0f),
-    glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f),
-    1.0f, 0.09f, 0.032f);
-  m_pointLights.emplace_back(glm::vec3(2.3f, -3.3f, -4.0f)
-    , glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f),
-    1.0f, 0.09f, 0.032f);
-  m_pointLights.emplace_back(glm::vec3(-4.0f, 2.0f, -12.0f)
-    , glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f),
-    1.0f, 0.09f, 0.032f);
-  m_pointLights.emplace_back(glm::vec3(0.0f, 0.0f, -3.0f)
-    , glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f),
-    1.0f, 0.09f, 0.032f);
+  //Setup the skybox ----------
+  glGenVertexArrays(1, &skyboxVAO);
+  glGenBuffers(1, &skyboxVBO);
 
-  m_flashLight.Init(m_camera.GetPosition(), m_camera.GetDirection(),
-    glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f),
-    1.0f, 0.09f, 0.032f, glm::cos(glm::radians(12.5f)), glm::cos(glm::radians(15.5f)));
+  glBindVertexArray(skyboxVAO);
+  glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
 
-  m_directionalLight.Init(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.5f, 0.5f, 0.5f));
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
-  //glGenVertexArrays(1, &m_containerVAO);
+  glBindVertexArray(0);
 
-  //glGenBuffers(1, &m_VBO);
-  //glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-  //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  std::vector<std::string> skyboxFaces;
+  skyboxFaces.push_back("Assets/Skybox/right.png");
+  skyboxFaces.push_back("Assets/Skybox/left.png");
+  skyboxFaces.push_back("Assets/Skybox/top.png");
+  skyboxFaces.push_back("Assets/Skybox/bottom.png");
+  skyboxFaces.push_back("Assets/Skybox/back.png");
+  skyboxFaces.push_back("Assets/Skybox/front.png");
 
-  //glBindVertexArray(m_containerVAO);
-  //// Position attribute
-  //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-  //glEnableVertexAttribArray(0);
-
-  //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-  //glEnableVertexAttribArray(1);
-
-  //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-  //glEnableVertexAttribArray(2);
-
-  //glBindVertexArray(0);
-
-  // Then, we set the light's VAO (VBO stays the same. After all, the vertices are the same for the light object (also a 3D cube))
-  //glGenVertexArrays(1, &m_lightVAO);
-  //glBindVertexArray(m_lightVAO);
-  //// We only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need.
-  //glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-  //// Set the vertex attributes (only position data for the lamp))
-  //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-  //glEnableVertexAttribArray(0);
-  //glBindVertexArray(0);
-
-  //m_diffuseMap = GameEngine::ResourceManager::GetTexture("Assets/container2.png");
-  //m_specularMap = GameEngine::ResourceManager::GetTexture("Assets/container2_specular.png");
+  m_skybox = GameEngine::ResourceManager::GetCubemap(skyboxFaces);
   
-  // Set texture units
-  /*m_lightProgram.Use();
+  m_playerModel.LoadModel("Assets/nanosuit/nanosuit.obj");
+#pragma endregion
 
-  GLint matDiffuseLoc = m_lightProgram.GetUniformLocation("material.diffuseMap");
-  GLint matSpecularLoc = m_lightProgram.GetUniformLocation("material.specularMap");
-
-  glUniform1i(matDiffuseLoc, 0);
-  glUniform1i(matSpecularLoc, 1);
-
-  m_lightProgram.UnUse();*/
-
-  // Enable depth test
-  glEnable(GL_DEPTH_TEST);
-  // Accept fragment if it closer to the camera than the former one
-  // glDepthFunc(GL_LESS);
-  // Cull triangles which normal is not towards the camera
-  // glEnable(GL_CULL_FACE);
+  //Draw as wireframe
+  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void GameplayScreen::OnExit()
 {
-
+  // Clean up
+  glDeleteFramebuffers(1, &frameBuffer);
 }
 
 void GameplayScreen::Update()
 {
   m_camera.Update();
-  m_flashLight.SetPosition(m_camera.GetPosition());
-  m_flashLight.SetDirection(m_camera.GetDirection());
 
   CheckInput();
 }
 void GameplayScreen::Draw()
 {
-  // Clear the screen
+  // Clear buffers
+  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   m_lightProgram.Use();
 
-  /*m_lightPos.x = 1.0f + sin(SDL_GetTicks() / 1000.0f );
-  m_lightPos.y = sin(SDL_GetTicks() / 1000.0f);*/
-
-  GLint viewPosLoc = m_lightProgram.GetUniformLocation("viewPos");
-  glUniform3f(viewPosLoc, m_camera.GetPosition().x, m_camera.GetPosition().y, m_camera.GetPosition().z);
-  //Get material locations
-  GLint matShineLoc = m_lightProgram.GetUniformLocation("material.shininess");
-  //Set material properties
-  glUniform1f(matShineLoc, 32.0f);
-
-  //Directional Lights
-  m_directionalLight.UploadToShader(m_lightProgram, "dirLight");
-
-  //Point lights
-  for (GLint i = 0; i < m_pointLights.size(); i++)
-  {
-    std::string number = std::to_string(i);
-
-    m_pointLights.at(i).UploadToShader(m_lightProgram, "pointLights[" + number + "]");
-  }
-
-  //Spot Light (flash light)
-  m_flashLight.UploadToShader(m_lightProgram, "spotLight");
-
-  GLint modelMatrixID = m_lightProgram.GetUniformLocation("modelMatrix");
-  GLint viewMatrixID = m_lightProgram.GetUniformLocation("viewMatrix");
-  GLint projMatrixID = m_lightProgram.GetUniformLocation("projMatrix");
-
-  glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
-  glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
-
   glm::mat4 model(1.0f);
-  model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
+  model = glm::translate(model, glm::vec3(0.0f, 1.75f, 1.0f));
   model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+  glUniformMatrix4fv(m_lightProgram.GetUniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
+  glUniformMatrix4fv(m_lightProgram.GetUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
+  glUniformMatrix4fv(m_lightProgram.GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
 
-  glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, glm::value_ptr(model));
+  glUniform3f(m_lightProgram.GetUniformLocation("cameraPos"), m_camera.GetPosition().x, m_camera.GetPosition().y, m_camera.GetPosition().z);
 
-  gameModel.Draw(m_lightProgram);
+  glActiveTexture(GL_TEXTURE3); /* We already have 3 texture units active (in this shader)
+                                so set the skybox as the 4th texture unit (texture units are 0 based so index number 3) */
+  glUniform1i(m_lightProgram.GetUniformLocation("skybox"), 3);
 
-  //// Bind diffuse map
-  //glActiveTexture(GL_TEXTURE0);
-  //glBindTexture(GL_TEXTURE_2D, m_diffuseMap.id);
-  //// Bind specular map
-  //glActiveTexture(GL_TEXTURE1);
-  //glBindTexture(GL_TEXTURE_2D, m_specularMap.id);
-
-  // Draw the container (using container's vertex attributes)
-  //glBindVertexArray(m_containerVAO);
-
-  /*for (GLuint i = 0; i < 10; i++)
-  {
-    glm::mat4 modelMatrix(1.0f);
-    modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
-    GLfloat angle = 20.0f * i;
-    modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(1.0f, 0.3f, 0.5f));
-
-    glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-  }*/
-  
-  //glBindVertexArray(0);
+  //Draw the model
+  glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.id);
+  m_playerModel.Draw(m_lightProgram);
 
   m_lightProgram.UnUse();
 
-  // Also draw the lamp object, again binding the appropriate shader
-  m_lampProgram.Use();
+  //Render the skybox
+  glDepthFunc(GL_LEQUAL);
 
-  modelMatrixID = m_lampProgram.GetUniformLocation("modelMatrix");
-  viewMatrixID = m_lampProgram.GetUniformLocation("viewMatrix");
-  projMatrixID = m_lampProgram.GetUniformLocation("projMatrix");
+  m_skyboxShader.Use();
 
-  glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
-  glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
+  //Set view and proj matrix
+  GLint viewID = m_skyboxShader.GetUniformLocation("view");
+  GLint projectionID = m_skyboxShader.GetUniformLocation("projection");
 
-  // We now draw as many light bulbs as we have point lights.
-  //glBindVertexArray(m_lightVAO);
+  glUniformMatrix4fv(viewID, 1, GL_FALSE, glm::value_ptr(glm::mat4(glm::mat3(m_camera.GetViewMatrix()))));
+  glUniformMatrix4fv(projectionID, 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
 
-  for (GLint i = 0; i < m_pointLights.size(); i++)
-  {
-    glm::mat4 modelMatrix(1.0f);
-    modelMatrix = glm::translate(modelMatrix, m_pointLights.at(i).GetPosition());
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.02f)); //make it smaller
-    glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    gameModel.Draw(m_lampProgram);
-    //glDrawArrays(GL_TRIANGLES, 0, 36);
-  }
-  //glBindVertexArray(0);
+  // skybox cube
+  glBindVertexArray(skyboxVAO);
+  glActiveTexture(GL_TEXTURE0);
+  glUniform1i(m_skyboxShader.GetUniformLocation("skybox"), 0);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.id);
 
-  m_lampProgram.UnUse();
+  glDrawArrays(GL_TRIANGLES, 0, 36);
+  glBindVertexArray(0);
+  glDepthFunc(GL_LESS);
+
+  m_skyboxShader.UnUse();
 }
 
 void GameplayScreen::CheckInput()
@@ -315,6 +220,10 @@ void GameplayScreen::CheckInput()
     m_game->OnSDLEvent(evnt);
   }
 
+  if (m_game->inputManager.IsKeyDown(SDLK_ESCAPE))
+  {
+    m_currentState = GameEngine::ScreenState::EXIT_APPLICATION;
+  }
   if (m_game->inputManager.IsKeyDown(SDLK_w))
   {
     m_camera.Move(GameEngine::MoveState::FORWARD, m_game->GetFPS());

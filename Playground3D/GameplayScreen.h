@@ -7,6 +7,7 @@
 #include <GameEngine\Camera3D.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Lights.h>
+#include <map>
 
 // Our custom gameplay screen that inherits from the IGameScreen
 
@@ -35,29 +36,32 @@ public:
 private:
   void CheckInput();
 
-  GLuint m_containerVAO;
-  GLuint m_lightVAO;
+  GLuint cubeVAO, cubeVBO;
+  GLuint planeVAO, planeVBO;
+  GLuint vegetationVAO, vegetationVBO;
+  GLuint screenQuadVAO, screenQuadVBO;
+  GLuint skyboxVAO, skyboxVBO;
 
-  GLuint m_VBO;
+  GLuint frameBuffer, texColorBuffer, RBO;
 
-  std::vector<GameEngine::PointLight> m_pointLights;
-  GameEngine::SpotLight m_flashLight;
-  GameEngine::DirectionalLight m_directionalLight;
 
-  std::vector<glm::vec3> cubePositions;
+  std::vector<glm::vec3> m_vegetation;
+  std::map<float, glm::vec3> sorted;
 
-  GameEngine::GLTexture m_diffuseMap;
-  GameEngine::GLTexture m_specularMap;
+  GameEngine::GLTexture m_cubeTexture;
+  GameEngine::GLTexture m_floorTexture;
+  GameEngine::GLTexture m_grassTexture;
+  GameEngine::GLCubemap m_skybox;
 
   //the texturing program for sprites and lights
   GameEngine::GLSLProgram m_lightProgram;
-  GameEngine::GLSLProgram m_lampProgram;
+  GameEngine::GLSLProgram m_outlineColor;
+  GameEngine::GLSLProgram m_skyboxShader;
 
   //the cameras
   GameEngine::Camera3D m_camera;
   //the pointer to the game window
   GameEngine::Window* m_window;
-
-  GameEngine::Model gameModel;
+  GameEngine::Model m_playerModel;
 };
 

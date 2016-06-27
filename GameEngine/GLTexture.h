@@ -1,6 +1,7 @@
 #pragma once
 #include <GL/glew.h>
 #include <string>
+#include <vector>
 
 namespace GameEngine
 {
@@ -11,5 +12,11 @@ namespace GameEngine
     GLuint id;
     int width;
     int height;
+  };
+
+  struct GLCubemap
+  {
+    std::vector<GLTexture> textures;
+    GLuint id;
   };
 }

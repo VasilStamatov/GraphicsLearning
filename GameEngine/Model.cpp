@@ -42,12 +42,16 @@ namespace GameEngine
     // Process all the node's meshes (if any)
     for (GLuint i = 0; i < _node->mNumMeshes; i++)
     {
+      // The node object only contains indices to index the actual objects in the scene. 
+      // The scene contains all the data, node is just to keep stuff organized.
       aiMesh* mesh = _scene->mMeshes[_node->mMeshes[i]];
       m_meshes.push_back(ProcessMesh(mesh, _scene));
     }
     // Then do the same for each of its children
     for (GLuint i = 0; i < _node->mNumChildren; i++)
     {
+      // Child nodes are actually stored in the node, not in the scene (which makes sense since nodes only contain
+      // links and indices, nothing more, so why store that in the scene)
       ProcessNode(_node->mChildren[i], _scene);
     }
   }
@@ -95,17 +99,24 @@ namespace GameEngine
     {
       aiMaterial* material = _scene->mMaterials[_mesh->mMaterialIndex];
 
+      // 1. Diffuse maps
       std::vector<GLTexture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
       textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
+      // 2. Specular maps
       std::vector<GLTexture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
       textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+      /* 3. Reflection maps (Note that ASSIMP doesn't load reflection maps properly from wavefront objects,
+      so we'll cheat a little by defining the reflection maps as ambient maps in the .obj file, which ASSIMP is able to load)*/
+      std::vector<GLTexture> ambientMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_reflection");
+      textures.insert(textures.end(), ambientMaps.begin(), ambientMaps.end());
     }
 
     return Mesh(vertices, indices, textures);
   }
 
-  std::vector<GLTexture> Model::LoadMaterialTextures(aiMaterial* _mat, aiTextureType _type, const std::string& _typeName)
+  std::vector<GLTexture> Model::LoadMaterialTextures(aiMaterial* _mat, const aiTextureType& _type, const std::string& _typeName)
   {
     std::vector<GLTexture> textures;
 

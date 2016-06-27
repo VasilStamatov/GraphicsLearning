@@ -26,7 +26,7 @@ namespace GameEngine
     void ProcessNode(aiNode* _node, const aiScene* _scene);
     Mesh ProcessMesh(aiMesh* _mesh, const aiScene* _scene);
 
-    std::vector<GLTexture> LoadMaterialTextures(aiMaterial* _mat, aiTextureType _type, const std::string& _typeName);
+    std::vector<GLTexture> LoadMaterialTextures(aiMaterial* _mat, const aiTextureType& _type, const std::string& _typeName);
   };
 }
 

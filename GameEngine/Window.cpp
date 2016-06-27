@@ -30,6 +30,12 @@ namespace GameEngine
     {
       flags |= SDL_WINDOW_BORDERLESS;
     }
+
+    //set the depth size to 24 (default 16)
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    //set the stencil size to 8 (default 0)
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    
     //Open an SDL window
     m_sdlWindow = SDL_CreateWindow(_windowName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _screenWidth, _screenHeight, flags);
     if (m_sdlWindow == nullptr)

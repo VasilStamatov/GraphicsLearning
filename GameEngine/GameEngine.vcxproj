@@ -61,7 +61,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_mixer.lib;opengl32.lib;glew32.lib;Box2D.lib;assimp-vc120-mtd.lib;CEGUIBase-0_d.lib;CEGUIOpenGLRenderer-0_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_mixer.lib;opengl32.lib;glew32.lib;Box2D.lib;SOIL.lib;assimp-vc120-mtd.lib;CEGUIBase-0_d.lib;CEGUIOpenGLRenderer-0_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)deps/lib/Debug/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>
       </SubSystem>
@@ -85,7 +85,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_mixer.lib;opengl32.lib;glew32.lib;Box2D.lib;assimp-vc120-mt.lib;CEGUIBase-0.lib;CEGUIOpenGLRenderer-0.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_mixer.lib;opengl32.lib;glew32.lib;Box2D.lib;SOIL.lib;assimp-vc120-mt.lib;CEGUIBase-0.lib;CEGUIOpenGLRenderer-0.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)deps/lib/Release/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -112,7 +112,6 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ParticleBatch2D.cpp" />
     <ClCompile Include="ParticleEngine2D.cpp" />
-    <ClCompile Include="picoPNG.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="ScreenList.cpp" />
@@ -142,7 +141,6 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="ParticleBatch2D.h" />
     <ClInclude Include="ParticleEngine2D.h" />
-    <ClInclude Include="picoPNG.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ScreenList.h" />

@@ -33,6 +33,38 @@ namespace GameEngine
     void SetPosition(const glm::vec3& _newPos)
     {
       m_position = _newPos;
+      m_needsMatrixUpdate = true;
+    }
+    /** \brief offsets the position of the camera
+    * \param _offset - the offset which the position will add
+    */
+    void OffsetPosition(const glm::vec3& _offset) { m_position += _offset; m_needsMatrixUpdate = true; }
+
+    /** \brief Sets the camera orientation to a specific one
+    * \param _horizontal - the new horizontal orientation (degrees)
+    * \param _vertical - the new vertical orientation (degrees)
+    */
+    void SetOrientation(float _horizontal, float _vertical)
+    {
+      m_horizontalAngle = glm::radians(_horizontal);
+      m_verticalAngle = glm::radians(_vertical);
+
+      CalculateOrientation(false);
+
+      m_needsMatrixUpdate = true;
+    }
+    /** \brief offsets the orientation of the camera
+    * \param _horizontal - the horizontal offset (degrees)
+    * \param _vertical - the vertical offset (degrees)
+    */
+    void OffsetOrientation(float _horizontal, float _vertical)
+    {
+      m_horizontalAngle += glm::radians(_horizontal);
+      m_verticalAngle += glm::radians(_vertical);
+
+      CalculateOrientation(false);
+
+      m_needsMatrixUpdate = true;
     }
 
     /** \brief Translates the camera (can go +/- x axis and +/- z axis)
@@ -116,13 +148,15 @@ namespace GameEngine
      * \return the position vec3
      */
     glm::vec3 GetPosition() const { return m_position; }
-    
+
     /** \brief Gets the direction (always facing forward) vec3 of the camera
       * \return the direction vec3
       */
     glm::vec3 GetDirection() const { return m_direction; }
 
   private:
+    void CalculateOrientation(bool _limit);
+
     InputManager m_inputManager; ///< Handles events
 
     glm::mat4 m_projectionMatrix; ///< The projection matrix

@@ -21,6 +21,7 @@ namespace GameEngine
   {
     GLuint diffuseNr = 1;
     GLuint specularNr = 1;
+    GLuint reflectionNr = 1;
 
     for (GLuint i = 0; i < m_textures.size(); i++)
     {
@@ -37,13 +38,21 @@ namespace GameEngine
       {
         number = specularNr++;
       }
-      glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
-
-      // "material." is needed, because the material is usually carried in a struct with a variable "material"
+      else if (name == "texture_reflection")
+      {
+        number = reflectionNr++;
+      }
+      // Now set the sampler to the correct texture unit
       glUniform1i(_shaderProgram.GetUniformLocation("material." + name + std::to_string(number)), i);
 
-      //glActiveTexture(GL_TEXTURE0 + i);
+      // And finally bind the texture
+      glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
+
     }
+    glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
+
+    // Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
+    glUniform1f(_shaderProgram.GetUniformLocation("material.shininess"), 16.0f);
 
     //Draw mesh
     glBindVertexArray(m_VAO);
@@ -89,11 +98,11 @@ namespace GameEngine
 
     //Vertex texture coords
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_uv));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_normal));
 
     //Vertex normals
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_normal));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_uv));
 
     ////Vertex color
     //glEnableVertexAttribArray(3);

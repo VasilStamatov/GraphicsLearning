@@ -11,6 +11,9 @@ namespace GameEngine
     ColorRGBA8() : r(0), g(0), b(0), a(0) { }
     ColorRGBA8(GLubyte R, GLubyte G, GLubyte B, GLubyte A) : 
       r(R), g(G), b(B), a(A) { }
+    ColorRGBA8(GLubyte _rgb, GLubyte _alpha) :
+      r(_rgb), g(_rgb), b(_rgb), a(_alpha) { }
+
     GLubyte r;
     GLubyte g;
     GLubyte b;
@@ -20,6 +23,14 @@ namespace GameEngine
   //The vertex definition
   struct Vertex
   {
+    Vertex() {}
+    Vertex(const glm::vec3& _position, const glm::vec3& _normal, const glm::vec2& _uv, const ColorRGBA8& _color)
+    {
+      m_position = _position;
+      m_normal = _normal;
+      m_uv = _uv;
+      m_color = _color;
+    }
     //vertex position
     glm::vec3 m_position;
 

@@ -95,24 +95,33 @@ namespace GameEngine
     m_horizontalAngle -= m_mouseSpeed * deltaTime * _xrel;
 
     m_verticalAngle -= m_mouseSpeed * deltaTime * _yrel;
+    
+    CalculateOrientation(true);
 
-    // Restrict the verticle angle rotations (looking up and down) so you don't make air-rolls
-    if (m_verticalAngle < -glm::radians(89.0f))
+    m_needsMatrixUpdate = true;
+  }
+  void Camera3D::CalculateOrientation(bool _limit)
+  {
+    if (_limit)
     {
-      m_verticalAngle = -glm::radians(89.0f);
-    }
-    else if (m_verticalAngle > glm::radians(89.0f))
-    {
-      m_verticalAngle = glm::radians(89.0f);
-    }
-    // Keep the horizontal rotation range always between 0 and 360 degrees (but in radians ofc) so it doesn't go too high or low
-    if (m_horizontalAngle < 0.0f)
-    {
-      m_horizontalAngle += glm::radians(360.0f);
-    }
-    else if (m_horizontalAngle > glm::radians(360.0f))
-    {
-      m_horizontalAngle -= glm::radians(360.0f);
+      // Restrict the verticle angle rotations (looking up and down) so you don't make air-rolls
+      if (m_verticalAngle < -glm::radians(89.0f))
+      {
+        m_verticalAngle = -glm::radians(89.0f);
+      }
+      else if (m_verticalAngle > glm::radians(89.0f))
+      {
+        m_verticalAngle = glm::radians(89.0f);
+      }
+      // Keep the horizontal rotation range always between 0 and 360 degrees (but in radians ofc) so it doesn't go too high or low
+      if (m_horizontalAngle < 0.0f)
+      {
+        m_horizontalAngle += glm::radians(360.0f);
+      }
+      else if (m_horizontalAngle > glm::radians(360.0f))
+      {
+        m_horizontalAngle -= glm::radians(360.0f);
+      }
     }
     // the direction the camera is facing
     m_direction = glm::vec3(
@@ -128,7 +137,5 @@ namespace GameEngine
       );
     // Up vector : perpendicular to both direction and right
     m_up = glm::cross(m_right, m_direction);
-
-    m_needsMatrixUpdate = true;
   }
 }

@@ -8,7 +8,8 @@ namespace GameEngine
   {
   public:
     //png image loader
-    static GLTexture LoadPNG(std::string _filePath);
+    static GLTexture LoadPNG(const std::string& _filePath, bool _alpha);
+    static GLCubemap LoadCubemap(const std::vector<std::string>& _faces);
   };
 }
 
