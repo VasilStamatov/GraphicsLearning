@@ -6,7 +6,7 @@
 
 namespace GameEngine
 {
-  enum WindowFlags { INVISIBLE = 0x1, FULLSCREEN = 0x2, BORDERLESS = 0x4 };
+  enum WindowFlags { INVISIBLE = 0x1, FULLSCREEN = 0x2, BORDERLESS = 0x4, WINDOWED = 0x8 };
 
   class Window
   {
@@ -14,9 +14,11 @@ namespace GameEngine
     Window();
     ~Window();
     //create the window
-    int Create(std::string _windowName, int _screenWidth, int _screenHeight, unsigned int _currentFlags);
+    int Create(const std::string& _windowName, int _screenWidth, int _screenHeight, unsigned int _currentFlags);
     //swap the buffer
     void SwapBuffer();
+    //
+    void ChangeWindowType(const WindowFlags& _flags);
 
     //Getters
     int GetScreenWidth() { return m_screenWidth; };

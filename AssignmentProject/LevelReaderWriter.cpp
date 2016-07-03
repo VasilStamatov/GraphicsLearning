@@ -273,7 +273,7 @@ bool LevelReaderWriter::LoadAsTextV0(std::ifstream& _file, b2World* _world, Play
         >> uvRect.x >> uvRect.y >> uvRect.z >> uvRect.w
         >> angle >> texturePath >> isDynamic >> fixedRotation >> isSensor;
 
-      texture = GameEngine::ResourceManager::GetTexture(texturePath);
+      texture = GameEngine::ResourceManager::GetTexture(texturePath, false);
       _boxes.emplace_back();
       _boxes.back().Init(_world, pos, dims, texture, color, fixedRotation, isDynamic, isSensor, angle, uvRect);
     }

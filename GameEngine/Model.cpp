@@ -22,6 +22,45 @@ namespace GameEngine
     }
   }
 
+  void Model::DrawInstanced(GLSLProgram& _shader, std::vector<glm::mat4> _modelMatrices)
+  {
+    if (!m_instanceSetup)
+    {
+      for (GLuint i = 0; i < m_meshes.size(); i++)
+      {
+        GLuint VAO = m_meshes.at(i).GetVAO();
+        GLuint buffer;
+        glBindVertexArray(VAO);
+        glGenBuffers(1, &buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBufferData(GL_ARRAY_BUFFER, _modelMatrices.size() * sizeof(glm::mat4), _modelMatrices.data(), GL_STATIC_DRAW);
+        // Set attribute pointers for matrix (4 times vec4)
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)0);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(sizeof(glm::vec4)));
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(2 * sizeof(glm::vec4)));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(3 * sizeof(glm::vec4)));
+
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+
+        glBindVertexArray(0);
+
+        m_instanceSetup = true;
+      }
+    }
+    glBindTexture(GL_TEXTURE_2D, m_meshes.at(0).m_textures.at(0).id);
+    for (GLuint i = 0; i < m_meshes.size(); i++)
+    {
+      m_meshes[i].Draw(_shader, _modelMatrices.size(), true);
+    }
+  }
+
   void Model::LoadModel(const std::string& _path)
   {
     Assimp::Importer importer;

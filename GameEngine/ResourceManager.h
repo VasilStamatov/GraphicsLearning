@@ -1,5 +1,5 @@
 #pragma once
-#include "TextureCache.h"
+#include "Cache.h"
 #include <string>
 #include <vector>
 
@@ -10,12 +10,14 @@ namespace GameEngine
   {
   public:
     //gets the texture from the specified filepath
-    static GLTexture GetTexture(const std::string& _texturePath, bool _alpha = false);
+    static GLTexture GetTexture(const std::string& _texturePath, bool _alpha = true);
     //
     static GLCubemap GetCubemap(const std::vector<std::string>& _facesPaths);
+    //
+    static Model GetModel(const std::string& _texturePath);
   private:
     //the texture cache
-    static TextureCache s_textureCache;
+    static Cache s_cache;
   };
 }
 

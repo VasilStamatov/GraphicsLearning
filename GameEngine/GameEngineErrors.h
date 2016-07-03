@@ -3,5 +3,5 @@
 #include <string>
 namespace GameEngine
 {
-  extern void FatalError(std::string errorString);
+  extern void FatalError(const std::string& errorString);
 }

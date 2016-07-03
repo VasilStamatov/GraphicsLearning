@@ -4,6 +4,8 @@
 #include "GLTexture.h"
 #include "GLSLProgram.h"
 #include <vector>
+#include <glm\mat4x4.hpp>
+
 namespace GameEngine
 {
   class Mesh
@@ -16,7 +18,13 @@ namespace GameEngine
     std::vector<GLuint> m_indices;
     std::vector<GLTexture> m_textures;
     /* Mesh functions */
-    void Draw(GLSLProgram& _shaderProgram);
+    void Draw(GLSLProgram& _shaderProgram, int _amount = 1, bool _instanced = false);
+
+    /* Getters */
+    GLuint GetVAO() { return m_VAO; }
+    GLuint GetVBO() { return m_VBO; }
+    GLuint GetEBO() { return m_EBO; }
+
   private:
     /* Render Data */
     GLuint m_VAO = 0, m_VBO = 0, m_EBO = 0;

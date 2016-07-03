@@ -8,7 +8,7 @@ namespace fs = std::tr2::sys;
 
 namespace GameEngine
 {
-  bool IOManager::ReadFileToBuffer(std::string _filePath, std::vector<unsigned char>& _buffer)
+  bool IOManager::ReadFileToBuffer(const std::string& _filePath, std::vector<unsigned char>& _buffer)
   {
     std::ifstream file(_filePath, std::ios::binary);
     if (file.fail())
@@ -38,7 +38,7 @@ namespace GameEngine
     return true;
   }
 
-  bool IOManager::ReadFileToBuffer(std::string _filePath, std::string& _buffer)
+  bool IOManager::ReadFileToBuffer(const std::string& _filePath, std::string& _buffer)
   {
     std::ifstream file(_filePath, std::ios::binary);
     if (file.fail())

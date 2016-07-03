@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "GameEngineErrors.h"
+#include <iostream>
 
 namespace GameEngine
 {
@@ -12,30 +13,25 @@ namespace GameEngine
   {
   }
 
-  int Window::Create(std::string _windowName, int _screenWidth, int _screenHeight, unsigned int _currentFlags)
+  int Window::Create(const std::string& _windowName, int _screenWidth, int _screenHeight, unsigned int _currentFlags)
   {
     Uint32 flags = SDL_WINDOW_OPENGL;
     m_screenWidth = _screenWidth;
     m_screenHeight = _screenHeight;
     //if any of the bitwise operations aren't 0, then it's true
-    if (_currentFlags & INVISIBLE)
+    if (_currentFlags & WindowFlags::INVISIBLE)
     {
       flags |= SDL_WINDOW_HIDDEN;
     }
-    if (_currentFlags & FULLSCREEN)
+    if (_currentFlags & WindowFlags::FULLSCREEN)
     {
       flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     }
-    if (_currentFlags & BORDERLESS)
+    if (_currentFlags & WindowFlags::BORDERLESS)
     {
       flags |= SDL_WINDOW_BORDERLESS;
     }
 
-    //set the depth size to 24 (default 16)
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    //set the stencil size to 8 (default 0)
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    
     //Open an SDL window
     m_sdlWindow = SDL_CreateWindow(_windowName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _screenWidth, _screenHeight, flags);
     if (m_sdlWindow == nullptr)
@@ -58,12 +54,12 @@ namespace GameEngine
     //check the openGL version
     printf("*** OpenGL Version: %s ***\n", glGetString(GL_VERSION));
 
-    //Set the background color to blue
-    glClearColor(0.0f, 0.0f, 1.0f, 1.0);
+    //Set the background color to black
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0);
 
     //set vsync
     SDL_GL_SetSwapInterval(0);
-      
+
     //Enable alpha blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -73,6 +69,27 @@ namespace GameEngine
   void Window::SwapBuffer()
   {
     SDL_GL_SwapWindow(m_sdlWindow);
+  }
+  void Window::ChangeWindowType(const WindowFlags& _flags)
+  {
+    Uint32 screenType;
+
+    //if any of the bitwise operations aren't 0, then it's true
+    if (_flags == WindowFlags::FULLSCREEN)
+    {
+      screenType == SDL_WINDOW_FULLSCREEN;
+    }
+    else if (_flags == WindowFlags::BORDERLESS)
+    {
+      screenType = SDL_WINDOW_FULLSCREEN_DESKTOP;
+    }
+    else if (_flags == WindowFlags::WINDOWED)
+    {
+      screenType = 0;
+    }
+    SDL_SetWindowFullscreen(m_sdlWindow, screenType);
+    SDL_GetWindowSize(m_sdlWindow, &m_screenWidth, &m_screenHeight);
+
   }
 }
 

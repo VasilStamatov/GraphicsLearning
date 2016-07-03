@@ -18,7 +18,7 @@ namespace GameEngine
     void Update();
 
     //converts from screen space (0,0 topleft to SW,SH botright) to world space (0,0 in the middle and pos is relative to the cam)
-    glm::vec2 ConvertScreenToWorld(glm::vec2 _screenCords);
+    glm::vec2 ConvertScreenToWorld(const glm::vec2 _screenCords);
 
     //checks if the box is in view
     bool IsBoxInView(const glm::vec2& _position, const glm::vec2& _dimensions);

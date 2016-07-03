@@ -44,7 +44,7 @@ private:
 
   GLuint frameBuffer, texColorBuffer, RBO;
 
-
+  std::vector<glm::mat4> m_modelMatrices;
   std::vector<glm::vec3> m_vegetation;
   std::map<float, glm::vec3> sorted;
 
@@ -54,14 +54,17 @@ private:
   GameEngine::GLCubemap m_skybox;
 
   //the texturing program for sprites and lights
-  GameEngine::GLSLProgram m_lightProgram;
-  GameEngine::GLSLProgram m_outlineColor;
+  GameEngine::GLSLProgram m_planetShader;
+  GameEngine::GLSLProgram m_asteroidShader;
   GameEngine::GLSLProgram m_skyboxShader;
+  GameEngine::GLSLProgram m_outlineShader;
 
   //the cameras
   GameEngine::Camera3D m_camera;
   //the pointer to the game window
   GameEngine::Window* m_window;
-  GameEngine::Model m_playerModel;
+  GameEngine::Model m_planet;
+  GameEngine::Model m_asteroids;
+
 };
 

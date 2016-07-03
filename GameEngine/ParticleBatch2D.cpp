@@ -17,7 +17,7 @@ namespace GameEngine
   //initialize the particle batch
   void ParticleBatch2D::Init(int _maxParticles,
                              float _decayRate,
-                             GLTexture _texture,
+                             const GLTexture& _texture,
                              std::function<void(Particle2D&, float)> _updateFunc /* = defaultParticleUpdate */)
   {
     m_maxParticles = _maxParticles;
@@ -37,17 +37,17 @@ namespace GameEngine
     int particleIndex = FindFreeParticle();
 
     //edit the particle index values
-    auto& p = m_particles[particleIndex];
+    Particle2D& particle = m_particles[particleIndex];
 
-    p.m_life = 1.0f;
+    particle.m_life = 1.0f;
 
-    p.m_position = _position;
+    particle.m_position = _position;
 
-    p.m_velocity = _velocity;
+    particle.m_velocity = _velocity;
 
-    p.m_color = _color;
+    particle.m_color = _color;
 
-    p.m_width = _width;
+    particle.m_width = _width;
   }
 
   void ParticleBatch2D::Update(float _deltaTime)
@@ -71,11 +71,11 @@ namespace GameEngine
     for (int i = 0; i < m_maxParticles; i++)
     {
       // check if it is active
-      auto& p = m_particles[i];
-      if (p.m_life > 0.0f)
+      Particle2D& particle = m_particles[i];
+      if (particle.m_life > 0.0f)
       {
-        glm::vec4 destRect(p.m_position.x, p.m_position.y, p.m_width, p.m_width);
-        _spritebBatch->Draw(destRect, uvRect, m_texture.id, 0.0f, p.m_color);
+        glm::vec4 destRect(particle.m_position.x, particle.m_position.y, particle.m_width, particle.m_width);
+        _spritebBatch->Draw(destRect, uvRect, m_texture.id, 0.0f, particle.m_color);
       }
     }
   }

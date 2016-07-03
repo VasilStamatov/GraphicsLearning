@@ -6,7 +6,7 @@
 namespace GameEngine
 {
   //use this for fatal errors and when you want to exit immediately
-  void FatalError(std::string errorString)
+  void FatalError(const std::string& errorString)
   {
     std::cout << errorString << std::endl;
     std::cout << "Enter any key to quit. . .";

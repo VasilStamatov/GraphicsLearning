@@ -15,8 +15,8 @@ void App::OnInit()
 {
   //set up the variables for the window creation
   m_gameName = "3D Playground";
-  m_screenWidth = 640;
-  m_screenHeight = 480;
+  m_screenWidth = 960;
+  m_screenHeight = 540;
   m_currentFlags = 0;
   
 }

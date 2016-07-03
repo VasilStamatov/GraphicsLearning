@@ -33,5 +33,5 @@ void main()
 		reflectColor = texture(skybox, reflectDir) * reflectIntensity;
 	}
 	//combine the results
-	color = diffuseColor + reflectColor;
+	color = diffuseColor; //+ reflectColor;
 }

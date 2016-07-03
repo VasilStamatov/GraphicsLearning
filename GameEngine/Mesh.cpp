@@ -1,5 +1,7 @@
 #include "Mesh.h"
 #include <string>
+#include <glm\gtc\matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace GameEngine
 {
@@ -17,7 +19,7 @@ namespace GameEngine
   {
   }
 
-  void Mesh::Draw(GLSLProgram& _shaderProgram)
+  void Mesh::Draw(GLSLProgram& _shaderProgram, int _amount, bool _instanced)
   {
     GLuint diffuseNr = 1;
     GLuint specularNr = 1;
@@ -47,7 +49,6 @@ namespace GameEngine
 
       // And finally bind the texture
       glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
-
     }
     glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
 
@@ -57,7 +58,14 @@ namespace GameEngine
     //Draw mesh
     glBindVertexArray(m_VAO);
 
-    glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
+    if (_instanced)
+    {
+      glDrawElementsInstanced(GL_TRIANGLES, m_vertices.size(), GL_UNSIGNED_INT, 0, _amount);
+    }
+    else
+    {
+      glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
+    }
 
     glBindVertexArray(0);
   }
@@ -83,14 +91,14 @@ namespace GameEngine
 
     glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
 
-    glBufferSubData(GL_ARRAY_BUFFER, 0, m_vertices.size() * sizeof(Vertex), &m_vertices[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, m_vertices.size() * sizeof(Vertex), m_vertices.data());
 
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLuint), nullptr, GL_STATIC_DRAW);
 
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, m_indices.size() * sizeof(GLuint), &m_indices[0]);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, m_indices.size() * sizeof(GLuint), m_indices.data());
 
     //Vertex position
     glEnableVertexAttribArray(0);

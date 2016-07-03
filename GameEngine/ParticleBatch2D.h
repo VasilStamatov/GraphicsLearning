@@ -21,7 +21,7 @@ namespace GameEngine
   };
 
   // Default function pointer
-  inline void DefaultParticleUpdate(Particle2D _particle, float _deltaTime)
+  inline void DefaultParticleUpdate(Particle2D& _particle, float _deltaTime)
   {
     _particle.m_position += _particle.m_velocity * _deltaTime;
   }
@@ -32,7 +32,7 @@ namespace GameEngine
     ParticleBatch2D();
     ~ParticleBatch2D();
     //initialize the particle batch
-    void Init(int _maxParticles, float _decayRate, GLTexture _texture, std::function<void(Particle2D&, float)> _updateFunc = DefaultParticleUpdate);
+    void Init(int _maxParticles, float _decayRate, const GLTexture& _texture, std::function<void(Particle2D&, float)> _updateFunc = DefaultParticleUpdate);
     //add a oarticle
     void AddParticle(const glm::vec2& _position,
                      const glm::vec2& _velocity,

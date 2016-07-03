@@ -1017,7 +1017,7 @@ bool inEnemySelect(const EnemyRobot& _enemy, const glm::vec2& _pos)
 void EditorScreen::UpdateMouseDown(const SDL_Event& _evnt)
 {
   //texture for boxes
-  static GameEngine::GLTexture texture = GameEngine::ResourceManager::GetTexture("Assets/Tiles/MetalTexture.png");
+  static GameEngine::GLTexture texture = GameEngine::ResourceManager::GetTexture("Assets/Tiles/MetalTexture.png", false);
 
   glm::vec2 pos;
   glm::vec4 uvRect;
@@ -1486,7 +1486,7 @@ void EditorScreen::RefreshSelectedBox(const glm::vec2& _newPos)
     return;
   }
   //Texture for boxes
-  static GameEngine::GLTexture texture = GameEngine::ResourceManager::GetTexture("Assets/Tiles/MetalTexture.png");
+  static GameEngine::GLTexture texture = GameEngine::ResourceManager::GetTexture("Assets/Tiles/MetalTexture.png", false);
   Box newBox;
   glm::vec4 uvRect;
 

@@ -96,9 +96,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AudioEngine.cpp" />
+    <ClCompile Include="Cache.cpp" />
     <ClCompile Include="Camera2D.cpp" />
     <ClCompile Include="Camera3D.cpp" />
     <ClCompile Include="DebugRenderer.cpp" />
+    <ClCompile Include="Framebuffer.cpp" />
     <ClCompile Include="GameEngineErrors.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GLSLProgram.cpp" />
@@ -117,15 +119,16 @@
     <ClCompile Include="ScreenList.cpp" />
     <ClCompile Include="SpriteBatch.cpp" />
     <ClCompile Include="SpriteFont.cpp" />
-    <ClCompile Include="TextureCache.cpp" />
     <ClCompile Include="Timing.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h" />
+    <ClInclude Include="Cache.h" />
     <ClInclude Include="Camera2D.h" />
     <ClInclude Include="Camera3D.h" />
     <ClInclude Include="DebugRenderer.h" />
+    <ClInclude Include="Framebuffer.h" />
     <ClInclude Include="GameEngineErrors.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GLSLProgram.h" />
@@ -146,7 +149,6 @@
     <ClInclude Include="ScreenList.h" />
     <ClInclude Include="SpriteBatch.h" />
     <ClInclude Include="SpriteFont.h" />
-    <ClInclude Include="TextureCache.h" />
     <ClInclude Include="TileSheet.h" />
     <ClInclude Include="Timing.h" />
     <ClInclude Include="Vertex.h" />
