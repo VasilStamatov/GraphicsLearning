@@ -44,7 +44,9 @@ private:
 
   GLuint frameBuffer, texColorBuffer, RBO;
 
-  std::vector<glm::mat4> m_modelMatrices;
+  std::vector<glm::mat4> m_asteroidMatrices;
+  std::vector<glm::mat4> m_planetMatrices;
+
   std::vector<glm::vec3> m_vegetation;
   std::map<float, glm::vec3> sorted;
 

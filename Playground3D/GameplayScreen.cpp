@@ -112,8 +112,13 @@ void GameplayScreen::OnEntry()
     model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
 
     // 4. Now add to list of matrices
-    m_modelMatrices.push_back(model);
+    m_asteroidMatrices.push_back(model);
   }
+
+  glm::mat4 model(1.0f);
+  model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
+  model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+  m_planetMatrices.push_back(model);
 
   GLfloat skyboxVertices[] = {
     // Positions          
@@ -199,6 +204,8 @@ void GameplayScreen::OnExit()
 {
   // Clean up
   glDeleteFramebuffers(1, &frameBuffer);
+  m_planet.Dispose();
+  m_asteroids.Dispose();
 }
 
 void GameplayScreen::Update()
@@ -213,34 +220,22 @@ void GameplayScreen::Draw()
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  m_planetShader.Use();
-  glm::mat4 model;
-  model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
-  model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+  m_asteroidShader.Use();
 
   glUniformMatrix4fv(m_planetShader.GetUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
   glUniformMatrix4fv(m_planetShader.GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
-  glUniformMatrix4fv(m_planetShader.GetUniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
 
-  glUniform3f(m_planetShader.GetUniformLocation("cameraPos"), m_camera.GetPosition().x, m_camera.GetPosition().y, m_camera.GetPosition().z);
+  //glUniform3f(m_planetShader.GetUniformLocation("cameraPos"), m_camera.GetPosition().x, m_camera.GetPosition().y, m_camera.GetPosition().z);
 
-  glActiveTexture(GL_TEXTURE3); /* We already have 3 texture units active (in this shader)
-                                so set the skybox as the 4th texture unit (texture units are 0 based so index number 3) */
-  glUniform1i(m_planetShader.GetUniformLocation("skybox"), 3);
+  //glActiveTexture(GL_TEXTURE3); /* We already have 3 texture units active (in this shader)
+  //                              so set the skybox as the 4th texture unit (texture units are 0 based so index number 3) */
+  //glUniform1i(m_planetShader.GetUniformLocation("skybox"), 3);
 
   //Draw the model
-  glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.id);
-  m_planet.Draw(m_planetShader);
+  //glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.id);
+  m_planet.Draw(m_asteroidShader, m_planetMatrices);
 
-  m_planetShader.UnUse();
-
-  //Draw ALL the asteroids
-  m_asteroidShader.Use();
-
-  glUniformMatrix4fv(m_asteroidShader.GetUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
-  glUniformMatrix4fv(m_asteroidShader.GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
-
-  m_asteroids.DrawInstanced(m_asteroidShader, m_modelMatrices);
+  m_asteroids.Draw(m_asteroidShader, m_asteroidMatrices);
 
   m_asteroidShader.UnUse();
 

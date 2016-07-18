@@ -5,9 +5,12 @@ struct Material
 	sampler2D texture_diffuse1;
 	sampler2D texture_specular1;
 	sampler2D texture_reflection1;
+	sampler2D texture_normal1;
 	float shininess;
 };
 
+in vec3 Position;
+in vec3 Normal;
 in vec2 UV;
 
 uniform Material material;

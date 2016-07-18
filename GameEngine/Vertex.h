@@ -24,12 +24,13 @@ namespace GameEngine
   struct Vertex
   {
     Vertex() {}
-    Vertex(const glm::vec3& _position, const glm::vec3& _normal, const glm::vec2& _uv, const ColorRGBA8& _color)
+    Vertex(const glm::vec3& _position, const glm::vec3& _normal, const glm::vec2& _uv, const ColorRGBA8& _color, const glm::vec3& _tangents)
     {
       m_position = _position;
       m_normal = _normal;
       m_uv = _uv;
       m_color = _color;
+      m_tangents = _tangents;
     }
     //vertex position
     glm::vec3 m_position;
@@ -42,6 +43,8 @@ namespace GameEngine
 
     //vertex color
     ColorRGBA8 m_color;
+
+    glm::vec3 m_tangents;
 
     void SetPosition(const glm::vec3& _position)
     {
@@ -75,6 +78,15 @@ namespace GameEngine
       m_color.g = _g;
       m_color.b = _b;
       m_color.a = _a;
+    }
+
+    void SetTangents(const glm::vec3& _tangents)
+    {
+      m_tangents = _tangents;
+    }
+    void SetTangents(float _x, float _y, float _z)
+    {
+      m_tangents = glm::vec3(_x, _y, _z);
     }
   };
 }

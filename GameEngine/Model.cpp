@@ -14,57 +14,33 @@ namespace GameEngine
   {
   }
 
-  void Model::Draw(GLSLProgram& _shader)
+  void Model::Draw(GLSLProgram& _shader, std::vector<glm::mat4> _modelMatrices)
   {
+    
     for (GLuint i = 0; i < m_meshes.size(); i++)
     {
-      m_meshes[i].Draw(_shader);
+      glBindBuffer(GL_ARRAY_BUFFER, m_meshes.at(i).GetMBO());
+      glBufferData(GL_ARRAY_BUFFER, _modelMatrices.size() * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
+      glBufferSubData(GL_ARRAY_BUFFER, 0, _modelMatrices.size() * sizeof(glm::mat4), _modelMatrices.data());
+      m_meshes.at(i).Draw(_shader, _modelMatrices.size());
+    }
+  }
+  void Model::Dispose()
+  {
+    //delete the vao's and vbo's and reset them to 0
+    for (GLuint i = 0; i < m_meshes.size(); i++)
+    {
+      m_meshes.at(i).Dispose();
     }
   }
 
-  void Model::DrawInstanced(GLSLProgram& _shader, std::vector<glm::mat4> _modelMatrices)
-  {
-    if (!m_instanceSetup)
-    {
-      for (GLuint i = 0; i < m_meshes.size(); i++)
-      {
-        GLuint VAO = m_meshes.at(i).GetVAO();
-        GLuint buffer;
-        glBindVertexArray(VAO);
-        glGenBuffers(1, &buffer);
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        glBufferData(GL_ARRAY_BUFFER, _modelMatrices.size() * sizeof(glm::mat4), _modelMatrices.data(), GL_STATIC_DRAW);
-        // Set attribute pointers for matrix (4 times vec4)
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)0);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(sizeof(glm::vec4)));
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(2 * sizeof(glm::vec4)));
-        glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(3 * sizeof(glm::vec4)));
-
-        glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
-        glVertexAttribDivisor(5, 1);
-        glVertexAttribDivisor(6, 1);
-
-        glBindVertexArray(0);
-
-        m_instanceSetup = true;
-      }
-    }
-    glBindTexture(GL_TEXTURE_2D, m_meshes.at(0).m_textures.at(0).id);
-    for (GLuint i = 0; i < m_meshes.size(); i++)
-    {
-      m_meshes[i].Draw(_shader, _modelMatrices.size(), true);
-    }
-  }
 
   void Model::LoadModel(const std::string& _path)
   {
+    m_meshes.clear();
+
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(_path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = importer.ReadFile(_path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || !scene->mRootNode || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE)
     {
@@ -122,6 +98,11 @@ namespace GameEngine
         vertex.m_uv.x = 0.0f;
         vertex.m_uv.y = 0.0f;
       }
+
+      vertex.m_tangents.x = _mesh->mTangents[i].x;
+      vertex.m_tangents.y = _mesh->mTangents[i].y;
+      vertex.m_tangents.z = _mesh->mTangents[i].z;
+
       vertices.push_back(vertex);
     }
 
@@ -150,6 +131,10 @@ namespace GameEngine
       so we'll cheat a little by defining the reflection maps as ambient maps in the .obj file, which ASSIMP is able to load)*/
       std::vector<GLTexture> ambientMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_reflection");
       textures.insert(textures.end(), ambientMaps.begin(), ambientMaps.end());
+
+      // 2. Normal maps
+      std::vector<GLTexture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+      textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     }
 
     return Mesh(vertices, indices, textures);

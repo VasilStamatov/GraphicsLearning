@@ -12,11 +12,23 @@ namespace GameEngine
     GLuint id;
     int width;
     int height;
+
+    void Bind(GLenum _textureUnit)
+    {
+      glActiveTexture(_textureUnit);
+      glBindTexture(GL_TEXTURE_2D, id);
+    }
   };
 
   struct GLCubemap
   {
     std::vector<GLTexture> textures;
     GLuint id;
+
+    void Bind(GLenum _textureUnit)
+    {
+      glActiveTexture(_textureUnit);
+      glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+    }
   };
 }

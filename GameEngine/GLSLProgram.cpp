@@ -244,6 +244,9 @@ namespace GameEngine
   {
     //deletes the program ID if there is one (not 0)
     if (m_programID) glDeleteProgram(m_programID);
+
+    //clears the shader vector
+    m_shaders.clear();
   }
 
   //Compiles a single shader file

@@ -5,8 +5,8 @@
 namespace GameEngine
 {
   //This caches the textures so that multiple sprites can use the same textures
-  class GLTexture;
-  class GLCubemap;
+  struct GLTexture;
+  struct GLCubemap;
   class Model;
 
   class Cache

@@ -2,7 +2,7 @@
 
 namespace GameEngine
 {
-  Framebuffer::Framebuffer()
+  Framebuffer::Framebuffer() : m_fbo(0), m_textureBuffer(0), m_rbo(0), m_vao(0)
   {
   }
 
@@ -25,10 +25,26 @@ namespace GameEngine
 
   void Framebuffer::Destroy()
   {
-    glDeleteFramebuffers(1, &m_fbo);
-    glDeleteTextures(1, &m_textureBuffer);
-    glDeleteRenderbuffers(1, &m_rbo);
-    glDeleteVertexArrays(1, &m_vao);
+    if (m_fbo != 0)
+    {
+      glDeleteFramebuffers(1, &m_fbo);
+      m_fbo = 0;
+    }
+    if (m_textureBuffer != 0)
+    {
+      glDeleteTextures(1, &m_textureBuffer);
+      m_textureBuffer = 0;
+    }
+    if (m_rbo != 0)
+    {
+      glDeleteRenderbuffers(1, &m_rbo);
+      m_rbo = 0;
+    }
+    if (m_vao != 0)
+    {
+      glDeleteVertexArrays(1, &m_vao);
+      m_vao = 0;
+    }
   }
 
   void Framebuffer::BindFramebuffer(GLenum _target)
@@ -179,11 +195,12 @@ namespace GameEngine
     glGenVertexArrays(1, &m_vao);
     glGenBuffers(1, &vbo);
 
+    glBindVertexArray(m_vao);
+
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), nullptr, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), &vertices[0]);
 
-    glBindVertexArray(m_vao);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
