@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <glm\vec3.hpp>
 #include <glm\vec2.hpp>
+#include <glm\vec4.hpp>
 
 namespace GameEngine
 {
@@ -9,7 +10,7 @@ namespace GameEngine
   struct ColorRGBA8
   {
     ColorRGBA8() : r(0), g(0), b(0), a(0) { }
-    ColorRGBA8(GLubyte R, GLubyte G, GLubyte B, GLubyte A) : 
+    ColorRGBA8(GLubyte R, GLubyte G, GLubyte B, GLubyte A) :
       r(R), g(G), b(B), a(A) { }
     ColorRGBA8(GLubyte _rgb, GLubyte _alpha) :
       r(_rgb), g(_rgb), b(_rgb), a(_alpha) { }
@@ -45,6 +46,19 @@ namespace GameEngine
     ColorRGBA8 m_color;
 
     glm::vec3 m_tangents;
+
+    glm::ivec4 m_boneIDs;
+
+    glm::vec4 m_weights;
+
+    void SetBoneIDs(const glm::ivec4& _boneID)
+    {
+      m_boneIDs = _boneID;
+    }
+    void SetBoneWeights(const glm::vec4& _weights)
+    {
+      m_weights = _weights;
+    }
 
     void SetPosition(const glm::vec3& _position)
     {

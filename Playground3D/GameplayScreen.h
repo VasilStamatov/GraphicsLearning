@@ -68,5 +68,6 @@ private:
   GameEngine::Model m_planet;
   GameEngine::Model m_asteroids;
 
-};
+  float m_startTime;
 
+};

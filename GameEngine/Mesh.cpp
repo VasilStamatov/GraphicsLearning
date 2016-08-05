@@ -9,18 +9,25 @@ namespace GameEngine
 #define POS_LOC 0
 #define NORMAL_LOC 1
 #define UV_LOC 2
-#define MODEL_LOC 3
+#define BONE_ID_LOC 3
+#define WEIGHT_LOC 4
+#define MODEL_LOC 5
 
+  Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures, bool _hasAnim)
+  {
+    m_vertices = _vertices;
+    m_indices = _indices;
+    m_textures = _textures;
+    m_hasAnimations = _hasAnim;
+    SetupMesh();
+  }
   Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures)
   {
     m_vertices = _vertices;
     m_indices = _indices;
     m_textures = _textures;
-
     SetupMesh();
   }
-
-
   Mesh::~Mesh()
   {
   }
@@ -67,7 +74,7 @@ namespace GameEngine
     //Draw mesh
     glBindVertexArray(m_VAO);
 
-    glDrawElementsInstanced(GL_TRIANGLES, m_vertices.size(), GL_UNSIGNED_INT, 0, _amount);
+    glDrawElementsInstanced(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0, _amount);
 
     glBindVertexArray(0);
   }
@@ -134,27 +141,36 @@ namespace GameEngine
     glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, m_vertices.size() * sizeof(Vertex), m_vertices.data());
+    
+    GLuint attributeLocation = 0;
 
     //Vertex position
-    glEnableVertexAttribArray(POS_LOC);
-    glVertexAttribPointer(POS_LOC, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_position));
+    glEnableVertexAttribArray(attributeLocation);
+    glVertexAttribPointer(attributeLocation++, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_position));
 
     //Vertex texture coords
-    glEnableVertexAttribArray(NORMAL_LOC);
-    glVertexAttribPointer(NORMAL_LOC, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_normal));
+    glEnableVertexAttribArray(attributeLocation);
+    glVertexAttribPointer(attributeLocation++, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_normal));
 
     //Vertex normals
-    glEnableVertexAttribArray(UV_LOC);
-    glVertexAttribPointer(UV_LOC, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_uv));
+    glEnableVertexAttribArray(attributeLocation);
+    glVertexAttribPointer(attributeLocation++, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_uv));
 
+    if (m_hasAnimations)
+    {
+      glEnableVertexAttribArray(attributeLocation);
+      glVertexAttribIPointer(attributeLocation++, 4, GL_INT, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_boneIDs));
 
+      glEnableVertexAttribArray(attributeLocation);
+      glVertexAttribPointer(attributeLocation++, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_weights));
+    }
     glBindBuffer(GL_ARRAY_BUFFER, m_MBO);
     // Set attribute pointers for matrix (4 times vec4)
     for (GLint i = 0; i < 4; i++)
     {
-      glEnableVertexAttribArray(MODEL_LOC + i);
-      glVertexAttribPointer(MODEL_LOC + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(i * sizeof(glm::vec4)));
-      glVertexAttribDivisor(MODEL_LOC + i, 1);
+      glEnableVertexAttribArray(attributeLocation + i);
+      glVertexAttribPointer(attributeLocation + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(i * sizeof(glm::vec4)));
+      glVertexAttribDivisor(attributeLocation + i, 1);
     }
 
     glBindVertexArray(0);

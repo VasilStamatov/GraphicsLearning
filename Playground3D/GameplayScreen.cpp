@@ -36,6 +36,7 @@ void GameplayScreen::Destroy()
 
 void GameplayScreen::OnEntry()
 {
+  m_startTime = SDL_GetTicks();
   m_camera.Init(45.0f, m_window->GetScreenWidth(), m_window->GetScreenHeight(), SDL_TRUE);
   m_camera.SetPosition(glm::vec3(0.0f, 0.0f, -15.0f));
   glEnable(GL_MULTISAMPLE);
@@ -52,13 +53,16 @@ void GameplayScreen::OnEntry()
 
   std::vector<GameEngine::Shader> planetShaders =
   {
-    { GL_VERTEX_SHADER, "Shaders/Advanced.vert", "Planet Vertex Shader" },
-    { GL_FRAGMENT_SHADER, "Shaders/Advanced.frag", "Planet Fragment Shader" },
+    { GL_VERTEX_SHADER, "Shaders/Animation.vert", "Animation Vertex Shader" },
+    { GL_FRAGMENT_SHADER, "Shaders/Animation.frag", "Animation Fragment Shader" },
   };
   m_planetShader.CompileShaders(planetShaders);
   m_planetShader.AddAttribute("position");
   m_planetShader.AddAttribute("normal");
   m_planetShader.AddAttribute("UV");
+  m_planetShader.AddAttribute("BoneIDs");
+  m_planetShader.AddAttribute("Weights");
+  m_planetShader.AddAttribute("modelInstanced");
   m_planetShader.LinkShaders();
 
   std::vector<GameEngine::Shader> InstancedShaders =
@@ -117,7 +121,9 @@ void GameplayScreen::OnEntry()
 
   glm::mat4 model(1.0f);
   model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
-  model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+  model = glm::rotate(model, 90.0f, glm::vec3(-1, 0, 0));
+  model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+
   m_planetMatrices.push_back(model);
 
   GLfloat skyboxVertices[] = {
@@ -179,18 +185,26 @@ void GameplayScreen::OnEntry()
 
   glBindVertexArray(0);
 
-  std::vector<std::string> skyboxFaces;
+  std::vector<std::string> skyboxFaces = 
+  {
+    "Assets/Skybox/right.png",
+    "Assets/Skybox/left.png",
+    "Assets/Skybox/top.png",
+    "Assets/Skybox/bottom.png",
+    "Assets/Skybox/back.png",
+    "Assets/Skybox/front.png"
+  };
 
-  skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_bk.JPG");
+  /*skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_bk.JPG");
   skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_dn.JPG");
   skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_ft.JPG");
   skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_lf.JPG");
   skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_rt.JPG");
-  skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_up.JPG");
+  skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_up.JPG");*/
 
   m_skybox = GameEngine::ResourceManager::GetCubemap(skyboxFaces);
-  
-  m_planet = GameEngine::ResourceManager::GetModel("Assets/planet/planet.obj");
+
+  m_planet = GameEngine::ResourceManager::GetModel("Assets/MD5/Bob.md5mesh");
   m_asteroids = GameEngine::ResourceManager::GetModel("Assets/rock/rock.obj");
 
 
@@ -211,7 +225,8 @@ void GameplayScreen::OnExit()
 void GameplayScreen::Update()
 {
   m_camera.Update();
-
+  float elapsedTime = (SDL_GetTicks() - m_startTime) / 1000.0f;
+  m_planet.UpdateAnimation(elapsedTime);
   CheckInput();
 }
 void GameplayScreen::Draw()
@@ -220,10 +235,10 @@ void GameplayScreen::Draw()
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  m_asteroidShader.Use();
-
+  m_planetShader.Use();
   glUniformMatrix4fv(m_planetShader.GetUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
   glUniformMatrix4fv(m_planetShader.GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
+  m_planet.Draw(m_planetShader, m_planetMatrices);
 
   //glUniform3f(m_planetShader.GetUniformLocation("cameraPos"), m_camera.GetPosition().x, m_camera.GetPosition().y, m_camera.GetPosition().z);
 
@@ -233,8 +248,13 @@ void GameplayScreen::Draw()
 
   //Draw the model
   //glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.id);
-  m_planet.Draw(m_asteroidShader, m_planetMatrices);
 
+
+  m_planetShader.UnUse();
+
+  m_asteroidShader.Use();
+  glUniformMatrix4fv(m_asteroidShader.GetUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
+  glUniformMatrix4fv(m_asteroidShader.GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
   m_asteroids.Draw(m_asteroidShader, m_asteroidMatrices);
 
   m_asteroidShader.UnUse();
