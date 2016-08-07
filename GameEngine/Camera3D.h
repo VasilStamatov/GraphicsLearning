@@ -96,9 +96,9 @@ namespace GameEngine
       {
         m_initialFoV = 1.0f;
       }
-      else if (m_initialFoV > 60.0f)
+      else if (m_initialFoV > 120.0f)
       {
-        m_initialFoV = 60.0f;
+        m_initialFoV = 120.0f;
       }
       printf("fov: %f \n", m_initialFoV);
       m_projectionMatrix = glm::perspective(m_initialFoV, GetAspectRatio(), 0.1f, 100.0f);
@@ -167,7 +167,7 @@ namespace GameEngine
     glm::vec3 GetDirection() const { return m_direction; }
 
   private:
-    void CalculateOrientation(bool _limit);
+    void CalculateOrientation(bool _limit); ///< calculate the orientation of the camera
 
     InputManager m_inputManager; ///< Handles events
 

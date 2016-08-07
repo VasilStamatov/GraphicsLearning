@@ -13,6 +13,7 @@ out vec2 UV;
 
 const int MAX_BONES = 100;
 
+uniform mat4 baseModelMatrix;
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 gBones[MAX_BONES];
@@ -41,14 +42,16 @@ void main()
 	//the vertex position in clip space
 	vec4 PosL = BoneTransform * vec4(in_position, 1.0);
 	
-	gl_Position = projection * view * in_modelInstanced * PosL;
+	mat4 model = baseModelMatrix * in_modelInstanced;
+	
+	gl_Position = projection * view * model * PosL;
 	
 	vec4 NormalL = BoneTransform * vec4(in_normal, 0.0);
 
 	//send the normal of the vertex (unchangeable by transofmations)
-	Normal = mat3((transpose(inverse(in_modelInstanced)))) * NormalL.xyz;
+	Normal = mat3((transpose(inverse(model)))) * NormalL.xyz;
 	//send the worldspace position of the vertex
-	Position = vec3(in_modelInstanced * PosL);
+	Position = vec3(model * PosL);
 	//send the texture coordinates
 	UV = in_uv;
 }

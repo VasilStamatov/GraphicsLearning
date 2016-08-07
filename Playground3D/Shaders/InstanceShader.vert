@@ -9,17 +9,19 @@ out vec3 Position;
 out vec3 Normal;
 out vec2 UV;
 
+uniform mat4 baseModelMatrix;
 uniform mat4 projection;
 uniform mat4 view;
 
 void main()
 {
+	mat4 model = baseModelMatrix * modelInstanced;
 	//the vertex position in clip space
-	gl_Position = projection * view * modelInstanced * vec4(position, 1.0);
+	gl_Position = projection * view * model * vec4(position, 1.0);
 	//send the normal of the vertex (unchangeable by transofmations)
-	Normal = mat3(transpose(inverse(modelInstanced))) * normal;
+	Normal = mat3(transpose(inverse(model))) * normal;
 	//send the worldspace position of the vertex
-	Position = vec3(modelInstanced * vec4 (position, 1.0));
+	Position = vec3(model * vec4 (position, 1.0));
 	//send the texture coordinates
 	UV = uv;
 }

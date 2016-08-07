@@ -226,7 +226,7 @@ void GameplayScreen::Update()
 {
   m_camera.Update();
   float elapsedTime = (SDL_GetTicks() - m_startTime) / 1000.0f;
-  m_planet.UpdateAnimation(elapsedTime);
+  m_planet.PlayAnimation(elapsedTime);
   CheckInput();
 }
 void GameplayScreen::Draw()

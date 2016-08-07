@@ -112,10 +112,10 @@ namespace GameEngine
   //Adds an attribute to our shader. SHould be called between compiling and linking.
   void GLSLProgram::AddAttribute(const std::string& attributeName)
   {
-    glBindAttribLocation(m_programID, m_numAttributes++, attributeName.c_str());
+    //glBindAttribLocation(m_programID, m_numAttributes++, attributeName.c_str());
     //Remember: binding attribute's locations isn't needed in the new versions of GLSL where the layout locations are specified,
     //all that's needed are enough glEnablings in the loop in Use()
-    //m_numAttributes++;
+    m_numAttributes++;
   }
 
   GLint GLSLProgram::GetAttribLoc(const std::string& _attributeName)

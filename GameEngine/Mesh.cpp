@@ -13,12 +13,14 @@ namespace GameEngine
 #define WEIGHT_LOC 4
 #define MODEL_LOC 5
 
-  Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures, bool _hasAnim)
+  Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures,
+    bool _hasAnim, const glm::mat4& _baseModelMatrix)
   {
     m_vertices = _vertices;
     m_indices = _indices;
     m_textures = _textures;
     m_hasAnimations = _hasAnim;
+    m_baseModelMatrix = _baseModelMatrix;
     SetupMesh();
   }
   Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures)
@@ -70,7 +72,7 @@ namespace GameEngine
 
     // Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
     glUniform1f(_shaderProgram.GetUniformLocation("material.shininess"), 16.0f);
-
+    glUniformMatrix4fv(_shaderProgram.GetUniformLocation("baseModelMatrix"), 1, GL_FALSE, glm::value_ptr(m_baseModelMatrix));
     //Draw mesh
     glBindVertexArray(m_VAO);
 

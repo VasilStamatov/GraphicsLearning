@@ -17,7 +17,8 @@ namespace GameEngine
     }
     Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures);
 
-    Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures, bool _hasAnim);
+    Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures,
+      bool _hasAnim, const glm::mat4& _baseModelMatrix);
     ~Mesh();
     /* Mesh functions */
     void Draw(GLSLProgram& _shaderProgram, int _amount = 1);
@@ -40,7 +41,7 @@ namespace GameEngine
     std::vector<Vertex> m_vertices;
     std::vector<GLuint> m_indices;
     std::vector<GLTexture> m_textures;
-
+    glm::mat4 m_baseModelMatrix;
     bool m_hasAnimations = false;
     /* Setup Function */
     void SetupMesh();

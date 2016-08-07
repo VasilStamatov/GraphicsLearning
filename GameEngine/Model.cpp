@@ -57,14 +57,17 @@ namespace GameEngine
   {
     for (GLuint i = 0; i < m_meshes.size(); i++)
     {
+      //upload the model matrices data into the shader
       glBindBuffer(GL_ARRAY_BUFFER, m_meshes.at(i).GetMBO());
       glBufferData(GL_ARRAY_BUFFER, _modelMatrices.size() * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
       glBufferSubData(GL_ARRAY_BUFFER, 0, _modelMatrices.size() * sizeof(glm::mat4), _modelMatrices.data());
       if (m_hasAnimation)
       {
+        //Upload the bone transformation if there is animations
         glUniformMatrix4fv(_shader.GetUniformLocation("gBones"), m_animations[m_currentAnimation].m_boneTrans.size(),
           GL_FALSE, (GLfloat*)&m_animations[m_currentAnimation].m_boneTrans[0][0]);
       }
+      //Draw each mesh
       m_meshes.at(i).Draw(_shader, _modelMatrices.size());
     }
   }
@@ -80,31 +83,42 @@ namespace GameEngine
 
   void Model::LoadModel(const std::string& _path)
   {
+    //cleach the mesh vector
     m_meshes.clear();
 
+    //use assimp to import the model
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(_path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
+    //error check
     if (!scene || !scene->mRootNode || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE)
     {
       std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
       return;
     }
+    
     m_directory = _path.substr(0, _path.find_last_of('/'));
     m_meshes.resize(scene->mNumMeshes);
     m_hasAnimation = scene->HasAnimations();
 
     if (m_hasAnimation)
     {
+      //if the model has animations get the global inverse transform
       m_globalInverseTransform = AssimpToGlmMat4(&scene->mRootNode->mTransformation);
       glm::inverse(m_globalInverseTransform);
+      //Process all the animations
       ProcessAnimations(scene);
     }
-
+    //Process all the nodes(setup the meshes)
     ProcessNode(scene->mRootNode, scene);
+
     if (m_hasAnimation)
     {
-      m_animations[m_currentAnimation].BuildBoneTree(scene, scene->mRootNode, &m_animations[m_currentAnimation].root, this);
+      //Build the bone trees for all animations
+      for (GLuint i = 0; i < m_animations.size(); i++)
+      {
+        m_animations[i].BuildBoneTree(scene, scene->mRootNode, &m_animations[i].root, this);
+      }
     }
   }
 
@@ -133,18 +147,17 @@ namespace GameEngine
     std::vector<GLuint> indices;
     std::vector<GLTexture> textures;
     
-    glm::mat4 baseModelMatrix;
-
-    baseModelMatrix = AssimpToGlmMat4(&_node->mTransformation);
-    if (_node->mParent != nullptr)
-    {
-      baseModelMatrix = AssimpToGlmMat4(&_node->mParent->mTransformation) * baseModelMatrix;
-    }
-
+    //reserve space for the vectors for optimization
     vertices.reserve(_mesh->mNumVertices);
     indices.reserve(_mesh->mNumFaces * 3);
 
     const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
+    //The base model matrix from the node
+    glm::mat4 baseModelMatrix = AssimpToGlmMat4(&_node->mTransformation);
+    if (_node->mParent != nullptr)
+    {
+      baseModelMatrix = AssimpToGlmMat4(&_node->mParent->mTransformation) * baseModelMatrix;
+    }
 
     for (GLuint i = 0; i < _mesh->mNumVertices; i++)
     {
@@ -173,45 +186,45 @@ namespace GameEngine
       {
         // bone index, decides what bone we modify
         GLuint boneIndex = 0;
+        //the name of the current bone
         std::string boneName = _mesh->mBones[x]->mName.data;
 
+        //check if there is an ID associated to this boneName already
         if (m_findBoneIDbyName.find(boneName) == m_findBoneIDbyName.end())
-        { // create a new bone
-          // current index is the new bone
+        { 
+          //if there is no ID to this boneName
+          //create a new bone
+          //current index is the new bone
           boneIndex = m_findBoneIDbyName.size();
         }
         else
         {
+          //if a bone ID is already associated to this boneName
+          //set the boneindex to the index associated to this boneName
           boneIndex = m_findBoneIDbyName[boneName];
         }
 
+        //Set the ID of the current bone name to the bone index (whether it be new or the same)
         m_findBoneIDbyName[boneName] = boneIndex;
 
+        //iterate through all the channels(bones)
         for (GLuint y = 0; y < m_animations[m_currentAnimation].m_channels.size(); y++)
         {
+          //check which channel corresponds to this bone
           if (m_animations[m_currentAnimation].m_channels[y].m_name == boneName)
           {
+            //Set the bone offset of this bone name to the corresponding offset matrix from the aimesh
             m_animations[m_currentAnimation].m_findBoneOffsetByName[boneName] = AssimpToGlmMat4(&_mesh->mBones[x]->mOffsetMatrix);
           }
         }
 
+        //Iterate through all the weights of this bone
         for (GLuint y = 0; y < _mesh->mBones[x]->mNumWeights; y++)
         {
           GLuint vertexID = _mesh->mBones[x]->mWeights[y].mVertexId;
           GLfloat weight = _mesh->mBones[x]->mWeights[y].mWeight;
-          // first we check if the boneid vector has any filled in
+          // first we check if the boneID at this vertex ID has any filled in
           // if it does then we need to fill the weight vector with the same value
-
-          /*for (GLuint i = 0; i < 4; i++) 
-          {
-            if (vertices.at(vertexID).m_weights[i] == 0.0) 
-            {
-              vertices.at(vertexID).m_boneIDs[i] = boneIndex;
-              vertices.at(vertexID).m_weights[i] = weight;
-              break;
-            }
-          }*/
-
           if (vertices.at(vertexID).m_boneIDs.x == INVALID_BONE_ID)
           {
             vertices.at(vertexID).m_boneIDs.x = boneIndex;
@@ -235,7 +248,7 @@ namespace GameEngine
         }
       }
     }
-
+    //Set the faces
     for (GLuint i = 0; i < _mesh->mNumFaces; i++)
     {
       aiFace face = _mesh->mFaces[i];
@@ -245,6 +258,7 @@ namespace GameEngine
       }
     }
 
+    //set the material textures
     if (_mesh->mMaterialIndex >= 0)
     {
       aiMaterial* material = _scene->mMaterials[_mesh->mMaterialIndex];
@@ -262,23 +276,23 @@ namespace GameEngine
       std::vector<GLTexture> ambientMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_reflection");
       textures.insert(textures.end(), ambientMaps.begin(), ambientMaps.end());
 
-      // 2. Normal maps
+      // 4. Normal maps
       std::vector<GLTexture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
       textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     }
 
-    return Mesh(vertices, indices, textures, m_hasAnimation);
+    return Mesh(vertices, indices, textures, m_hasAnimation, baseModelMatrix);
   }
 
   void Model::ProcessAnimations(const aiScene* scene)
   {
     for (GLuint animationIndex = 0; animationIndex < scene->mNumAnimations; animationIndex++)
     {
+      //set up the animation
       Animation tempAnim;
       tempAnim.m_name = scene->mAnimations[animationIndex]->mName.data;
       tempAnim.m_duration = scene->mAnimations[animationIndex]->mDuration;
-      tempAnim.m_ticksPerSecond = scene->mAnimations[animationIndex]->mTicksPerSecond;
-      //tempAnim.data = scene->mAnimations[animationIndex];
+      tempAnim.m_ticksPerSecond = (scene->mAnimations[animationIndex]->mTicksPerSecond) != 0 ? scene->mAnimations[animationIndex]->mTicksPerSecond : 25.0f;
 
       // load in required data for animation so that we don't have to save the entire scene
       for (GLuint channelIndex = 0; channelIndex < scene->mAnimations[animationIndex]->mNumChannels; channelIndex++)
@@ -331,9 +345,9 @@ namespace GameEngine
     return textures;
   }
 
-  void Model::UpdateAnimation(float _deltaTIme)
+  void Model::PlayAnimation(float _ticks)
   {
-    float timeInTicks = _deltaTIme * m_animations[m_currentAnimation].m_ticksPerSecond;
+    float timeInTicks = _ticks * m_animations[m_currentAnimation].m_ticksPerSecond;
 
     UpdateBoneTree(timeInTicks, &m_animations[m_currentAnimation].root, glm::mat4(1.0f));
   }
@@ -375,39 +389,54 @@ namespace GameEngine
     {
       lerp(aiTranslation, m_animations[m_currentAnimation].m_channels[channelIndex].m_positionKeys[key1].mValue,
         m_animations[m_currentAnimation].m_channels[channelIndex].m_positionKeys[key2].mValue, animTime - key1); // translation
+
       aiTranslation.Normalize();
     }
     if (m_animations[m_currentAnimation].m_channels[channelIndex].m_scalingKeys.size() > 1)
     {
       lerp(aiScale, m_animations[m_currentAnimation].m_channels[channelIndex].m_scalingKeys[key1].mValue,
         m_animations[m_currentAnimation].m_channels[channelIndex].m_scalingKeys[key2].mValue, animTime - key1); // scale
+
       aiScale.Normalize();
     }
     if (m_animations[m_currentAnimation].m_channels[channelIndex].m_rotationKeys.size() > 1)
     {
       slerp(aiRotation, m_animations[m_currentAnimation].m_channels[channelIndex].m_rotationKeys[key1].mValue,
         m_animations[m_currentAnimation].m_channels[channelIndex].m_rotationKeys[key2].mValue, animTime - key1); // rotation
+
       aiRotation.Normalize();
     }
     glm::vec3 translation((GLfloat)aiTranslation.x, (GLfloat)aiTranslation.y, (GLfloat)aiTranslation.z);
     glm::vec3 scaling((GLfloat)aiScale.x, (GLfloat)aiScale.y, (GLfloat)aiScale.z);
     glm::quat rotation((GLfloat)aiRotation.w, (GLfloat)aiRotation.x, (GLfloat)aiRotation.y, (GLfloat)aiRotation.z);
 
-    glm::mat4 finalModel =
-      _parentTransform
-      * glm::translate(glm::mat4(1.0f), translation)
+    _node->m_nodeTransform = glm::translate(glm::mat4(1.0f), translation)
       * glm::mat4_cast(rotation)
       * glm::scale(glm::mat4(1.0f), scaling);
+
+    glm::mat4 finalModel = _parentTransform * _node->m_nodeTransform;
 
     m_animations[m_currentAnimation].m_boneTrans[m_findBoneIDbyName[boneName]] =
       m_globalInverseTransform *
       finalModel *
-      m_animations[m_currentAnimation].m_findBoneOffsetByName[boneName];
+      _node->m_boneTransform;
 
     // loop through every child and use this bone's transformations as the parent transform
     for (GLuint x = 0; x < _node->m_children.size(); x++)
     {
       UpdateBoneTree(_deltaTIme, &_node->m_children[x], finalModel);
+    }
+  }
+
+  void Model::SetAnimation(const std::string& _animName)
+  {
+    for (GLuint animIndex = 0; animIndex < m_animations.size(); animIndex++)
+    {
+      if (m_animations[animIndex].m_name == _animName)
+      {
+        m_currentAnimation = animIndex;
+        return;
+      }
     }
   }
 
