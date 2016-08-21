@@ -18,6 +18,11 @@ namespace GameEngine
       glActiveTexture(_textureUnit);
       glBindTexture(GL_TEXTURE_2D, id);
     }
+
+    static void UnbindTexture()
+    {
+      glBindTexture(GL_TEXTURE_2D, 0);
+    }
   };
 
   struct GLCubemap
@@ -29,6 +34,11 @@ namespace GameEngine
     {
       glActiveTexture(_textureUnit);
       glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+    }
+
+    static void UnbindCubemap()
+    {
+      glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
   };
 }

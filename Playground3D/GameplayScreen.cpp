@@ -3,6 +3,7 @@
 #include <GameEngine\IMainGame.h>
 #include <GameEngine\ResourceManager.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 GameplayScreen::GameplayScreen(GameEngine::Window* _window) : m_window(_window)
 {
@@ -36,6 +37,7 @@ void GameplayScreen::Destroy()
 
 void GameplayScreen::OnEntry()
 {
+  m_random.GenSeed(GameEngine::SeedType::CLOCK_TICKS);
   m_startTime = SDL_GetTicks();
   m_camera.Init(45.0f, m_window->GetScreenWidth(), m_window->GetScreenHeight(), SDL_TRUE);
   m_camera.SetPosition(glm::vec3(0.0f, 0.0f, -15.0f));
@@ -51,19 +53,20 @@ void GameplayScreen::OnEntry()
   glCullFace(GL_BACK);
   glFrontFace(GL_CCW);
 
-  std::vector<GameEngine::Shader> planetShaders =
+  ////////////Set up all the Shaders
+  std::vector<GameEngine::Shader> villagerShaders =
   {
     { GL_VERTEX_SHADER, "Shaders/Animation.vert", "Animation Vertex Shader" },
     { GL_FRAGMENT_SHADER, "Shaders/Animation.frag", "Animation Fragment Shader" },
   };
-  m_planetShader.CompileShaders(planetShaders);
-  m_planetShader.AddAttribute("position");
-  m_planetShader.AddAttribute("normal");
-  m_planetShader.AddAttribute("UV");
-  m_planetShader.AddAttribute("BoneIDs");
-  m_planetShader.AddAttribute("Weights");
-  m_planetShader.AddAttribute("modelInstanced");
-  m_planetShader.LinkShaders();
+  m_villagerShader.CompileShaders(villagerShaders);
+  m_villagerShader.AddAttribute("position");
+  m_villagerShader.AddAttribute("normal");
+  m_villagerShader.AddAttribute("UV");
+  m_villagerShader.AddAttribute("BoneIDs");
+  m_villagerShader.AddAttribute("Weights");
+  m_villagerShader.AddAttribute("modelInstanced");
+  m_villagerShader.LinkShaders();
 
   std::vector<GameEngine::Shader> InstancedShaders =
   {
@@ -86,6 +89,37 @@ void GameplayScreen::OnEntry()
   m_skyboxShader.CompileShaders(skyboxShader);
   m_skyboxShader.AddAttribute("position");
   m_skyboxShader.LinkShaders();
+
+  std::vector<GameEngine::Shader> screenShader =
+  {
+    { GL_VERTEX_SHADER, "Shaders/SimpleTransform.vert", "Simple Vertex Shader" },
+    { GL_FRAGMENT_SHADER, "Shaders/SingleColor.frag", "Single Fragment Shader" },
+  };
+
+  m_screenShader.CompileShaders(screenShader);
+  m_screenShader.AddAttribute("position");
+  m_screenShader.AddAttribute("texCoords");
+  m_screenShader.LinkShaders();
+
+  /////////Set up the framebuffers for some post-processing
+  m_framebuffer.Init(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+  m_framebuffer.Bind(GL_FRAMEBUFFER);
+  m_framebuffer.AttachTexture2D(false, false, true);
+  m_framebuffer.AttachRenderbuffer(true, true, true);
+  if (!m_framebuffer.CheckFramebufferStatus())
+  {
+    std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+  }
+  m_framebuffer.Unbind(GL_FRAMEBUFFER);
+
+  m_intermediateFB.Init(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+  m_intermediateFB.Bind(GL_FRAMEBUFFER);
+  m_intermediateFB.AttachTexture2D(false, false, false);
+  if (!m_intermediateFB.CheckFramebufferStatus())
+  {
+  std::cout << "ERROR::FRAMEBUFFER:: Intermediate Framebuffer is not complete!" << std::endl;
+  }
+  m_intermediateFB.Unbind(GL_FRAMEBUFFER);
 
 #pragma region "object_initialization"
 
@@ -124,68 +158,10 @@ void GameplayScreen::OnEntry()
   model = glm::rotate(model, 90.0f, glm::vec3(-1, 0, 0));
   model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 
-  m_planetMatrices.push_back(model);
+  m_villagerMatrices.push_back(model);
 
-  GLfloat skyboxVertices[] = {
-    // Positions          
-    -1.0f, 1.0f, -1.0f,
-    -1.0f, -1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-    1.0f, 1.0f, -1.0f,
-    -1.0f, 1.0f, -1.0f,
-
-    -1.0f, -1.0f, 1.0f,
-    -1.0f, -1.0f, -1.0f,
-    -1.0f, 1.0f, -1.0f,
-    -1.0f, 1.0f, -1.0f,
-    -1.0f, 1.0f, 1.0f,
-    -1.0f, -1.0f, 1.0f,
-
-    1.0f, -1.0f, -1.0f,
-    1.0f, -1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-
-    -1.0f, -1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, -1.0f, 1.0f,
-    -1.0f, -1.0f, 1.0f,
-
-    -1.0f, 1.0f, -1.0f,
-    1.0f, 1.0f, -1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f, -1.0f,
-
-    -1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f, 1.0f,
-    1.0f, -1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f, 1.0f,
-    1.0f, -1.0f, 1.0f
-  };
-
-
-  //Setup the skybox ----------
-  glGenVertexArrays(1, &skyboxVAO);
-  glGenBuffers(1, &skyboxVBO);
-
-  glBindVertexArray(skyboxVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-
-  glBindVertexArray(0);
-
-  std::vector<std::string> skyboxFaces = 
+  ////////////Set up the skybox and models
+  std::vector<std::string> skyboxFaces =
   {
     "Assets/Skybox/right.png",
     "Assets/Skybox/left.png",
@@ -202,11 +178,9 @@ void GameplayScreen::OnEntry()
   skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_rt.JPG");
   skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_up.JPG");*/
 
-  m_skybox = GameEngine::ResourceManager::GetCubemap(skyboxFaces);
-
-  m_planet = GameEngine::ResourceManager::GetModel("Assets/MD5/Bob.md5mesh");
+  m_skybox.Init(GameEngine::ResourceManager::GetCubemap(skyboxFaces));
+  m_villager = GameEngine::ResourceManager::GetModel("Assets/MD5/Bob.md5mesh");
   m_asteroids = GameEngine::ResourceManager::GetModel("Assets/rock/rock.obj");
-
 
 #pragma endregion
 
@@ -217,40 +191,44 @@ void GameplayScreen::OnEntry()
 void GameplayScreen::OnExit()
 {
   // Clean up
-  glDeleteFramebuffers(1, &frameBuffer);
-  m_planet.Dispose();
+  m_villager.Dispose();
   m_asteroids.Dispose();
+  m_skybox.Dispose();
+  m_framebuffer.Destroy();
+  m_intermediateFB.Destroy();
+
 }
 
 void GameplayScreen::Update()
 {
   m_camera.Update();
   float elapsedTime = (SDL_GetTicks() - m_startTime) / 1000.0f;
-  m_planet.PlayAnimation(elapsedTime);
+  m_villager.PlayAnimation(elapsedTime);
   CheckInput();
+  //std::cout << m_random.GenRandInt(2, 100) << std::endl;
 }
 void GameplayScreen::Draw()
 {
+  m_framebuffer.Bind(GL_FRAMEBUFFER);
   // Clear buffers
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  m_planetShader.Use();
-  glUniformMatrix4fv(m_planetShader.GetUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
-  glUniformMatrix4fv(m_planetShader.GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
-  m_planet.Draw(m_planetShader, m_planetMatrices);
+  m_villagerShader.Use();
+  glUniformMatrix4fv(m_villagerShader.GetUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
+  glUniformMatrix4fv(m_villagerShader.GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
+  m_villager.Draw(m_villagerShader, m_villagerMatrices);
 
-  //glUniform3f(m_planetShader.GetUniformLocation("cameraPos"), m_camera.GetPosition().x, m_camera.GetPosition().y, m_camera.GetPosition().z);
+  //glUniform3f(m_villagerShader.GetUniformLocation("cameraPos"), m_camera.GetPosition().x, m_camera.GetPosition().y, m_camera.GetPosition().z);
 
   //glActiveTexture(GL_TEXTURE3); /* We already have 3 texture units active (in this shader)
   //                              so set the skybox as the 4th texture unit (texture units are 0 based so index number 3) */
-  //glUniform1i(m_planetShader.GetUniformLocation("skybox"), 3);
+  //glUniform1i(m_villagerShader.GetUniformLocation("skybox"), 3);
 
   //Draw the model
   //glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.id);
 
-
-  m_planetShader.UnUse();
+  m_villagerShader.UnUse();
 
   m_asteroidShader.Use();
   glUniformMatrix4fv(m_asteroidShader.GetUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(m_camera.GetViewMatrix()));
@@ -259,10 +237,8 @@ void GameplayScreen::Draw()
 
   m_asteroidShader.UnUse();
 
-  m_skyboxShader.Use();
-
   //Render the skybox
-  glDepthFunc(GL_LEQUAL);
+  m_skyboxShader.Use();
 
   //Set view and proj matrix
   GLint viewID = m_skyboxShader.GetUniformLocation("view");
@@ -271,17 +247,23 @@ void GameplayScreen::Draw()
   glUniformMatrix4fv(viewID, 1, GL_FALSE, glm::value_ptr(glm::mat4(glm::mat3(m_camera.GetViewMatrix()))));
   glUniformMatrix4fv(projectionID, 1, GL_FALSE, glm::value_ptr(m_camera.GetProjectionMatrix()));
 
-  // skybox cube
-  glBindVertexArray(skyboxVAO);
-  glActiveTexture(GL_TEXTURE0);
-  glUniform1i(m_skyboxShader.GetUniformLocation("skybox"), 0);
-  glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.id);
-
-  glDrawArrays(GL_TRIANGLES, 0, 36);
-  glBindVertexArray(0);
-  glDepthFunc(GL_LESS);
+  m_skybox.Render();
 
   m_skyboxShader.UnUse();
+
+  m_framebuffer.Bind(GL_READ_FRAMEBUFFER);
+  m_intermediateFB.Bind(GL_DRAW_FRAMEBUFFER);
+  m_framebuffer.Blit(GL_COLOR_BUFFER_BIT, GL_NEAREST);
+  
+  m_framebuffer.Unbind(GL_FRAMEBUFFER);
+  glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  m_screenShader.Use();
+
+  m_intermediateFB.Render();
+
+  m_screenShader.UnUse();
 }
 
 void GameplayScreen::CheckInput()

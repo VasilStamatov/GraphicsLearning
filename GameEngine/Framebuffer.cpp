@@ -2,7 +2,7 @@
 
 namespace GameEngine
 {
-  Framebuffer::Framebuffer() : m_fbo(0), m_textureBuffer(0), m_rbo(0), m_vao(0)
+  Framebuffer::Framebuffer() : m_fboID(0), m_rboID(0), m_textureBuffer(0)
   {
   }
 
@@ -16,48 +16,49 @@ namespace GameEngine
   {
     m_screenWidth = _screenWidth;
     m_screenHeight = _screenHeight;
-    if (m_fbo == 0)
+    if (m_fboID == 0)
     {
-      glGenFramebuffers(1, &m_fbo);
+      glGenFramebuffers(1, &m_fboID);
     }
-    InitRenderData();
+    m_quad.Init();
   }
 
   void Framebuffer::Destroy()
   {
-    if (m_fbo != 0)
+    if (m_fboID != 0)
     {
-      glDeleteFramebuffers(1, &m_fbo);
-      m_fbo = 0;
+      glDeleteFramebuffers(1, &m_fboID);
+      m_fboID = 0;
     }
     if (m_textureBuffer != 0)
     {
       glDeleteTextures(1, &m_textureBuffer);
       m_textureBuffer = 0;
     }
-    if (m_rbo != 0)
+    if (m_rboID != 0)
     {
-      glDeleteRenderbuffers(1, &m_rbo);
-      m_rbo = 0;
+      glDeleteRenderbuffers(1, &m_rboID);
+      m_rboID = 0;
     }
-    if (m_vao != 0)
-    {
-      glDeleteVertexArrays(1, &m_vao);
-      m_vao = 0;
-    }
+    m_quad.Dispose();
   }
 
-  void Framebuffer::BindFramebuffer(GLenum _target)
+  void Framebuffer::Bind(GLenum _target)
   {
-    if (m_fbo != 0)
+    if (m_fboID != 0)
     {
-      glBindFramebuffer(_target, m_fbo);
+      glBindFramebuffer(_target, m_fboID);
     }
   }
 
-  void Framebuffer::UnbindFramebuffer(GLenum _target)
+  void Framebuffer::Unbind(GLenum _target)
   {
     glBindFramebuffer(_target, 0);
+  }
+
+  void Framebuffer::Blit(GLbitfield _mask, GLenum _filter)
+  {
+    glBlitFramebuffer(0, 0, m_screenWidth, m_screenHeight, 0, 0, m_screenWidth, m_screenHeight, _mask, _filter);
   }
 
   void Framebuffer::AttachTexture2D(GLboolean _depth, GLboolean _stencil, GLboolean _multisampled, GLint _samples)
@@ -81,19 +82,17 @@ namespace GameEngine
     }
 
     glGenTextures(1, &m_textureBuffer);
-    glBindTexture(GL_TEXTURE_2D, m_textureBuffer);
 
     if (_multisampled)
     {
+      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_textureBuffer);
       glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, _samples, attachmentType, m_screenWidth, m_screenHeight, GL_TRUE);
-
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glBindTexture(GL_TEXTURE_2D, 0);
+      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_textureBuffer, 0);
     }
     else
     {
+      glBindTexture(GL_TEXTURE_2D, m_textureBuffer);
       if (attachmentType == GL_DEPTH24_STENCIL8)
       {
         glTexImage2D(GL_TEXTURE_2D, 0, attachmentType, m_screenWidth, m_screenHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
@@ -129,9 +128,9 @@ namespace GameEngine
     {
       attachmentType = GL_STENCIL_INDEX;
     }
-    GLuint rbo;
-    glGenRenderbuffers(1, &m_rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+    GLuint rbo = 0;
+    glGenRenderbuffers(1, &m_rboID);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_rboID);
 
     if (_multisampled)
     {
@@ -145,29 +144,29 @@ namespace GameEngine
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     if (_depth && _stencil)
     {
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rboID);
     }
     else if (_depth && !_stencil)
     {
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rboID);
     }
     else if (!_depth && _stencil)
     {
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rboID);
     }
     else if (!_depth && !_stencil)
     {
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_rbo);
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_rboID);
     }
   }
 
   void Framebuffer::Render()
   {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_textureBuffer);
-    glBindVertexArray(m_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
+    glDisable(GL_DEPTH_TEST);
+
+    m_quad.Render(m_textureBuffer);
+
+    glEnable(GL_DEPTH_TEST);
   }
 
   bool Framebuffer::CheckFramebufferStatus()
@@ -177,32 +176,5 @@ namespace GameEngine
       return false;
     }
     return true;
-  }
-
-  void Framebuffer::InitRenderData()
-  {
-    GLuint vbo;
-    GLfloat vertices[] = {
-      // Pos        // Tex
-      -1.0f, -1.0f, 0.0f, 0.0f,
-       1.0f, 1.0f,  1.0f, 1.0f,
-      -1.0f, 1.0f,  0.0f, 1.0f,
-
-      -1.0f, -1.0f, 0.0f, 0.0f,
-      1.0f, -1.0f,  1.0f, 0.0f,
-      1.0f, 1.0f,   1.0f, 1.0f
-    };  
-    glGenVertexArrays(1, &m_vao);
-    glGenBuffers(1, &vbo);
-
-    glBindVertexArray(m_vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), &vertices[0]);
-
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
   }
 }

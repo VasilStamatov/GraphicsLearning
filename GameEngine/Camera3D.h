@@ -14,6 +14,7 @@ namespace GameEngine
   {
   public:
     Camera3D();
+
     ~Camera3D();
 
     /** \brief The init function for the camera

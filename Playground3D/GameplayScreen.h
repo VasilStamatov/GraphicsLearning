@@ -7,6 +7,9 @@
 #include <GameEngine\Camera3D.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Lights.h>
+#include <GameEngine\Random.h>
+#include <GameEngine\Framebuffer.h>
+#include <GameEngine\Skybox.h>
 #include <map>
 
 // Our custom gameplay screen that inherits from the IGameScreen
@@ -36,38 +39,29 @@ public:
 private:
   void CheckInput();
 
-  GLuint cubeVAO, cubeVBO;
-  GLuint planeVAO, planeVBO;
-  GLuint vegetationVAO, vegetationVBO;
-  GLuint screenQuadVAO, screenQuadVBO;
-  GLuint skyboxVAO, skyboxVBO;
+  GameEngine::Framebuffer m_framebuffer;
+  GameEngine::Framebuffer m_intermediateFB;
 
-  GLuint frameBuffer, texColorBuffer, RBO;
+  GameEngine::Skybox m_skybox;
 
   std::vector<glm::mat4> m_asteroidMatrices;
-  std::vector<glm::mat4> m_planetMatrices;
-
-  std::vector<glm::vec3> m_vegetation;
-  std::map<float, glm::vec3> sorted;
-
-  GameEngine::GLTexture m_cubeTexture;
-  GameEngine::GLTexture m_floorTexture;
-  GameEngine::GLTexture m_grassTexture;
-  GameEngine::GLCubemap m_skybox;
+  std::vector<glm::mat4> m_villagerMatrices;
 
   //the texturing program for sprites and lights
-  GameEngine::GLSLProgram m_planetShader;
+  GameEngine::GLSLProgram m_villagerShader;
   GameEngine::GLSLProgram m_asteroidShader;
   GameEngine::GLSLProgram m_skyboxShader;
-  GameEngine::GLSLProgram m_outlineShader;
+  GameEngine::GLSLProgram m_screenShader;
 
   //the cameras
   GameEngine::Camera3D m_camera;
   //the pointer to the game window
   GameEngine::Window* m_window;
-  GameEngine::Model m_planet;
+  //The models
+  GameEngine::Model m_villager;
   GameEngine::Model m_asteroids;
-
+  
   float m_startTime;
 
+  GameEngine::Random m_random;
 };

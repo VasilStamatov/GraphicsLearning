@@ -5,14 +5,6 @@
 
 namespace GameEngine
 {
-
-#define POS_LOC 0
-#define NORMAL_LOC 1
-#define UV_LOC 2
-#define BONE_ID_LOC 3
-#define WEIGHT_LOC 4
-#define MODEL_LOC 5
-
   Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures,
     bool _hasAnim, const glm::mat4& _baseModelMatrix)
   {
@@ -150,11 +142,11 @@ namespace GameEngine
     glEnableVertexAttribArray(attributeLocation);
     glVertexAttribPointer(attributeLocation++, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_position));
 
-    //Vertex texture coords
+    //Vertex normals
     glEnableVertexAttribArray(attributeLocation);
     glVertexAttribPointer(attributeLocation++, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_normal));
 
-    //Vertex normals
+    //Vertex texture coords
     glEnableVertexAttribArray(attributeLocation);
     glVertexAttribPointer(attributeLocation++, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_uv));
 

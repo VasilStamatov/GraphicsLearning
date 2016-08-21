@@ -1,8 +1,10 @@
 #pragma once
 #include <GL\glew.h>
-#include "Vertex.h"
 #include <glm\glm.hpp>
 #include <vector>
+
+#include "Vertex.h"
+#include "SpriteFont.h"
 
 namespace GameEngine
 {
