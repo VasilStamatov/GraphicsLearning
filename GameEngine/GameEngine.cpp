@@ -23,6 +23,11 @@ namespace GameEngine
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
+    // Use OpenGL core profile
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    //set the accelerated visuals (it's possible that it's set by default but doing this just in case)
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     return 0;
   }
 }

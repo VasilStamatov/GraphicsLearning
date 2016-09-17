@@ -10,13 +10,16 @@ namespace GameEngine
 
 #define INVALID_BONE_ID -999
 #define MAX_BONES 100
+
+  //differentiating the nodes and bone nodes
   void Model::Animation::BuildBoneTree(const aiScene* _scene, aiNode* _node, BoneNode* _bNode, Model* _m)
   {
     if (_scene->HasAnimations())
     {
-      // found the node
+      //Check if the passed node is a bone node, by cheching to see if the name matches with a bone ID 
       if (_m->m_findBoneIDbyName.find(_node->mName.data) != _m->m_findBoneIDbyName.end())
       {
+        // This node is a bone node
         BoneNode tempNode;
         tempNode.m_name = _node->mName.data;
         tempNode.m_parent = _bNode;
@@ -27,19 +30,16 @@ namespace GameEngine
       }
     }
 
-    if (_node->mNumChildren > 0)
+    for (GLuint x = 0; x < _node->mNumChildren; x++)
     {
-      for (GLuint x = 0; x < _node->mNumChildren; x++)
+      // if the node we just found was a bone node then pass it in (current bone node child vector size - 1)
+      if (_m->m_findBoneIDbyName.find(_node->mName.data) != _m->m_findBoneIDbyName.end())
       {
-        // if the node we just found was a bone node then pass it in (current bone node child vector size - 1)
-        if (_m->m_findBoneIDbyName.find(_node->mName.data) != _m->m_findBoneIDbyName.end())
-        {
-          BuildBoneTree(_scene, _node->mChildren[x], &_bNode->m_children[_bNode->m_children.size() - 1], _m);
-        }
-        else
-        {
-          BuildBoneTree(_scene, _node->mChildren[x], _bNode, _m);
-        }
+        BuildBoneTree(_scene, _node->mChildren[x], &_bNode->m_children[_bNode->m_children.size() - 1], _m);
+      }
+      else
+      {
+        BuildBoneTree(_scene, _node->mChildren[x], _bNode, _m);
       }
     }
   }
@@ -71,6 +71,26 @@ namespace GameEngine
       m_meshes.at(i).Draw(_shader, _modelMatrices.size());
     }
   }
+
+  void Model::SetAnimation(const std::string& _animName)
+  {
+    for (GLuint animIndex = 0; animIndex < m_animations.size(); animIndex++)
+    {
+      if (m_animations[animIndex].m_name == _animName)
+      {
+        m_currentAnimation = animIndex;
+        return;
+      }
+    }
+  }
+
+  void Model::PlayAnimation(float _ticks)
+  {
+    float timeInTicks = _ticks * m_animations[m_currentAnimation].m_ticksPerSecond;
+
+    UpdateBoneTree(timeInTicks, &m_animations[m_currentAnimation].root, glm::mat4(1.0f));
+  }
+
   void Model::Dispose()
   {
     //delete the vao's and vbo's and reset them to 0
@@ -96,7 +116,7 @@ namespace GameEngine
       std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
       return;
     }
-    
+
     m_directory = _path.substr(0, _path.find_last_of('/'));
     m_meshes.resize(scene->mNumMeshes);
     m_hasAnimation = scene->HasAnimations();
@@ -132,6 +152,7 @@ namespace GameEngine
       aiMesh* mesh = _scene->mMeshes[_node->mMeshes[i]];
       m_meshes.push_back(ProcessMesh(mesh, _scene, _node));
     }
+
     // Then do the same for each of its children
     for (GLuint i = 0; i < _node->mNumChildren; i++)
     {
@@ -146,12 +167,11 @@ namespace GameEngine
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
     std::vector<GLTexture> textures;
-    
+
     //reserve space for the vectors for optimization
     vertices.reserve(_mesh->mNumVertices);
     indices.reserve(_mesh->mNumFaces * 3);
 
-    const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
     //The base model matrix from the node
     glm::mat4 baseModelMatrix = AssimpToGlmMat4(&_node->mTransformation);
     if (_node->mParent != nullptr)
@@ -162,14 +182,21 @@ namespace GameEngine
     for (GLuint i = 0; i < _mesh->mNumVertices; i++)
     {
       Vertex vertex;
-      const aiVector3D* pPos = &(_mesh->mVertices[i]);
-      const aiVector3D* pNormal = _mesh->HasNormals() ? &(_mesh->mNormals[i]) : &Zero3D;
-      const aiVector3D* pTexCoord = _mesh->HasTextureCoords(0) ? &(_mesh->mTextureCoords[0][i]) : &Zero3D;
-      const aiVector3D* pTangets = _mesh->HasTangentsAndBitangents() ? &(_mesh->mTangents[i]) : &Zero3D;
-      vertex.SetPosition(pPos->x, pPos->y, pPos->z);
-      vertex.SetNormal(pNormal->x, pNormal->y, pNormal->z);
-      vertex.SetUV(pTexCoord->x, pTexCoord->y);
-      vertex.SetTangents(pTangets->x, pTangets->y, pTangets->z);
+
+      vertex.SetPosition(_mesh->mVertices[i].x, _mesh->mVertices[i].y, _mesh->mVertices[i].z);
+
+      if (_mesh->HasNormals())
+      {
+        vertex.SetNormal(_mesh->mNormals[i].x, _mesh->mNormals[i].y, _mesh->mNormals[i].z);
+      }
+      if (_mesh->HasTextureCoords(0))
+      {
+        vertex.SetUV(_mesh->mTextureCoords[0][i].x, _mesh->mTextureCoords[0][i].y);
+      }
+      if (_mesh->HasTangentsAndBitangents())
+      {
+        vertex.SetTangents(_mesh->mTangents[i].x, _mesh->mTangents[i].y, _mesh->mTangents[i].z);
+      }
 
       if (m_hasAnimation)
       {
@@ -191,7 +218,7 @@ namespace GameEngine
 
         //check if there is an ID associated to this boneName already
         if (m_findBoneIDbyName.find(boneName) == m_findBoneIDbyName.end())
-        { 
+        {
           //if there is no ID to this boneName
           //create a new bone
           //current index is the new bone
@@ -215,6 +242,7 @@ namespace GameEngine
           {
             //Set the bone offset of this bone name to the corresponding offset matrix from the aimesh
             m_animations[m_currentAnimation].m_findBoneOffsetByName[boneName] = AssimpToGlmMat4(&_mesh->mBones[x]->mOffsetMatrix);
+            m_animations[m_currentAnimation].m_channels[y].m_offset = AssimpToGlmMat4(&_mesh->mBones[x]->mOffsetMatrix);
           }
         }
 
@@ -345,12 +373,6 @@ namespace GameEngine
     return textures;
   }
 
-  void Model::PlayAnimation(float _ticks)
-  {
-    float timeInTicks = _ticks * m_animations[m_currentAnimation].m_ticksPerSecond;
-
-    UpdateBoneTree(timeInTicks, &m_animations[m_currentAnimation].root, glm::mat4(1.0f));
-  }
   void Model::UpdateBoneTree(float _deltaTIme, Animation::BoneNode* _node, const glm::mat4& _parentTransform)
   {
     GLint channelIndex = 0;
@@ -365,53 +387,12 @@ namespace GameEngine
     }
     float animTime = std::fmod(_deltaTIme, m_animations[m_currentAnimation].m_duration);
 
-    aiQuaternion aiRotation(m_animations[m_currentAnimation].m_channels[channelIndex].m_rotationKeys[0].mValue);
-    aiVector3D aiTranslation(m_animations[m_currentAnimation].m_channels[channelIndex].m_positionKeys[0].mValue);
-    aiVector3D aiScale(m_animations[m_currentAnimation].m_channels[channelIndex].m_scalingKeys[0].mValue);
-
-    Assimp::Interpolator<aiQuaternion> slerp;
-    Assimp::Interpolator<aiVector3D> lerp;
-
-    // get the two animation keys it is between for lerp and slerp
-    int key1, key2;
-    if (std::round(animTime) < animTime)
-    {
-      key1 = std::round(animTime);
-      key2 = key1 + 1;
-    }
-    else
-    {
-      key1 = std::round(animTime) - 1;
-      key2 = std::round(animTime);
-    }
-
-    if (m_animations[m_currentAnimation].m_channels[channelIndex].m_positionKeys.size() > 1)
-    {
-      lerp(aiTranslation, m_animations[m_currentAnimation].m_channels[channelIndex].m_positionKeys[key1].mValue,
-        m_animations[m_currentAnimation].m_channels[channelIndex].m_positionKeys[key2].mValue, animTime - key1); // translation
-
-      aiTranslation.Normalize();
-    }
-    if (m_animations[m_currentAnimation].m_channels[channelIndex].m_scalingKeys.size() > 1)
-    {
-      lerp(aiScale, m_animations[m_currentAnimation].m_channels[channelIndex].m_scalingKeys[key1].mValue,
-        m_animations[m_currentAnimation].m_channels[channelIndex].m_scalingKeys[key2].mValue, animTime - key1); // scale
-
-      aiScale.Normalize();
-    }
-    if (m_animations[m_currentAnimation].m_channels[channelIndex].m_rotationKeys.size() > 1)
-    {
-      slerp(aiRotation, m_animations[m_currentAnimation].m_channels[channelIndex].m_rotationKeys[key1].mValue,
-        m_animations[m_currentAnimation].m_channels[channelIndex].m_rotationKeys[key2].mValue, animTime - key1); // rotation
-
-      aiRotation.Normalize();
-    }
-    glm::vec3 translation((GLfloat)aiTranslation.x, (GLfloat)aiTranslation.y, (GLfloat)aiTranslation.z);
-    glm::vec3 scaling((GLfloat)aiScale.x, (GLfloat)aiScale.y, (GLfloat)aiScale.z);
-    glm::quat rotation((GLfloat)aiRotation.w, (GLfloat)aiRotation.x, (GLfloat)aiRotation.y, (GLfloat)aiRotation.z);
+    glm::vec3 translation = CalcInterpolatedPosition(animTime, m_animations[m_currentAnimation].m_channels[channelIndex]);
+    glm::vec3 scaling = CalcInterpolatedScaling(animTime, m_animations[m_currentAnimation].m_channels[channelIndex]);
+    glm::mat4 rotation = CalcInterpolatedRotation(animTime, m_animations[m_currentAnimation].m_channels[channelIndex]);
 
     _node->m_nodeTransform = glm::translate(glm::mat4(1.0f), translation)
-      * glm::mat4_cast(rotation)
+      * rotation
       * glm::scale(glm::mat4(1.0f), scaling);
 
     glm::mat4 finalModel = _parentTransform * _node->m_nodeTransform;
@@ -428,16 +409,123 @@ namespace GameEngine
     }
   }
 
-  void Model::SetAnimation(const std::string& _animName)
+  GLuint Model::FindPositionKey(float _animTime, Animation::Channel& _channel)
   {
-    for (GLuint animIndex = 0; animIndex < m_animations.size(); animIndex++)
+    for (GLuint i = 0; i < _channel.m_positionKeys.size() - 1; i++)
     {
-      if (m_animations[animIndex].m_name == _animName)
+      if (_animTime < (float)_channel.m_positionKeys.at(i + 1).mTime)
       {
-        m_currentAnimation = animIndex;
-        return;
+        return i;
       }
     }
+
+    assert(0);
+
+    return 0;
+  }
+
+  GLuint Model::FindRotationKey(float _animTime, Animation::Channel& _channel)
+  {
+    for (GLuint i = 0; i < _channel.m_rotationKeys.size() - 1; i++)
+    {
+      if (_animTime < (float)_channel.m_rotationKeys.at(i + 1).mTime)
+      {
+        return i;
+      }
+    }
+
+    assert(0);
+
+    return 0;
+  }
+  GLuint Model::FindScalingKey(float _animTime, Animation::Channel& _channel)
+  {
+    for (GLuint i = 0; i < _channel.m_scalingKeys.size() - 1; i++)
+    {
+      if (_animTime < (float)_channel.m_scalingKeys.at(i + 1).mTime)
+      {
+        return i;
+      }
+    }
+
+    assert(0);
+
+    return 0;
+  }
+
+  glm::vec3 Model::CalcInterpolatedPosition(float _animTime, Animation::Channel& _channel)
+  {
+    glm::vec3 result(0.0f);
+    if (_channel.m_positionKeys.size() == 1)
+    {
+      // we need at least two values to interpolate...
+      result = glm::vec3(_channel.m_positionKeys.at(0).mValue.x, _channel.m_positionKeys.at(0).mValue.y, _channel.m_positionKeys.at(0).mValue.z);
+      return result;
+    }
+
+    GLuint positionIndex = FindPositionKey(_animTime, _channel);
+    GLuint nextPositionIndex = (positionIndex + 1);
+    assert(nextPositionIndex < _channel.m_positionKeys.size());
+    float deltaTime = (float)(_channel.m_positionKeys.at(nextPositionIndex).mTime - _channel.m_positionKeys.at(positionIndex).mTime);
+    float factor = (_animTime - (float)_channel.m_positionKeys.at(positionIndex).mTime) / deltaTime;
+    assert(factor >= 0.0f && factor <= 1.0f);
+    const aiVector3D& start = _channel.m_positionKeys.at(positionIndex).mValue;
+    const aiVector3D& end = _channel.m_positionKeys.at(nextPositionIndex).mValue;
+    aiVector3D delta = end - start;
+    aiVector3D resultingVec = start + (factor * delta);
+    result = glm::vec3(resultingVec.x, resultingVec.y, resultingVec.z);
+    return result;
+  }
+
+  glm::mat4 Model::CalcInterpolatedRotation(float _animTime, Animation::Channel& _channel)
+  {
+    glm::quat result;
+    aiQuaternion aiRotation;
+
+    if (_channel.m_rotationKeys.size() == 1)
+    {
+      // we need at least two values to interpolate...
+      aiRotation = _channel.m_rotationKeys.at(0).mValue;
+      result = glm::quat((GLfloat)aiRotation.w, (GLfloat)aiRotation.x, (GLfloat)aiRotation.y, (GLfloat)aiRotation.z);
+      return glm::mat4_cast(result);
+    }
+
+    GLuint rotationIndex = FindRotationKey(_animTime, _channel);
+    GLuint nextRotationIndex = (rotationIndex + 1);
+    assert(nextRotationIndex < _channel.m_positionKeys.size());
+    float deltaTime = (float)(_channel.m_rotationKeys.at(nextRotationIndex).mTime - _channel.m_rotationKeys.at(rotationIndex).mTime);
+    float factor = (_animTime - (float)_channel.m_rotationKeys.at(rotationIndex).mTime) / deltaTime;
+    assert(factor >= 0.0f && factor <= 1.0f);
+    const aiQuaternion& StartRotationQ = _channel.m_rotationKeys.at(rotationIndex).mValue;
+    const aiQuaternion& EndRotationQ = _channel.m_rotationKeys.at(nextRotationIndex).mValue;
+    aiQuaternion::Interpolate(aiRotation, StartRotationQ, EndRotationQ, factor);
+    aiRotation = aiRotation.Normalize();
+    result = glm::quat((GLfloat)aiRotation.w, (GLfloat)aiRotation.x, (GLfloat)aiRotation.y, (GLfloat)aiRotation.z);
+    return glm::mat4_cast(result);
+  }
+
+  glm::vec3 Model::CalcInterpolatedScaling(float _animTime, Animation::Channel& _channel)
+  {
+    glm::vec3 result(0.0f);
+    if (_channel.m_scalingKeys.size() == 1)
+    {
+      // we need at least two values to interpolate...
+      result = glm::vec3(_channel.m_scalingKeys.at(0).mValue.x, _channel.m_scalingKeys.at(0).mValue.y, _channel.m_scalingKeys.at(0).mValue.z);
+      return result;
+    }
+
+    GLuint scalingIndex = FindScalingKey(_animTime, _channel);
+    GLuint nextScalingIndex = (scalingIndex + 1);
+    assert(nextScalingIndex < _channel.m_scalingKeys.size());
+    float deltaTime = (float)(_channel.m_scalingKeys.at(nextScalingIndex).mTime - _channel.m_scalingKeys.at(scalingIndex).mTime);
+    float factor = (_animTime - (float)_channel.m_scalingKeys.at(scalingIndex).mTime) / deltaTime;
+    assert(factor >= 0.0f && factor <= 1.0f);
+    const aiVector3D& start = _channel.m_scalingKeys.at(scalingIndex).mValue;
+    const aiVector3D& end = _channel.m_scalingKeys.at(nextScalingIndex).mValue;
+    aiVector3D delta = end - start;
+    aiVector3D resultingVec = start + (factor * delta);
+    result = glm::vec3(resultingVec.x, resultingVec.y, resultingVec.z);
+    return result;
   }
 
   glm::mat4 AssimpToGlmMat4(const aiMatrix4x4* _aiMatrix)

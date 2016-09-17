@@ -155,10 +155,16 @@ void GameplayScreen::OnEntry()
 
   glm::mat4 model(1.0f);
   model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
-  model = glm::rotate(model, 90.0f, glm::vec3(-1, 0, 0));
-  model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+  model = glm::rotate(model, 90.0f, glm::vec3(1, 0, 0));
+  model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+
+  glm::mat4 model2(1.0f);
+  model2 = glm::translate(model2, glm::vec3(0.0f, 5.0f, 0.0f));
+  model2 = glm::rotate(model2, 90.0f, glm::vec3(1, 0, 0));
+  model2 = glm::scale(model2, glm::vec3(0.1f, 0.1f, 0.1f));
 
   m_villagerMatrices.push_back(model);
+  m_villagerMatrices.push_back(model2);
 
   ////////////Set up the skybox and models
   std::vector<std::string> skyboxFaces =
@@ -205,7 +211,6 @@ void GameplayScreen::Update()
   float elapsedTime = (SDL_GetTicks() - m_startTime) / 1000.0f;
   m_villager.PlayAnimation(elapsedTime);
   CheckInput();
-  //std::cout << m_random.GenRandInt(2, 100) << std::endl;
 }
 void GameplayScreen::Draw()
 {

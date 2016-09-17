@@ -43,6 +43,9 @@ namespace GameEngine
       }
     }
 
+    SDL_GL_DeleteContext(m_window.GetGLContext());
+    SDL_DestroyWindow(m_window.GetWindow());
+    SDL_Quit();
   }
 
   void IMainGame::ExitGame() 
@@ -93,9 +96,6 @@ namespace GameEngine
   {
     //Initialize the game engine library
     GameEngine::Init();
-
-    //set the accelerated visuals (it's possible that it's set by default but doing this just in case)
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
     //Call on init at the start of the game
     OnInit();

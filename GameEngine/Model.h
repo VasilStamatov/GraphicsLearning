@@ -109,16 +109,25 @@ namespace GameEngine
     GLuint m_currentAnimation = 0; ///< the current animation this model will play
     bool m_hasAnimation = false; ///< a flag if this model has any animations or not
     glm::mat4 m_globalInverseTransform = glm::mat4(1.0f); ///the global inverse transform matrix
-
     /* Model functions */
+    void LoadModel(const std::string& _path);
+
     void ProcessNode(aiNode* _node, const aiScene* _scene);
     Mesh ProcessMesh(aiMesh* _mesh, const aiScene* _scene, aiNode* _node);
     void ProcessAnimations(const aiScene* scene);
 
-    void LoadModel(const std::string& _path);
-
     std::vector<GLTexture> LoadMaterialTextures(aiMaterial* _mat, const aiTextureType& _type, const std::string& _typeName);
 
     void UpdateBoneTree(float _deltaTIme, Animation::BoneNode* _node, const glm::mat4& _parentTransform);
+
+    /** \brief Find which keyframe the animation is at now for the current channel (bone) */
+    GLuint FindPositionKey(float _animTime, Animation::Channel& _channel);
+    GLuint FindRotationKey(float _animTime, Animation::Channel& _channel);
+    GLuint FindScalingKey(float _animTime, Animation::Channel& _channel);
+
+    /** \brief Calculate the interpolated position*/
+    glm::vec3 CalcInterpolatedPosition(float _animTime, Animation::Channel& _channel);
+    glm::mat4 CalcInterpolatedRotation(float _animTime, Animation::Channel& _channel);
+    glm::vec3 CalcInterpolatedScaling(float _animTime, Animation::Channel& _channel);
   };
 }

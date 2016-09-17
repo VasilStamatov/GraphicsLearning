@@ -248,7 +248,8 @@ void GameEngine::GUI::OnSDLEvent(SDL_Event& _evnt)
     {
       std::string evntText = std::string(_evnt.text.text);
       std::vector<int> utf32result;
-      utf8::utf8to32(_evnt.text.text, _evnt.text.text + evntText.size(),
+      utf8::utf8to32(_evnt.text.text, _evnt.text.text + evntText.size(),
+
       std::back_inserter(utf32result));
       codePoint = (CEGUI::utf32)utf32result[0];
       m_context->injectChar(codePoint);

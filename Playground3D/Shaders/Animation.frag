@@ -9,9 +9,10 @@ struct Material
 	float shininess;
 };
 
-in vec3 Position;
-in vec3 Normal;
-in vec2 UV;
+in vec3 out_Position;
+in vec3 out_Normal;
+in vec2 out_UV;
+in vec4 out_weights;
 
 uniform Material material;
 
@@ -19,5 +20,8 @@ out vec4 color;
 
 void main()
 {
-	color = texture(material.texture_diffuse1, UV);
+	float shininess = material.shininess;
+	//color = out_weights;
+	color = texture(material.texture_diffuse1, out_UV);
+
 }

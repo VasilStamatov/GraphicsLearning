@@ -20,6 +20,7 @@ namespace GameEngine
     m_vertices = _vertices;
     m_indices = _indices;
     m_textures = _textures;
+    m_baseModelMatrix = glm::mat4(1.0f);
     SetupMesh();
   }
   Mesh::~Mesh()

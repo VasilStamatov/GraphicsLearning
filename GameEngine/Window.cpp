@@ -39,8 +39,8 @@ namespace GameEngine
       FatalError("SDL Window could not be created! ");
     }
     //Set up our OpenGL context
-    SDL_GLContext glContext = SDL_GL_CreateContext(m_sdlWindow);
-    if (glContext == nullptr)
+    m_glContext = SDL_GL_CreateContext(m_sdlWindow);
+    if (m_glContext == nullptr)
     {
       FatalError("SDL_GL context could not be created!");
     }
@@ -52,7 +52,12 @@ namespace GameEngine
     }
 
     //check the openGL version
-    printf("*** OpenGL Version: %s ***\n", glGetString(GL_VERSION));
+    std::cout << "INFO: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
+
+    std::cout << "INFO: OpenGL Vendor: " << glGetString(GL_VENDOR) << std::endl;
+    std::cout << "INFO: OpenGL Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    std::cout << "INFO: OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "INFO: OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
     //Set the background color to black
     glClearColor(0.0f, 0.0f, 0.0f, 1.0);

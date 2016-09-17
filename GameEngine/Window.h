@@ -23,9 +23,11 @@ namespace GameEngine
     //Getters
     int GetScreenWidth() { return m_screenWidth; };
     int GetScreenHeight() { return m_screenHeight; };
+    SDL_GLContext GetGLContext() { return m_glContext; }
     SDL_Window* GetWindow() { return m_sdlWindow; }
   private:
     SDL_Window* m_sdlWindow;
+    SDL_GLContext m_glContext;
     int m_screenWidth, m_screenHeight;
   };
 }

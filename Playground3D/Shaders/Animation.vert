@@ -7,9 +7,10 @@ layout (location = 3) in ivec4 in_boneIDs;
 layout (location = 4) in vec4 in_weights;
 layout (location = 5) in mat4 in_modelInstanced;
 
-out vec3 Position;
-out vec3 Normal;
-out vec2 UV;
+out vec3 out_Position;
+out vec3 out_Normal;
+out vec2 out_UV;
+out vec4 out_weights;
 
 const int MAX_BONES = 100;
 
@@ -39,19 +40,22 @@ void main()
 	{
 	    BoneTransform += gBones[bone4] * in_weights.w;
 	}
-	//the vertex position in clip space
+	//the vertex position in bone space
 	vec4 PosL = BoneTransform * vec4(in_position, 1.0);
 	
 	mat4 model = baseModelMatrix * in_modelInstanced;
-	
-	gl_Position = projection * view * model * PosL;
+
+	//the vertex position in clip space
+	gl_Position = (projection * view * model * PosL);
 	
 	vec4 NormalL = BoneTransform * vec4(in_normal, 0.0);
 
 	//send the normal of the vertex (unchangeable by transofmations)
-	Normal = mat3((transpose(inverse(model)))) * NormalL.xyz;
+	out_Normal = mat3((transpose(inverse(model)))) * NormalL.xyz;
 	//send the worldspace position of the vertex
-	Position = vec3(model * PosL);
+	out_Position = vec3(model * PosL);
 	//send the texture coordinates
-	UV = in_uv;
+	out_UV = in_uv;
+	
+	out_weights = in_weights;
 }
