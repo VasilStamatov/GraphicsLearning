@@ -54,9 +54,9 @@ namespace GameEngine
       struct Channel
       {
         ///the name of the bone (the bone node corresponding to a bone has the same name)
-        std::string m_name = "";
+        std::string m_name{ "" };
         ///The offset matrix of this bone
-        glm::mat4 m_offset = glm::mat4(1.0f);
+        glm::mat4 m_offset{ 1.0f };
         ///The position, rotation and scaling values for this bone for every frame of the current animation
         std::vector <aiVectorKey> m_positionKeys;
         std::vector <aiQuatKey> m_rotationKeys;
@@ -70,22 +70,22 @@ namespace GameEngine
       struct BoneNode
       {
         ///the name of this bone node(same as the name of the bone this node corresponds to)
-        std::string m_name = "";
+        std::string m_name{ "" };
         ///the parent of this bone node
-        BoneNode* m_parent = nullptr;
+        BoneNode* m_parent{ nullptr };
         ///The children of this bone node
         std::vector <BoneNode> m_children;
         ///The container of the translation * rotation * scaling matrix
-        glm::mat4 m_nodeTransform = glm::mat4(1.0f);
+        glm::mat4 m_nodeTransform{ 1.0f };
         ///the container of the bone offset for this node
-        glm::mat4 m_boneTransform = glm::mat4(1.0f);
+        glm::mat4 m_boneTransform{ 1.0f };
       };
       ///the name of this animation
-      std::string m_name = "";
+      std::string m_name{ "" };
       ///the durotation of this animation
-      float m_duration = 0.0f;
+      float m_duration{ 0.0f };
       ///It's ticks per second
-      float m_ticksPerSecond = 0.0f;
+      float m_ticksPerSecond{ 0.0f };
       ///a map to find a mat4 bone offset by its name
       std::map <std::string, glm::mat4> m_findBoneOffsetByName;
       ///all of the bone transformations, this is modified every frame
@@ -102,13 +102,13 @@ namespace GameEngine
 
     /* Model parameters */
     std::vector<Mesh> m_meshes; ///< all the meshes this model consists of
-    std::string m_directory = ""; ///< the directory of this model
+    std::string m_directory{ "" }; ///< the directory of this model
     std::map<std::string, GLuint> m_findBoneIDbyName; ///< a map to find a bone's ID by it's name
 
     std::vector<Animation> m_animations; ///< all the animations this model has
-    GLuint m_currentAnimation = 0; ///< the current animation this model will play
+    GLuint m_currentAnimation{ 0 }; ///< the current animation this model will play
     bool m_hasAnimation = false; ///< a flag if this model has any animations or not
-    glm::mat4 m_globalInverseTransform = glm::mat4(1.0f); ///the global inverse transform matrix
+    glm::mat4 m_globalInverseTransform{ 1.0f }; ///the global inverse transform matrix
     /* Model functions */
     void LoadModel(const std::string& _path);
 

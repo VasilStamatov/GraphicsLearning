@@ -62,16 +62,16 @@ namespace GameEngine
     }
 
   private:
-    int m_screenWidth;
-    int m_screenHeight;
+    int m_screenWidth{ 500 };
+    int m_screenHeight{ 500 };
 
-    bool m_needsMatrixUpdate;
+    bool m_needsMatrixUpdate{ true };
 
-    float m_scale;
+    float m_scale{ 1.0f };
 
-    glm::vec2 m_position; ///< camera position
-    glm::mat4 m_cameraMatrix; ///< view matrix
-    glm::mat4 m_orthoMatrix; ///< ortho matrix
+    glm::vec2 m_position{ 0.0f, 0.0f }; ///< camera position
+    glm::mat4 m_cameraMatrix{ 1.0f }; ///< view matrix
+    glm::mat4 m_orthoMatrix{ 1.0f }; ///< ortho matrix
 
   };
 

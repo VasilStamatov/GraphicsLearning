@@ -45,8 +45,8 @@ namespace GameEngine
     int GetScreenWidth()      const noexcept { return m_screenWidth; }
     int GetScreenHeight()     const noexcept { return m_screenHeight; }
   private:
-    int m_screenWidth, m_screenHeight;
-    GLuint m_fboID, m_rboID, m_textureBuffer;
+    int m_screenWidth{ 500 }, m_screenHeight{ 500 };
+    GLuint m_fboID{ 0 }, m_rboID{ 0 }, m_textureBuffer{ 0 };
     ScreenQuad m_quad;
   };
 }

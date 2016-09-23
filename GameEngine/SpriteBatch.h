@@ -26,8 +26,8 @@ namespace GameEngine
 
     Glyph(const glm::vec4& _destRect, const glm::vec4& _uvRect, GLuint _texture, float _depth, const ColorRGBA8& _color, float _angle);
 
-    GLuint m_texture;
-    float m_depth;
+    GLuint m_texture{ 0 };
+    float m_depth{ 0.0f };
 
     Vertex m_topLeft;
     Vertex m_bottomLeft;
@@ -45,9 +45,9 @@ namespace GameEngine
     RenderBatches(GLuint _offset, GLuint _numVertices, GLuint _texture) :
       m_offset(_offset), m_numVertices(_numVertices), m_texture(_texture) {
     }
-    GLuint m_offset;
-    GLuint m_numVertices;
-    GLuint m_texture;
+    GLuint m_offset{ 0 };
+    GLuint m_numVertices{ 0 };
+    GLuint m_texture{ 0 };
   };
 
   // The SpriteBatch class is an efficient way of drawing sprites
@@ -89,8 +89,8 @@ namespace GameEngine
     static bool CompareBackToFront(Glyph* a, Glyph* b);
     static bool CompareTexture(Glyph* a, Glyph* b);
 
-    GLuint m_vbo;
-    GLuint m_vao;
+    GLuint m_vbo{ 0 };
+    GLuint m_vao{ 0 };
 
     GlyphSortType m_sortType;
 

@@ -25,7 +25,7 @@ namespace GameEngine
 
     void SetCubemap(const GLCubemap& _cubemap) { m_cubemap = _cubemap; }
   private:
-    GLuint m_VAO, m_VBO;
+    GLuint m_VAO{ 0 }, m_VBO{ 0 };
     GLCubemap m_cubemap;
   };
 }

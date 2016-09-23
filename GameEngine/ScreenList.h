@@ -27,8 +27,8 @@ namespace GameEngine
     IGameScreen* GetCurrent();
 
   protected:
-    IMainGame* m_game = nullptr;
+    IMainGame* m_game{ nullptr };
     std::vector<IGameScreen*> m_screens;
-    int m_currentScreenIndex = -1;
+    int m_currentScreenIndex{ -1 };
   };
 }

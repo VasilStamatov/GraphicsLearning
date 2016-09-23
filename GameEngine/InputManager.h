@@ -42,9 +42,9 @@ namespace GameEngine
     std::unordered_map<KeyID, bool> m_keyMap;
     std::unordered_map<KeyID, bool> m_previousKeyMap;
 
-    glm::vec2 m_mouseCoords;
-    glm::vec2 m_relativeMouseMotion;
-    glm::vec2 m_mouseWheel;
+    glm::vec2 m_mouseCoords{ 0.0f, 0.0f };
+    glm::vec2 m_relativeMouseMotion{ 0.0f, 0.0f };
+    glm::vec2 m_mouseWheel{ 0.0f, 0.0f };
   };
 }
 

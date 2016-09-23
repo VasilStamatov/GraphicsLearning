@@ -43,18 +43,18 @@ namespace GameEngine
     //create the window
     bool InitSystems();
     //list of screens
-    std::unique_ptr<ScreenList> m_screenList = nullptr;
+    std::unique_ptr<ScreenList> m_screenList{ nullptr };
     //current screen
-    IGameScreen* m_currentScreen = nullptr;
+    IGameScreen* m_currentScreen{ nullptr };
 
-    bool m_isRunning = false;
-    float m_fps = 0.0f;
+    bool m_isRunning{ false };
+    float m_fps{ 0.0f };
     //the window
     Window m_window;
-    std::string m_gameName = "Default";
-    int m_screenHeight = 500;
-    int m_screenWidth = 500;
-    unsigned int m_currentFlags = 0;
+    std::string m_gameName{ "Default" };
+    int m_screenHeight{ 500 };
+    int m_screenWidth{ 500 };
+    unsigned int m_currentFlags{ 0 };
   };
 }
 

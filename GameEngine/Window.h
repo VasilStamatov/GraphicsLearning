@@ -28,7 +28,7 @@ namespace GameEngine
   private:
     SDL_Window* m_sdlWindow;
     SDL_GLContext m_glContext;
-    int m_screenWidth, m_screenHeight;
+    int m_screenWidth{ 500 }, m_screenHeight{ 500 };
   };
 }
 

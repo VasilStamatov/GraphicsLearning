@@ -157,7 +157,7 @@ namespace GameEngine
     UniformLocation GetUniformLoc(const std::string& _uniformName);
 
     /// The program ID of the whole shader program
-    ProgramID m_programID;
+    ProgramID m_programID{ 0 };
     /// A vector containing all the shaders of 1 GLSL program object
     std::vector<Shader> m_shaders;
 

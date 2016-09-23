@@ -16,15 +16,6 @@ namespace GameEngine
 
   void EntityManager::Update(float _deltaTime)
   {
-    //First cleap up all the dead entities
-    //Since they are all unique pointers, the memory will be freed correctly
-    m_entities.erase(std::remove_if(std::begin(m_entities), std::end(m_entities),
-      [](const std::unique_ptr<Entity>& _entity)
-    {
-      return !_entity->IsAlive();
-    }),
-      std::end(m_entities));
-
     for (auto& entity : m_entities)
     {
       entity->Update(_deltaTime);

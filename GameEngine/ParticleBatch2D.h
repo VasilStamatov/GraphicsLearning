@@ -50,11 +50,11 @@ namespace GameEngine
 
     std::function<void(Particle2D&, float)> m_updateFunc;
 
-    float m_decayRate = 0.1f;
+    float m_decayRate{ 0.1f };
 
-    std::unique_ptr<Particle2D[]> m_particles = nullptr;
-    int m_maxParticles = 0;
-    int m_lastFreeParticle = 0;
+    std::unique_ptr<Particle2D[]> m_particles{ nullptr };
+    int m_maxParticles{ 0 };
+    int m_lastFreeParticle{ 0 };
     GLTexture m_texture;
   };
 }

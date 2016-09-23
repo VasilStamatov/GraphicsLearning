@@ -63,7 +63,7 @@ namespace GameEngine
 
   protected:
     ScreenState m_currentState = ScreenState::NONE;
-    IMainGame* m_game = nullptr;
-    int m_screenIndex = -1;
+    IMainGame* m_game{ nullptr };
+    int m_screenIndex{ -1 };
   };
 }

@@ -42,9 +42,9 @@ namespace GameEngine
 
   private:
     static CEGUI::OpenGL3Renderer* m_renderer;
-    CEGUI::GUIContext* m_context = nullptr;
-    CEGUI::Window* m_root = nullptr;
-    unsigned int m_lastTime = 0;
+    CEGUI::GUIContext* m_context{ nullptr };
+    CEGUI::Window* m_root{ nullptr };
+    unsigned int m_lastTime{ 0 };
   };
 }
 

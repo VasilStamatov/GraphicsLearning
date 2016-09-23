@@ -13,7 +13,7 @@ namespace GameEngine
     void Dispose();
     void Render(GLuint _textureID);
   private:
-    GLuint m_VAO = 0, m_VBO = 0, m_EBO = 0;
+    GLuint m_VAO{ 0 }, m_VBO{ 0 }, m_EBO{ 0 };
   };
 }
 

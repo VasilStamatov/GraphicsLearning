@@ -7,11 +7,11 @@ namespace GameEngine
 {
   struct GLTexture
   {
-    std::string filePath = "";
-    std::string type = "";
-    GLuint id;
-    int width;
-    int height;
+    std::string filePath{ "" };
+    std::string type{ "" };
+    GLuint id{ 0 };
+    int width{ 500 };
+    int height{ 500 };
 
     void Bind(GLenum _textureUnit)
     {

@@ -28,6 +28,6 @@ namespace GameEngine
     float m_maxFPS{ 0.0f };
     float m_fps{ 0.0f };
     float m_frameTime{ 0.0f };
-    unsigned int m_startTicks;
+    unsigned int m_startTicks{ 0 };
   };
 }

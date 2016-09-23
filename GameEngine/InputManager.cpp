@@ -2,7 +2,7 @@
 
 namespace GameEngine
 {
-  InputManager::InputManager() : m_mouseCoords(0.0f)
+  InputManager::InputManager()
   {
   }
 

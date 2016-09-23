@@ -8,7 +8,7 @@
 namespace GameEngine
 {
   //inoitialize all the variables to 0
-  GLSLProgram::GLSLProgram() : m_programID(0)
+  GLSLProgram::GLSLProgram()
   {
 
   }

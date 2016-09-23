@@ -31,6 +31,6 @@ namespace GameEngine
     }
 
     GLTexture texture;
-    glm::ivec2 dims;
+    glm::ivec2 dims{ 0, 0 };
   };
 }

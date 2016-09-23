@@ -2,7 +2,7 @@
 
 namespace GameEngine
 {
-  Framebuffer::Framebuffer() : m_fboID(0), m_rboID(0), m_textureBuffer(0)
+  Framebuffer::Framebuffer()
   {
   }
 

@@ -4,7 +4,7 @@
 
 namespace GameEngine
 {
-  Skybox::Skybox() : m_VAO(0), m_VBO(0)
+  Skybox::Skybox()
   {
   }
 

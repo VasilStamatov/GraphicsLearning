@@ -35,14 +35,14 @@ namespace GameEngine
 
   private:
     /* Render Data */
-    GLuint m_VAO = 0, m_VBO = 0, m_EBO = 0, m_MBO;
+    GLuint m_VAO{ 0 }, m_VBO{ 0 }, m_EBO{ 0 }, m_MBO{ 0 };
 
     /* Mesh data */
     std::vector<Vertex> m_vertices;
     std::vector<GLuint> m_indices;
     std::vector<GLTexture> m_textures;
-    glm::mat4 m_baseModelMatrix;
-    bool m_hasAnimations = false;
+    glm::mat4 m_baseModelMatrix{ 1.0f };
+    bool m_hasAnimations{ false };
     /* Setup Function */
     void SetupMesh();
   };

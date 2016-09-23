@@ -39,7 +39,7 @@ namespace GameEngine
     std::vector<DebugVertex> m_verts;
     std::vector<GLuint> m_indices;
     GLuint m_vbo = 0, m_vao = 0, m_ibo = 0;
-    int m_numElements = 0;
+    int m_numElements{ 0 };
   };
 }
 

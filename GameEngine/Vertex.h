@@ -9,16 +9,16 @@ namespace GameEngine
   //color struct
   struct ColorRGBA8
   {
-    ColorRGBA8() : r(0), g(0), b(0), a(0) { }
+    ColorRGBA8(){ }
     ColorRGBA8(GLubyte R, GLubyte G, GLubyte B, GLubyte A) :
       r(R), g(G), b(B), a(A) { }
     ColorRGBA8(GLubyte _rgb, GLubyte _alpha) :
       r(_rgb), g(_rgb), b(_rgb), a(_alpha) { }
 
-    GLubyte r;
-    GLubyte g;
-    GLubyte b;
-    GLubyte a;
+    GLubyte r{ 0 };
+    GLubyte g{ 0 };
+    GLubyte b{ 0 };
+    GLubyte a{ 0 };
   };
 
   //The vertex definition
@@ -34,22 +34,22 @@ namespace GameEngine
       m_tangents = _tangents;
     }
     //vertex position
-    glm::vec3 m_position;
+    glm::vec3 m_position{ 0.0f,  0.0f,  0.0f};
 
     //vertex normal
-    glm::vec3 m_normal;
+    glm::vec3 m_normal{ 0.0f,  0.0f,  0.0f };
 
     //vertex texture coordinates
-    glm::vec2 m_uv;
+    glm::vec2 m_uv{ 0.0f,  0.0f};
 
     //vertex color
     ColorRGBA8 m_color;
 
-    glm::vec3 m_tangents;
+    glm::vec3 m_tangents{ 0.0f,  0.0f,  0.0f };
 
-    glm::ivec4 m_boneIDs;
+    glm::ivec4 m_boneIDs{ 0,  0,  0, 0 };
 
-    glm::vec4 m_weights;
+    glm::vec4 m_weights{ 0.0f,  0.0f,  0.0f, 0.0f };
 
     void SetBoneIDs(const glm::ivec4& _boneID)
     {

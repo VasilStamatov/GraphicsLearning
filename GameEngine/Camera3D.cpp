@@ -3,12 +3,7 @@
 #include <SDL\SDL_events.h>
 namespace GameEngine
 {
-  Camera3D::Camera3D() :
-    m_position(0, 0, 5),
-    m_projectionMatrix(1.0f),
-    m_viewMatrix(1.0f),
-    m_screenWidth(500),
-    m_screenHeight(500)
+  Camera3D::Camera3D()
   {
     //camera direction
     m_direction = glm::vec3(

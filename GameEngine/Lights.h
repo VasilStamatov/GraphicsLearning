@@ -24,15 +24,15 @@ namespace GameEngine
     glm::vec3 GetPosition() const { return m_position; }
 
   private:
-    glm::vec3 m_position;
+    glm::vec3 m_position{ 0.0f, 0.0f, 0.0f };
 
-    glm::vec3 m_ambient;
-    glm::vec3 m_diffuse;
-    glm::vec3 m_specular;
+    glm::vec3 m_ambient{ 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_diffuse{ 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_specular{ 0.0f, 0.0f, 0.0f };
 
-    float m_constant;
-    float m_linear;
-    float m_quadratic;
+    float m_constant{ 0.0f };
+    float m_linear{ 0.0f };
+    float m_quadratic{ 0.0f };
   };
 
   class SpotLight
@@ -64,19 +64,19 @@ namespace GameEngine
     glm::vec3 GetPosition() const { return m_position; }
 
   private:
-    glm::vec3 m_position;
-    glm::vec3 m_direction;
+    glm::vec3 m_position{ 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_direction{ 0.0f, 0.0f, 0.0f };
 
-    glm::vec3 m_ambient;
-    glm::vec3 m_diffuse;
-    glm::vec3 m_specular;
+    glm::vec3 m_ambient{ 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_diffuse{ 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_specular{ 0.0f, 0.0f, 0.0f };
 
-    float m_constant;
-    float m_linear;
-    float m_quadratic;
+    float m_constant{ 0.0f };
+    float m_linear{ 0.0f };
+    float m_quadratic{ 0.0f };
 
-    float m_cutOff;
-    float m_outerCutOff;
+    float m_cutOff{ 0.0f };
+    float m_outerCutOff{ 0.0f };
   };
 
   class DirectionalLight
@@ -90,11 +90,11 @@ namespace GameEngine
     void UploadToShader(GLSLProgram& _shader, const std::string& _uniformName);
 
   private:
-    glm::vec3 m_direction;
+    glm::vec3 m_direction{ 0.0f, 0.0f, 0.0f };
 
-    glm::vec3 m_ambient;
-    glm::vec3 m_diffuse;
-    glm::vec3 m_specular;
+    glm::vec3 m_ambient{ 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_diffuse{ 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_specular{ 0.0f, 0.0f, 0.0f };
   };
 }
 

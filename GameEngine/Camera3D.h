@@ -170,35 +170,33 @@ namespace GameEngine
   private:
     void CalculateOrientation(bool _limit); ///< calculate the orientation of the camera
 
-    InputManager m_inputManager; ///< Handles events
+    glm::mat4 m_projectionMatrix{ 1.0f }; ///< The projection matrix
+    glm::mat4 m_viewMatrix{ 1.0f }; ///< Camera matrix
 
-    glm::mat4 m_projectionMatrix; ///< The projection matrix
-    glm::mat4 m_viewMatrix; ///< Camera matrix
-
-    glm::vec3 m_position; ///< camera position
+    glm::vec3 m_position{ 0.0f, 0.0f, 0.0f }; ///< camera position
 
     /// horizontal angle : toward -Z
-    float m_horizontalAngle = glm::radians(180.0f); //yaw
+    float m_horizontalAngle{ glm::radians(180.0f) }; //yaw
 
     /// vertical angle : 0, look at the horizon
-    float m_verticalAngle = 0.0f; //pitch
+    float m_verticalAngle{ 0.0f }; //pitch
 
     //axis vectors
-    glm::vec3 m_direction; //The direction the player is facing
-    glm::vec3 m_right; // the axis to the right of the player of where he's facing
-    glm::vec3 m_up; //the axis up from the player of where he's facing
+    glm::vec3 m_direction{ 0.0f, 0.0f, 0.0f }; //The direction the player is facing
+    glm::vec3 m_right{ 0.0f, 0.0f, 0.0f }; // the axis to the right of the player of where he's facing
+    glm::vec3 m_up{ 0.0f, 0.0f, 0.0f }; //the axis up from the player of where he's facing
 
     //Is true if a value of the projection matrix is changed
-    bool m_needsMatrixUpdate = true;
+    bool m_needsMatrixUpdate{ true };
 
     /// Initial Field of View
-    float m_initialFoV = 45.0f;
+    float m_initialFoV{ 45.0f };
 
-    float m_speed = 4.0f; ///< speed of 3 units / second
+    float m_speed{ 4.0f }; ///< speed of 3 units / second
 
-    float m_mouseSpeed = 0.5f; ///< mouse speed/sensitivity
+    float m_mouseSpeed{ 0.5f }; ///< mouse speed/sensitivity
 
-    int m_screenWidth; ///< The width of the sdl screen
-    int m_screenHeight; ///< The height of the sdl screen
+    int m_screenWidth{ 500 }; ///< The width of the sdl screen
+    int m_screenHeight{ 500 }; ///< The height of the sdl screen
   };
 }
