@@ -43,20 +43,20 @@ namespace GameEngine
     }
 
     //getters
-    glm::vec2 GetPosition()
+    glm::vec2 GetPosition() const noexcept
     {
       return m_position;
     }
-    float GetScale()
+    float GetScale() const noexcept
     {
       return m_scale;
     }
-    glm::mat4 GetCameraMatrix()
+    glm::mat4 GetCameraMatrix() const noexcept
     {
       return m_cameraMatrix;
     }
 
-    float GetAspectRatio() const
+    float GetAspectRatio() const noexcept
     {
       return (float)m_screenWidth / (float)m_screenHeight;
     }

@@ -21,13 +21,13 @@ namespace GameEngine
     }
   }
 
-  void InputManager::PressKey(unsigned int _keyID)
+  void InputManager::PressKey(KeyID _keyID)
   {
     // Here we are treating _keyMap as an associative array.
     // if keyID doesn't already exist in _keyMap, it will get added
     m_keyMap[_keyID] = true;
   }
-  void InputManager::ReleaseKey(unsigned int _keyID)
+  void InputManager::ReleaseKey(KeyID _keyID)
   {
     // Here we are treating _keyMap as an associative array.
     // switch the pressed button from true (being pressed) to false (released)
@@ -49,7 +49,7 @@ namespace GameEngine
     m_mouseWheel.y = _yVal;
   }
 
-  bool InputManager::IsKeyDown(unsigned int _keyID)
+  bool InputManager::IsKeyDown(KeyID _keyID)
   {
     // We dont want to use the associative array approach here
     // because we don't want to create a key if it doesnt exist.
@@ -67,7 +67,7 @@ namespace GameEngine
     }
   }
 
-  bool InputManager::IsKeyPressed(unsigned int _keyID)
+  bool InputManager::IsKeyPressed(KeyID _keyID)
   {
     //check if it was pressed this frame, and wasn't pressed last frame
     if (IsKeyDown(_keyID) == true && wasKeyDown(_keyID) == false)
@@ -77,7 +77,7 @@ namespace GameEngine
     return false;
   }
 
-  bool InputManager::wasKeyDown(unsigned int _keyID)
+  bool InputManager::wasKeyDown(KeyID _keyID)
   {
     // We dont want to use the associative array approach here
     // because we don't want to create a key if it doesnt exist.

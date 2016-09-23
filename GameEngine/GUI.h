@@ -37,8 +37,8 @@ namespace GameEngine
     static void SetWidgetDestRect(CEGUI::Window* widget, const glm::vec4& destRectPerc, const glm::vec4& destRectPix);
 
     //Getters
-    static CEGUI::OpenGL3Renderer* GetRenderer() { return m_renderer; }
-    const CEGUI::GUIContext* GetContext() { return m_context; }
+    static CEGUI::OpenGL3Renderer* GetRenderer() noexcept { return m_renderer; }
+    const CEGUI::GUIContext* GetContext()  const noexcept { return m_context; }
 
   private:
     static CEGUI::OpenGL3Renderer* m_renderer;

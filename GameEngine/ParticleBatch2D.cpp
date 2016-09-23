@@ -11,7 +11,7 @@ namespace GameEngine
 
   ParticleBatch2D::~ParticleBatch2D()
   {
-    delete[] m_particles;
+    //delete[] m_particles;
   }
 
   //initialize the particle batch
@@ -21,7 +21,7 @@ namespace GameEngine
                              std::function<void(Particle2D&, float)> _updateFunc /* = defaultParticleUpdate */)
   {
     m_maxParticles = _maxParticles;
-    m_particles = new Particle2D[_maxParticles];
+    m_particles = std::make_unique<Particle2D[]>(_maxParticles);
     m_decayRate = _decayRate;
     m_texture = _texture;
     m_updateFunc = _updateFunc;
@@ -37,7 +37,9 @@ namespace GameEngine
     int particleIndex = FindFreeParticle();
 
     //edit the particle index values
-    Particle2D& particle = m_particles[particleIndex];
+    auto pointerToArray = m_particles.get();
+
+    Particle2D& particle = pointerToArray[particleIndex];
 
     particle.m_life = 1.0f;
 
@@ -52,14 +54,15 @@ namespace GameEngine
 
   void ParticleBatch2D::Update(float _deltaTime)
   {
+    auto pointerToArray = m_particles.get();
     for (int i = 0; i < m_maxParticles; i++)
     {
       // check if it is active
-      if (m_particles[i].m_life > 0.0f)
+      if (pointerToArray[i].m_life > 0.0f)
       {
         // Update using function pointer
-        m_updateFunc(m_particles[i], _deltaTime);
-        m_particles[i].m_life -= m_decayRate * _deltaTime;
+        m_updateFunc(pointerToArray[i], _deltaTime);
+        pointerToArray[i].m_life -= m_decayRate * _deltaTime;
       }
     }
   }
@@ -68,10 +71,11 @@ namespace GameEngine
   void ParticleBatch2D::Draw(SpriteBatch* _spritebBatch)
   {
     glm::vec4 uvRect(0.0f, 0.0f, 1.0f, 1.0f);
+    auto pointerToArray = m_particles.get();
     for (int i = 0; i < m_maxParticles; i++)
     {
       // check if it is active
-      Particle2D& particle = m_particles[i];
+      Particle2D& particle = pointerToArray[i];
       if (particle.m_life > 0.0f)
       {
         glm::vec4 destRect(particle.m_position.x, particle.m_position.y, particle.m_width, particle.m_width);

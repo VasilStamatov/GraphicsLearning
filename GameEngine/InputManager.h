@@ -7,6 +7,9 @@ namespace GameEngine
   // Input manager stores a key map that maps SDL_Keys to booleans.
   // If the value in the key map is true, then the key is pressed.
   // Otherwise, it is released.
+
+  using KeyID = unsigned int;
+
   class InputManager
   {
   public:
@@ -15,29 +18,29 @@ namespace GameEngine
     //update the key map
     void Update();
 
-    void PressKey(unsigned int _keyID);
-    void ReleaseKey(unsigned int _keyID);
+    void PressKey(KeyID _keyID);
+    void ReleaseKey(KeyID _keyID);
     void SetMouseCoords(float _x, float _y);
     void SetRelativeMouseMotion(float _xrel, float _yrel);
     void SetMouseWheel(float _wheelVal, float _yVal);
 
     ///return true if the key is held down
-    bool IsKeyDown(unsigned int _keyID);  
+    bool IsKeyDown(KeyID _keyID);
 
     ///returns true if the key is pressed this frame
-    bool IsKeyPressed(unsigned int _keyID);
+    bool IsKeyPressed(KeyID _keyID);
 
     //getters
-    glm::vec2 GetMouseCoords() const { return m_mouseCoords; }
-    glm::vec2 GetRelativeMouseMotion() const { return m_relativeMouseMotion; }
-    glm::vec2 GetMouseWheelValue() const { return m_mouseWheel;  }
+    glm::vec2 GetMouseCoords()         const noexcept { return m_mouseCoords; }
+    glm::vec2 GetRelativeMouseMotion() const noexcept { return m_relativeMouseMotion; }
+    glm::vec2 GetMouseWheelValue()     const noexcept { return m_mouseWheel;  }
 
 
   private:
-    bool wasKeyDown(unsigned int _keyID);
+    bool wasKeyDown(KeyID _keyID);
 
-    std::unordered_map<unsigned int, bool> m_keyMap;
-    std::unordered_map<unsigned int, bool> m_previousKeyMap;
+    std::unordered_map<KeyID, bool> m_keyMap;
+    std::unordered_map<KeyID, bool> m_previousKeyMap;
 
     glm::vec2 m_mouseCoords;
     glm::vec2 m_relativeMouseMotion;

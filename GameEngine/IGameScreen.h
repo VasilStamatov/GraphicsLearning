@@ -47,7 +47,7 @@ namespace GameEngine
     virtual void Draw() = 0;
 
     // Gets the index of the current screen
-    int GetScreenIndex() const
+    int GetScreenIndex() const noexcept
     {
       return m_screenIndex;
     }
@@ -56,7 +56,7 @@ namespace GameEngine
       m_currentState = ScreenState::RUNNING;
     }
 
-    ScreenState GetState() const { return m_currentState; }
+    ScreenState GetState() const noexcept { return m_currentState; }
 
     /// Sets m_game to the parent game
     void SetParentGame(IMainGame* _game) { m_game = _game; }

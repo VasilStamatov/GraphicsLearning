@@ -1,5 +1,7 @@
 #include "GameplayScreen.h"
 #include "ScreenIndices.h"
+#include "Components.h"
+#include <GameEngine\Entity.h>
 #include <GameEngine\IMainGame.h>
 #include <GameEngine\ResourceManager.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -32,11 +34,17 @@ void GameplayScreen::Build()
 
 void GameplayScreen::Destroy()
 {
-
 }
 
 void GameplayScreen::OnEntry()
 {
+  auto& entity1(m_eManager.AddEntity());
+  //make sure the counter component is added first so the kill component can get access to it
+
+  entity1.AddComponent<CounterComponent>();
+  entity1.AddComponent<KillCompontent>();
+  entity1.AddGroup(GroupsForEntities::Group1);
+
   m_random.GenSeed(GameEngine::SeedType::CLOCK_TICKS);
   m_startTime = SDL_GetTicks();
   m_camera.Init(45.0f, m_window->GetScreenWidth(), m_window->GetScreenHeight(), SDL_TRUE);
@@ -60,12 +68,6 @@ void GameplayScreen::OnEntry()
     { GL_FRAGMENT_SHADER, "Shaders/Animation.frag", "Animation Fragment Shader" },
   };
   m_villagerShader.CompileShaders(villagerShaders);
-  m_villagerShader.AddAttribute("position");
-  m_villagerShader.AddAttribute("normal");
-  m_villagerShader.AddAttribute("UV");
-  m_villagerShader.AddAttribute("BoneIDs");
-  m_villagerShader.AddAttribute("Weights");
-  m_villagerShader.AddAttribute("modelInstanced");
   m_villagerShader.LinkShaders();
 
   std::vector<GameEngine::Shader> InstancedShaders =
@@ -74,10 +76,10 @@ void GameplayScreen::OnEntry()
     { GL_FRAGMENT_SHADER, "Shaders/InstanceShader.frag", "Asteroid Fragment Shader" },
   };
   m_asteroidShader.CompileShaders(InstancedShaders);
-  m_asteroidShader.AddAttribute("position");
-  m_asteroidShader.AddAttribute("normal");
-  m_asteroidShader.AddAttribute("UV");
-  m_asteroidShader.AddAttribute("modelInstanced");
+  /*m_asteroidShader.RegisterAttribute("position");
+  m_asteroidShader.RegisterAttribute("normal");
+  m_asteroidShader.RegisterAttribute("UV");
+  m_asteroidShader.RegisterAttribute("modelInstanced");*/
   m_asteroidShader.LinkShaders();
 
   std::vector<GameEngine::Shader> skyboxShader =
@@ -87,7 +89,7 @@ void GameplayScreen::OnEntry()
   };
 
   m_skyboxShader.CompileShaders(skyboxShader);
-  m_skyboxShader.AddAttribute("position");
+  //m_skyboxShader.RegisterAttribute("position");
   m_skyboxShader.LinkShaders();
 
   std::vector<GameEngine::Shader> screenShader =
@@ -97,8 +99,8 @@ void GameplayScreen::OnEntry()
   };
 
   m_screenShader.CompileShaders(screenShader);
-  m_screenShader.AddAttribute("position");
-  m_screenShader.AddAttribute("texCoords");
+  /*m_screenShader.RegisterAttribute("position");
+  m_screenShader.RegisterAttribute("texCoords");*/
   m_screenShader.LinkShaders();
 
   /////////Set up the framebuffers for some post-processing
@@ -167,7 +169,7 @@ void GameplayScreen::OnEntry()
   m_villagerMatrices.push_back(model2);
 
   ////////////Set up the skybox and models
-  std::vector<std::string> skyboxFaces =
+  std::vector<std::string> skyboxFaces;/* =
   {
     "Assets/Skybox/right.png",
     "Assets/Skybox/left.png",
@@ -175,14 +177,14 @@ void GameplayScreen::OnEntry()
     "Assets/Skybox/bottom.png",
     "Assets/Skybox/back.png",
     "Assets/Skybox/front.png"
-  };
+  };*/
 
-  /*skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_bk.JPG");
+  skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_bk.JPG");
   skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_dn.JPG");
   skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_ft.JPG");
   skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_lf.JPG");
   skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_rt.JPG");
-  skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_up.JPG");*/
+  skyboxFaces.push_back("Assets/Skybox/space/sor_cwd/cwd_up.JPG");
 
   m_skybox.Init(GameEngine::ResourceManager::GetCubemap(skyboxFaces));
   m_villager = GameEngine::ResourceManager::GetModel("Assets/MD5/Bob.md5mesh");
@@ -207,6 +209,10 @@ void GameplayScreen::OnExit()
 
 void GameplayScreen::Update()
 {
+  m_eManager.Refresh();
+  m_eManager.Update(m_game->GetFPS());
+
+  SDL_SetWindowTitle(m_window->GetWindow(), std::to_string(m_game->GetFPS()).c_str());
   m_camera.Update();
   float elapsedTime = (SDL_GetTicks() - m_startTime) / 1000.0f;
   m_villager.PlayAnimation(elapsedTime);

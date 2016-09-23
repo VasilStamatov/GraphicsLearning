@@ -25,7 +25,7 @@ namespace GameEngine
       //if it's not in the map, then load the texture
       GLTexture newTexture = ImageLoader::LoadPNG(_texturePath, _alpha);
       //insert it into the map
-      m_textureCache.insert(make_pair(_texturePath, newTexture));
+      m_textureCache.insert(std::make_pair(_texturePath, newTexture));
       //return the new texture
       return newTexture;
     }
@@ -42,7 +42,7 @@ namespace GameEngine
       //if it's not in the map, then load the texture
       GLCubemap newCubemap = ImageLoader::LoadCubemap(_facesPaths);
       //insert it into the map
-      m_cubemapCache.insert(make_pair(_facesPaths, newCubemap));
+      m_cubemapCache.insert(std::make_pair(_facesPaths, newCubemap));
       //return the new texture
       return newCubemap;
     }
@@ -59,7 +59,7 @@ namespace GameEngine
       //if it's not in the map, then load the texture
       Model newModel(_filePath);
       //insert it into the map
-      m_modelCache.insert(make_pair(_filePath, newModel));
+      m_modelCache.insert(std::make_pair(_filePath, newModel));
       //return the new texture
       return newModel;
     }

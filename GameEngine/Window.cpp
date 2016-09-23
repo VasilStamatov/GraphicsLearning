@@ -82,7 +82,7 @@ namespace GameEngine
     //if any of the bitwise operations aren't 0, then it's true
     if (_flags == WindowFlags::FULLSCREEN)
     {
-      screenType == SDL_WINDOW_FULLSCREEN;
+      screenType = SDL_WINDOW_FULLSCREEN;
     }
     else if (_flags == WindowFlags::BORDERLESS)
     {

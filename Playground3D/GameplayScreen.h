@@ -10,6 +10,7 @@
 #include <GameEngine\Random.h>
 #include <GameEngine\Framebuffer.h>
 #include <GameEngine\Skybox.h>
+#include <GameEngine\EntityManager.h>
 #include <map>
 
 // Our custom gameplay screen that inherits from the IGameScreen
@@ -38,6 +39,14 @@ public:
 
 private:
   void CheckInput();
+
+  enum GroupsForEntities : std::size_t
+  {
+    Group1,
+    Group2
+  };
+
+  GameEngine::EntityManager m_eManager;
 
   GameEngine::Framebuffer m_framebuffer;
   GameEngine::Framebuffer m_intermediateFB;

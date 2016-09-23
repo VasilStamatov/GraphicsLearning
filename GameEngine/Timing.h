@@ -25,9 +25,9 @@ namespace GameEngine
     // Calculates the current FPS
     void CalculateFPS();
 
-    float m_maxFPS;
-    float m_fps;
-    float m_frameTime;
+    float m_maxFPS{ 0.0f };
+    float m_fps{ 0.0f };
+    float m_frameTime{ 0.0f };
     unsigned int m_startTicks;
   };
 }

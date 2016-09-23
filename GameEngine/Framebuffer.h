@@ -33,18 +33,17 @@ namespace GameEngine
     void AttachRenderbuffer(GLboolean _depth, GLboolean _stencil, GLboolean _multisampled, GLint _samples = 4);
 
     void Render();
-
+     
     /** Checks if the framebuffer is valid
       \return true if the framebuffer status is complete
       \return false if the renderbuffer status isn't complete */
     bool CheckFramebufferStatus();
 
     /** Accessors */
-    GLuint GetFBO() const { return m_fboID; }
-    GLuint GetTextureBuffer() const { return m_textureBuffer; }
-
-    int GetScreenWidth() const { return m_screenWidth; }
-    int GetScreenHeight() const { return m_screenHeight; }
+    GLuint GetFBO()           const noexcept { return m_fboID; }
+    GLuint GetTextureBuffer() const noexcept { return m_textureBuffer; }
+    int GetScreenWidth()      const noexcept { return m_screenWidth; }
+    int GetScreenHeight()     const noexcept { return m_screenHeight; }
   private:
     int m_screenWidth, m_screenHeight;
     GLuint m_fboID, m_rboID, m_textureBuffer;

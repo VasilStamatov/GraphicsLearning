@@ -45,7 +45,7 @@ namespace GameEngine
     * @return the random value*/
     int GenRandInt(int _min, int _max);
   private:
-    typedef std::chrono::high_resolution_clock Clock;
+    using Clock = std::chrono::high_resolution_clock;
     Clock::time_point m_beginning = Clock::now();
 
     std::mt19937 m_generator;

@@ -29,7 +29,7 @@ namespace GameEngine
     //handle SDL events
     void OnSDLEvent(SDL_Event& _evnt);
 
-    const float GetFPS() const { return m_fps; }
+    const float GetFPS() const noexcept { return m_fps; }
 
     InputManager inputManager;
 

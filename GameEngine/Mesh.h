@@ -25,13 +25,13 @@ namespace GameEngine
     void Dispose();
 
     /* Getters */
-    GLuint GetVAO() const { return m_VAO; }
-    GLuint GetVBO() const { return m_VBO; }
-    GLuint GetEBO() const { return m_EBO; }
-    GLuint GetMBO() const { return m_MBO; }
+    GLuint GetVAO() const noexcept { return m_VAO; }
+    GLuint GetVBO() const noexcept { return m_VBO; }
+    GLuint GetEBO() const noexcept { return m_EBO; }
+    GLuint GetMBO() const noexcept { return m_MBO; }
 
-    std::vector<GLTexture> GetTextures() const { return m_textures; }
-    std::vector<Vertex> GetVertices()    const { return m_vertices; }
+    std::vector<GLTexture> GetTextures() const noexcept { return m_textures; }
+    std::vector<Vertex> GetVertices()    const noexcept { return m_vertices; }
 
   private:
     /* Render Data */

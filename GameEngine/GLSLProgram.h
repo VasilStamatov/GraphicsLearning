@@ -3,9 +3,14 @@
 #include <string>
 #include <GL/glew.h>
 #include <vector>
+#include <map>
+#include <unordered_map>
 
 namespace GameEngine
 {
+  using AttribLocation = GLuint;
+  using UniformLocation = GLuint;
+  using ProgramID = GLuint;
   /** Shader structure to define a single shader object */
   struct Shader
   {
@@ -24,9 +29,9 @@ namespace GameEngine
     {
     }
     GLenum type; ///< GLenum types: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, or GL_GEOMETRY_SHADER. 
-    GLuint shaderID = 0; ///< The ID of the shader which is gotten when it's created by glCreateShader
-    std::string filePath = "Default"; ///< the filepath of the shader
-    std::string name = "Default"; ///< the name of the shader which is declared from the user
+    ProgramID shaderID{ 0 }; ///< The ID of the shader which is gotten when it's created by glCreateShader
+    std::string filePath{ "Default" }; ///< the filepath of the shader
+    std::string name{ "Default" }; ///< the name of the shader which is declared from the user
   };
 
   /** This class handles the compilation, linking, and usage of a GLSL shader program. */
@@ -48,23 +53,6 @@ namespace GameEngine
 
     /** Links the shaders together */
     void LinkShaders();
-
-    /** Adds an attribute to the shader ("in")
-      * \param[in] attributeName The name of the added attribute
-      */
-    void AddAttribute(const std::string& attributeName);
-
-    /** Gets the location of a specific attribute in the shader program
-    * \param[in] _attributeName The name of the searched attribute
-    * \return the GLint location of the specified attribute
-    */
-    GLint GetAttribLoc(const std::string& _attributeName);
-
-    /** Get the uniform location
-    * \param[in] _uniformName The name of the requested uniform
-    * \return output is the GLint location of the uniform in the shader
-    */
-    GLint GetUniformLocation(const std::string& _uniformName);
 
     /** Returns the index of the named uniform block specified by uniformBlockName associated with the shader program.
     * If uniformBlockName is not a valid uniform block of the shader program, GL_INVALID_INDEX is returned
@@ -142,16 +130,38 @@ namespace GameEngine
 
     /** Dispose of the shader*/
     void Dispose();
+    // Registers the location of an attribute in this shader (must be called after linking)
+    void RegisterAttribute(const std::string& _attrib);
+    // Registers the location of a uniform in this shader (must be called after linking)
+    void RegisterUniform(const std::string& _uniform);
+    ///accesses elements : shaders/uniforms;
+    AttribLocation GetAttribLocation(const std::string& _attrib);
+    UniformLocation GetUniformLocation(const std::string& _uniform);
 
   private:
     /// The number of attributes in a shader (the in values)
-    int m_numAttributes;
+    //int m_numAttributes;
     /// Compile a single shader program
     void CompileShader(const char* _source, const std::string& _name, GLuint _id);
+
+    /** Gets the location of a specific attribute in the shader program
+    * \param[in] _attributeName The name of the searched attribute
+    * \return the GLint location of the specified attribute
+    */
+    AttribLocation GetAttribLoc(const std::string& _attributeName);
+
+    /** Get the uniform location
+    * \param[in] _uniformName The name of the requested uniform
+    * \return output is the GLint location of the uniform in the shader
+    */
+    UniformLocation GetUniformLoc(const std::string& _uniformName);
+
     /// The program ID of the whole shader program
-    GLuint m_programID;
+    ProgramID m_programID;
     /// A vector containing all the shaders of 1 GLSL program object
     std::vector<Shader> m_shaders;
+
+    std::unordered_map<std::string, AttribLocation> m_attribList;
+    std::unordered_map<std::string, UniformLocation> m_unifLocationList;
   };
 }
-

@@ -8,13 +8,17 @@
 namespace GameEngine
 {
   //inoitialize all the variables to 0
-  GLSLProgram::GLSLProgram() : m_numAttributes(0), m_programID(0)
+  GLSLProgram::GLSLProgram() : m_programID(0)
   {
 
   }
 
   GLSLProgram::~GLSLProgram()
   {
+    if (m_programID > 0)
+    {
+      Dispose();
+    }
   }
 
   //Compiles the shaders into a form that your GPU can understand
@@ -109,40 +113,6 @@ namespace GameEngine
     }
   }
 
-  //Adds an attribute to our shader. SHould be called between compiling and linking.
-  void GLSLProgram::AddAttribute(const std::string& attributeName)
-  {
-    //glBindAttribLocation(m_programID, m_numAttributes++, attributeName.c_str());
-    //Remember: binding attribute's locations isn't needed in the new versions of GLSL where the layout locations are specified,
-    //all that's needed are enough glEnablings in the loop in Use()
-    m_numAttributes++;
-  }
-
-  GLint GLSLProgram::GetAttribLoc(const std::string& _attributeName)
-  {
-    GLint location = glGetAttribLocation(m_programID, _attributeName.c_str());
-    //error check
-    if (location == GL_INVALID_INDEX)
-    {
-      FatalError("Attribute " + _attributeName + " not found in shader!");
-    }
-    //return it if successful
-    return location;
-  }
-
-  GLint GLSLProgram::GetUniformLocation(const std::string& _uniformName)
-  {
-    //get the uniform location
-    GLint location = glGetUniformLocation(m_programID, _uniformName.c_str());
-    //error check
-    if (location == GL_INVALID_INDEX)
-    {
-      FatalError("Uniform " + _uniformName + " not found in shader!");
-    }
-    //return it if successful
-    return location;
-  }
-
   GLuint GLSLProgram::GetUniformBlockIndex(const std::string& _uniformBlockName)
   {
     GLuint index = glGetUniformBlockIndex(m_programID, _uniformBlockName.c_str());
@@ -223,30 +193,76 @@ namespace GameEngine
   void GLSLProgram::Use()
   {
     glUseProgram(m_programID);
-    for (int i = 0; i < m_numAttributes; i++)
+    /*for (int i = 0; i < m_numAttributes; i++)
     {
       glEnableVertexAttribArray(i);
-    }
+    }*/
   }
 
   //disable the shader
   void GLSLProgram::UnUse()
   {
     glUseProgram(0);
-    for (int i = 0; i < m_numAttributes; i++)
-    {
-      glDisableVertexAttribArray(i);
-    }
-    m_numAttributes = 0; // reset the num attributes
+    //for (int i = 0; i < m_numAttributes; i++)
+    //{
+    //  glDisableVertexAttribArray(i);
+    //}
+    //m_numAttributes = 0; // reset the num attributes
   }
 
   void GLSLProgram::Dispose()
   {
     //deletes the program ID if there is one (not 0)
     if (m_programID) glDeleteProgram(m_programID);
-
+    m_programID = 0;
     //clears the shader vector
     m_shaders.clear();
+  }
+
+  void GLSLProgram::RegisterAttribute(const std::string& _attrib)
+  {
+    //m_attribList.insert(std::make_pair(_attrib, GetAttribLoc(_attrib)));
+    m_attribList[_attrib] = GetAttribLoc(_attrib);
+  }
+
+  void GLSLProgram::RegisterUniform(const std::string& _uniform)
+  {
+    //m_unifLocationList.insert(std::make_pair(_uniform, GetUniformLocation(_uniform)));
+    m_unifLocationList[_uniform] = GetUniformLoc(_uniform);
+  }
+
+  AttribLocation GLSLProgram::GetAttribLocation(const std::string& _attrib)
+  {
+    auto it = m_attribList.find(_attrib);
+    if (it != m_attribList.end())
+    {
+      // Found the location
+      return it->second;
+    }
+    else
+    {
+      // Didn't find the location
+      // Try to register it if it just wasn't registered
+      RegisterAttribute(_attrib);
+      return m_attribList.at(_attrib);
+    }
+  }
+
+  UniformLocation GLSLProgram::GetUniformLocation(const std::string& _uniform)
+  {
+    auto it = m_unifLocationList.find(_uniform);
+    if (it != m_unifLocationList.end())
+    {
+      // Found the location
+      return it->second;
+    }
+    else
+    {
+      // Didn't find the location
+      // Try to see if it just wasn't registered
+      RegisterUniform(_uniform);
+      return m_unifLocationList.at(_uniform);
+    }
   }
 
   //Compiles a single shader file
@@ -279,5 +295,30 @@ namespace GameEngine
       std::printf("%s\n", &(errorLog[0]));
       FatalError("Shader " + _name + " failed to compile");
     }
+  }
+
+  AttribLocation GLSLProgram::GetAttribLoc(const std::string& _attributeName)
+  {
+    AttribLocation location = glGetAttribLocation(m_programID, _attributeName.c_str());
+    //error check
+    if (location == GL_INVALID_INDEX)
+    {
+      FatalError("Attribute " + _attributeName + " not found in shader!");
+    }
+    //return it if successful
+    return location;
+  }
+
+  UniformLocation GLSLProgram::GetUniformLoc(const std::string& _uniformName)
+  {
+    //get the uniform location
+    UniformLocation location = glGetUniformLocation(m_programID, _uniformName.c_str());
+    //error check
+    if (location == GL_INVALID_INDEX)
+    {
+      FatalError("Uniform " + _uniformName + " not found in shader!");
+    }
+    //return it if successful
+    return location;
   }
 }

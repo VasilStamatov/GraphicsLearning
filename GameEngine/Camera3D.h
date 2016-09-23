@@ -124,7 +124,7 @@ namespace GameEngine
     /** \brief Gets the aspect ratio of the screen
      * \return the division of SW / SH
      */
-    float GetAspectRatio() const
+    float GetAspectRatio() const noexcept
     {
       return (float)m_screenWidth / (float)m_screenHeight;
     }
@@ -144,7 +144,7 @@ namespace GameEngine
     /** \brief Gets the projection matrix of the camera
      * \return the projection matrix
      */
-    glm::mat4 GetProjectionMatrix()
+    glm::mat4 GetProjectionMatrix() const noexcept
     {
       return m_projectionMatrix;
     }
@@ -152,7 +152,7 @@ namespace GameEngine
     /** \brief Gets the view matrix of the camera
      * \return the view matrix
      */
-    glm::mat4 GetViewMatrix()
+    glm::mat4 GetViewMatrix() const noexcept
     {
       return m_viewMatrix;
     }
@@ -160,12 +160,12 @@ namespace GameEngine
     /** \brief Gets the position vec3 of the camera
      * \return the position vec3
      */
-    glm::vec3 GetPosition() const { return m_position; }
+    glm::vec3 GetPosition() const noexcept { return m_position; }
 
     /** \brief Gets the direction (always facing forward) vec3 of the camera
       * \return the direction vec3
       */
-    glm::vec3 GetDirection() const { return m_direction; }
+    glm::vec3 GetDirection() const noexcept { return m_direction; }
 
   private:
     void CalculateOrientation(bool _limit); ///< calculate the orientation of the camera

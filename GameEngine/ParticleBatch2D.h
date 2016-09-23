@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include <glm\glm.hpp>
 #include "Vertex.h"
 #include "SpriteBatch.h"
@@ -51,7 +52,7 @@ namespace GameEngine
 
     float m_decayRate = 0.1f;
 
-    Particle2D* m_particles = nullptr;
+    std::unique_ptr<Particle2D[]> m_particles = nullptr;
     int m_maxParticles = 0;
     int m_lastFreeParticle = 0;
     GLTexture m_texture;

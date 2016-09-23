@@ -21,10 +21,10 @@ namespace GameEngine
     void ChangeWindowType(const WindowFlags& _flags);
 
     //Getters
-    int GetScreenWidth() { return m_screenWidth; };
-    int GetScreenHeight() { return m_screenHeight; };
-    SDL_GLContext GetGLContext() { return m_glContext; }
-    SDL_Window* GetWindow() { return m_sdlWindow; }
+    int GetScreenWidth()         const noexcept { return m_screenWidth; };
+    int GetScreenHeight()        const noexcept { return m_screenHeight; };
+    SDL_GLContext GetGLContext() const noexcept { return m_glContext; }
+    SDL_Window* GetWindow()      const noexcept { return m_sdlWindow; }
   private:
     SDL_Window* m_sdlWindow;
     SDL_GLContext m_glContext;

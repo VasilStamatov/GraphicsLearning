@@ -23,8 +23,6 @@ namespace GameEngine
     };
     // Shader init
     m_program.CompileShaders(debugShaders);
-    m_program.AddAttribute("vertexPosition");
-    m_program.AddAttribute("vertexColor");
     m_program.LinkShaders();
 
     // Set up buffers
