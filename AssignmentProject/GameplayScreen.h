@@ -8,6 +8,7 @@
 #include "EnemyRobot.h"
 #include "Coins.h"
 #include "ScreenIndices.h"
+#include "ParallaxBackground.h"
 
 #include <GameEngine/IGameScreen.h>
 #include <Box2D/Box2D.h>
@@ -20,7 +21,6 @@
 #include <GameEngine/DebugRenderer.h>
 #include <GameEngine\SpriteFont.h>
 #include <GameEngine/AudioEngine.h>
-#include "ParallaxBackground.h"
 
 #include <GameEngine/GUI.h>
 

@@ -10,7 +10,10 @@ struct CounterComponent : public GameEngine::Component
   ~CounterComponent() {}
 
   float m_counter{ 0.0f };
+  void Init() override
+  {
 
+  }
   void Update(float _deltaTime) override
   {
     if (_deltaTime != 0.0f)
@@ -18,6 +21,10 @@ struct CounterComponent : public GameEngine::Component
       m_counter += 1.0f / _deltaTime;
     }
     //std::cout << m_counter << std::endl;
+  }
+  void Draw() override
+  {
+
   }
 };
 
@@ -37,5 +44,9 @@ struct KillCompontent : public GameEngine::Component
     {
       m_entity->Destroy();
     }
+  }
+  void Draw() override
+  {
+
   }
 };

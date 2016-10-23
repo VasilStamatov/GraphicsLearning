@@ -1,50 +1,42 @@
 #pragma once
 
 #include <assimp\scene.h>
-#include <assimp\Importer.hpp>
 #include <assimp\postprocess.h>
 #include <glm\mat4x4.hpp>
+#include <glm\gtc\matrix_transform.hpp>
+#include <glm\gtc\quaternion.hpp>
 #include <map>
 
-#include "GLSLProgram.h"
 #include "Mesh.h"
 
 namespace GameEngine
 {
-  class Model
+  /* Model with skinned bone animation*/
+  class SkinnedModel
   {
+    friend class AssimpLoader;
   public:
-    Model();
-    Model(const std::string& _path)
-    {
-      LoadModel(_path);
-    }
+    SkinnedModel() {}
+    ~SkinnedModel() { Dispose(); }
 
-    ~Model();
-
-    /** \brief Draws the model
-    * \param _shader - the shader used to upload the textures and model matrices
-    * \param _modelMatrices - the model matrices which tell the function how many
-    instances of this model will be drawn, and their transform in world space
-    */
-    void Draw(GLSLProgram& _shader, std::vector<glm::mat4> _modelMatrices);
-
-    /** \brief Updates the animation (if the model has one)
-    * \param _deltaTIme - used to interpolate the animation keyframes in a normal speed
-    */
-    void PlayAnimation(float _ticks);
-
-    /** \brief Sets the animation the model shall play
-    * \param _animName - the name of the animation (ex. "run", "walk", "jump" etc.)
-    */
-    void SetAnimation(const std::string& _animName);
-
-    /** \brief Disposes of the model */
     void Dispose();
 
-    /** \brief Get the vector of meshes this model consists of*/
-    std::vector<Mesh> GetMeshes() { return m_meshes; }
+    void Update(float _elapsed);
 
+    void Draw(GLSLProgram& _shader);
+
+    void SetAnimation(const std::string& _animName);
+    void SetAnimationPlay(bool _play) { m_play = _play; }
+
+    void OffsetPosition(const glm::vec3 _position);
+    void OffsetRotation(const glm::vec3 _rotation);
+    void OffsetScale(const glm::vec3 _scale);
+
+    void SetPosition(const glm::vec3 _position);
+    void SetRotation(const glm::vec3 _rotation);
+    void SetScale(const glm::vec3 _scale);
+
+    std::vector<Mesh> GetMeshes() { return m_meshes; }
   private:
     /** \brief The animation struct used to store the animation data of the model*/
     struct Animation
@@ -97,27 +89,21 @@ namespace GameEngine
       BoneNode root;
 
       ///Build the bone tree of this one animation
-      void BuildBoneTree(const aiScene* _scene, aiNode* _node, BoneNode* _bNode, Model* _m);
+      void BuildBoneTree(const aiScene* _scene, aiNode* _node, BoneNode* _bNode, SkinnedModel* _model);
     };
 
     /* Model parameters */
-    std::vector<Mesh> m_meshes; ///< all the meshes this model consists of
-    std::string m_directory{ "" }; ///< the directory of this model
-    std::map<std::string, GLuint> m_findBoneIDbyName; ///< a map to find a bone's ID by it's name
-
-    std::vector<Animation> m_animations; ///< all the animations this model has
     GLuint m_currentAnimation{ 0 }; ///< the current animation this model will play
-    bool m_hasAnimation = false; ///< a flag if this model has any animations or not
+    std::vector<Mesh> m_meshes; ///< all the meshes this model consists of
+    std::vector<Animation> m_animations; ///< all the animations this model has
     glm::mat4 m_globalInverseTransform{ 1.0f }; ///the global inverse transform matrix
+    std::map<std::string, GLuint> m_findBoneIDbyName; ///< a map to find a bone's ID by it's name
+    bool m_play{ true };
+    glm::vec3 m_position{ 0.0f, 0.0f, 0.0f };
+    glm::quat m_rotation{ 0.0f, 0.0f, 0.0f, 1.0f };
+    glm::vec3 m_scale{ 0.1f, 0.1f, 0.1f };
+
     /* Model functions */
-    void LoadModel(const std::string& _path);
-
-    void ProcessNode(aiNode* _node, const aiScene* _scene);
-    Mesh ProcessMesh(aiMesh* _mesh, const aiScene* _scene, aiNode* _node);
-    void ProcessAnimations(const aiScene* scene);
-
-    std::vector<GLTexture> LoadMaterialTextures(aiMaterial* _mat, const aiTextureType& _type, const std::string& _typeName);
-
     void UpdateBoneTree(float _deltaTIme, Animation::BoneNode* _node, const glm::mat4& _parentTransform);
 
     /** \brief Find which keyframe the animation is at now for the current channel (bone) */
@@ -129,5 +115,34 @@ namespace GameEngine
     glm::vec3 CalcInterpolatedPosition(float _animTime, Animation::Channel& _channel);
     glm::mat4 CalcInterpolatedRotation(float _animTime, Animation::Channel& _channel);
     glm::vec3 CalcInterpolatedScaling(float _animTime, Animation::Channel& _channel);
+  };
+
+  /* A Static Model*/
+  class StaticModel
+  {
+    friend class AssimpLoader;
+  public:
+    StaticModel() {}
+    ~StaticModel() { Dispose(); }
+
+    void Dispose();
+
+    void Draw(GLSLProgram& _shader);
+    void DrawInstanced(GLSLProgram& _shader, std::vector<glm::mat4>& _modelMatrices);
+
+    std::vector<Mesh> GetMeshes() { return m_meshes; }
+
+    void OffsetPosition(const glm::vec3 _position);
+    void OffsetRotation(const glm::vec3 _rotation);
+    void OffsetScale(const glm::vec3 _scale);
+
+    void SetPosition(const glm::vec3 _position);
+    void SetRotation(const glm::vec3 _rotation);
+    void SetScale(const glm::vec3 _scale);
+  private:
+    std::vector<Mesh> m_meshes; ///< all the meshes this model consists of
+    glm::vec3 m_position{ 0.0f, 0.0f, 0.0f };
+    glm::quat m_rotation{ 0.0f, 0.0f, 0.0f, 1.0f };
+    glm::vec3 m_scale{ 0.1f, 0.1f, 0.1f };
   };
 }

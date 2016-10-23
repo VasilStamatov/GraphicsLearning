@@ -44,6 +44,7 @@ namespace GameEngine
     CEGUI::WindowManager::getSingleton().destroyWindow(m_root);
     m_context = nullptr;
     m_root = nullptr;
+				m_freed = true;
   }
 
   void GUI::Draw()

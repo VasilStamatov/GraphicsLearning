@@ -30,6 +30,7 @@ namespace GameEngine
     void OnSDLEvent(SDL_Event& _evnt);
 
     const float GetFPS() const noexcept { return m_fps; }
+    const float GetDT() const noexcept { return m_deltaTime; }
 
     InputManager inputManager;
 
@@ -46,8 +47,12 @@ namespace GameEngine
     std::unique_ptr<ScreenList> m_screenList{ nullptr };
     //current screen
     IGameScreen* m_currentScreen{ nullptr };
+    //The renderer this game will use
 
     bool m_isRunning{ false };
+    bool m_paused{ false };
+
+    float m_deltaTime{ 1.0f };
     float m_fps{ 0.0f };
     //the window
     Window m_window;

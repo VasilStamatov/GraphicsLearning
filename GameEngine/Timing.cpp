@@ -1,6 +1,5 @@
 #include "Timing.h"
 #include <SDL\SDL.h>
-
 namespace GameEngine
 {
 
@@ -29,9 +28,10 @@ namespace GameEngine
   {
     CalculateFPS();
     float frameTicks = (float)SDL_GetTicks() - m_startTicks;
-    //limit the fps to the max fps
+    //check if the time it took this frame to be completed is lower than the desired frame time
     if (1000.0f / m_maxFPS > frameTicks)
     {
+      //if the frame was completed too fast, delay it to limit the fps
       SDL_Delay((Uint32)(1000.0f / m_maxFPS - frameTicks));
     }
     return m_fps;
@@ -39,6 +39,9 @@ namespace GameEngine
 
   void FpsLimiter::CalculateFPS()
   {
+    static constexpr float MS_PER_SECOND = 1000; // Number of milliseconds in a second
+    const float DESIRED_FRAMETIME = MS_PER_SECOND / m_maxFPS; // The desired frame time per frame
+
     //The number of frames to average
     static const int NUM_SAMPLES = 10;
     //Stores all the frametimes for each frame that we will average
@@ -46,12 +49,14 @@ namespace GameEngine
     //The current frame we are on
     static int currentFrame = 0;
     //the ticks of the previous frame
-    static float previousTicks = SDL_GetTicks();
+    static float previousTicks = static_cast<float>(SDL_GetTicks());
     //Ticks for the current frame
-    float currentTicks = SDL_GetTicks();
+    float currentTicks = static_cast<float>(SDL_GetTicks());
 
     //Calculate the number of ticks (ms) for this frame
     m_frameTime = (float)currentTicks - previousTicks;
+
+    m_deltaTime = m_frameTime / DESIRED_FRAMETIME;
     //currentFrame % NUM_SAMPLES -> makes sure that current frame isn't higher then the number of samples
     frameTimes[currentFrame % NUM_SAMPLES] = m_frameTime;
     //current ticks is now previous ticks
@@ -84,5 +89,43 @@ namespace GameEngine
     {
       m_fps = 60.0f;
     }
+  }
+
+  HRTimer::HRTimer()
+  {
+    Start();
+  }
+
+  HRTimer::~HRTimer()
+  {
+  }
+
+  void HRTimer::Start(bool _reset /*= true*/)
+  {
+    if (!m_isActive)
+    {
+      if (_reset)
+      {
+        m_start = HRTimePoint::clock::now();
+      }
+      m_isActive = true;
+    }
+  }
+
+  void HRTimer::Stop()
+  {
+    m_stop = HRTimePoint::clock::now();
+    m_isActive = false;
+  }
+
+  float HRTimer::Seconds() const
+  {
+    if (m_isActive)
+    {
+      float elapsedMilli = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(HRTimePoint::clock::now() - m_start).count();
+      return elapsedMilli / 1000.0f;
+    }
+    float elapsedMilli = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(m_stop - m_start).count();
+    return elapsedMilli / 1000.0f;
   }
 }

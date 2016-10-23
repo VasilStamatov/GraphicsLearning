@@ -2,11 +2,19 @@
 
 out vec4 color;
 
-in vec3 Position;
-in vec3 Normal;
-in vec2 UV;
+struct Material
+{
+	sampler2D texture_diffuse1;
+	sampler2D texture_specular1;
+	sampler2D texture_reflection1;
+	sampler2D texture_normal1;
+	float shininess;
+};
+
+uniform Material material;
 
 void main()
 {
-    color = vec4(0.04, 0.28, 0.26, 1.0);
+	float shine = material.shininess;
+    color = vec4(1.0, 1.0, 1.0, 1.0);
 }

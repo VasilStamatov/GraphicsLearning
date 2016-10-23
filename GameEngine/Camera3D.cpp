@@ -1,6 +1,7 @@
 #include "Camera3D.h"
 #include <SDL\SDL_mouse.h>
 #include <SDL\SDL_events.h>
+#include <iostream>
 namespace GameEngine
 {
   Camera3D::Camera3D()
@@ -33,7 +34,7 @@ namespace GameEngine
     m_screenHeight = _screenHeight;
     m_initialFoV = _fov;
     //projection matrix
-    m_projectionMatrix = glm::perspective(m_initialFoV, GetAspectRatio(), 0.1f, 100.0f);
+    m_projectionMatrix = glm::perspective(glm::radians(m_initialFoV), GetAspectRatio(), 0.1f, 100.0f);
 
     SDL_SetRelativeMouseMode(_relativeMM);
   }
@@ -46,32 +47,27 @@ namespace GameEngine
       m_needsMatrixUpdate = false;
     }
   }
-  void Camera3D::Move(const MoveState& _ms, float _fps)
+  void Camera3D::Move(const MoveState& _ms, float _deltaTime)
   {
-    float deltaTime = 1.0f;
-    if (_fps != 0.0f)
-    {
-      deltaTime = 1.0f / _fps;
-    }
     switch (_ms)
     {
     case MoveState::FORWARD:
-      m_position += m_direction * deltaTime * m_speed;
+      m_position += m_direction * _deltaTime * m_speed;
       break;
     case MoveState::BACKWARD:
-      m_position -= m_direction * deltaTime * m_speed;
+      m_position -= m_direction * _deltaTime * m_speed;
       break;
     case MoveState::LEFT:
-      m_position -= m_right * deltaTime * m_speed;
+      m_position -= m_right * _deltaTime * m_speed;
       break;
     case MoveState::RIGHT:
-      m_position += m_right * deltaTime * m_speed;
+      m_position += m_right * _deltaTime * m_speed;
       break;
     case MoveState::UP:
-      m_position += m_up * deltaTime * m_speed;
+      m_position += m_up * _deltaTime * m_speed;
       break;
     case MoveState::DOWN:
-      m_position -= m_up * deltaTime * m_speed;
+      m_position -= m_up * _deltaTime * m_speed;
       break;
     default:
       break;
@@ -79,18 +75,15 @@ namespace GameEngine
     m_needsMatrixUpdate = true;
   }
 
-  void Camera3D::Rotate(float _xrel, float _yrel, float _fps)
+  void Camera3D::Rotate(float _xrel, float _yrel, float _deltaTime)
   {
-    float deltaTime = 1.0f;
-    if (_fps != 0.0f)
-    {
-      deltaTime = 1.0f / _fps;
-    }
-
-    m_horizontalAngle -= m_mouseSpeed * deltaTime * _xrel;
-
-    m_verticalAngle -= m_mouseSpeed * deltaTime * _yrel;
+    m_horizontalAngle -= m_mouseSpeed * _deltaTime * _xrel;
     
+    m_verticalAngle -= m_mouseSpeed * _deltaTime * _yrel;
+    
+    /*std::cout << m_mouseSpeed << std::endl;
+    std::cout << m_speed << std::endl;*/
+
     CalculateOrientation(true);
 
     m_needsMatrixUpdate = true;

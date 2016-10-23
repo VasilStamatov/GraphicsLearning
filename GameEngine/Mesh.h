@@ -11,12 +11,7 @@ namespace GameEngine
   class Mesh
   {
   public:
-    Mesh()
-    {
-
-    }
-    Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures);
-
+    Mesh() {}
     Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures,
       bool _hasAnim, const glm::mat4& _baseModelMatrix);
     ~Mesh();

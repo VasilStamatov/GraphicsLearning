@@ -1,7 +1,6 @@
 #include "Mesh.h"
 #include <string>
 #include <glm\gtc\matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 namespace GameEngine
 {
@@ -13,14 +12,6 @@ namespace GameEngine
     m_textures = _textures;
     m_hasAnimations = _hasAnim;
     m_baseModelMatrix = _baseModelMatrix;
-    SetupMesh();
-  }
-  Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<GLTexture>& _textures)
-  {
-    m_vertices = _vertices;
-    m_indices = _indices;
-    m_textures = _textures;
-    m_baseModelMatrix = glm::mat4(1.0f);
     SetupMesh();
   }
   Mesh::~Mesh()
@@ -55,17 +46,14 @@ namespace GameEngine
       {
         number = normalNr++;
       }
-      // Now set the sampler to the correct texture unit
-      glUniform1i(_shaderProgram.GetUniformLocation("material." + name + std::to_string(number)), i);
-
-      // And finally bind the texture
-      m_textures.at(i).Bind(GL_TEXTURE0 + i);
+      // Upload the texture to the shader
+      _shaderProgram.UploadValue("material." + name + std::to_string(number), i, m_textures.at(i));
     }
     glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
 
     // Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
-    glUniform1f(_shaderProgram.GetUniformLocation("material.shininess"), 16.0f);
-    glUniformMatrix4fv(_shaderProgram.GetUniformLocation("baseModelMatrix"), 1, GL_FALSE, glm::value_ptr(m_baseModelMatrix));
+    _shaderProgram.UploadValue("material.shininess", 8.0f);
+    _shaderProgram.UploadValue("baseModelMatrix", m_baseModelMatrix);
     //Draw mesh
     glBindVertexArray(m_VAO);
 
@@ -136,7 +124,7 @@ namespace GameEngine
     glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, m_vertices.size() * sizeof(Vertex), m_vertices.data());
-    
+
     GLuint attributeLocation = 0;
 
     //Vertex position
@@ -151,6 +139,10 @@ namespace GameEngine
     glEnableVertexAttribArray(attributeLocation);
     glVertexAttribPointer(attributeLocation++, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_uv));
 
+    //Vertex tangent coords
+    glEnableVertexAttribArray(attributeLocation);
+    glVertexAttribPointer(attributeLocation++, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_tangents));
+
     if (m_hasAnimations)
     {
       glEnableVertexAttribArray(attributeLocation);
@@ -159,15 +151,17 @@ namespace GameEngine
       glEnableVertexAttribArray(attributeLocation);
       glVertexAttribPointer(attributeLocation++, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_weights));
     }
-    glBindBuffer(GL_ARRAY_BUFFER, m_MBO);
-    // Set attribute pointers for matrix (4 times vec4)
-    for (GLint i = 0; i < 4; i++)
+    else
     {
-      glEnableVertexAttribArray(attributeLocation + i);
-      glVertexAttribPointer(attributeLocation + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(i * sizeof(glm::vec4)));
-      glVertexAttribDivisor(attributeLocation + i, 1);
+      glBindBuffer(GL_ARRAY_BUFFER, m_MBO);
+      // Set attribute pointers for matrix (4 times vec4)
+      for (GLint i = 0; i < 4; i++)
+      {
+        glEnableVertexAttribArray(attributeLocation + i);
+        glVertexAttribPointer(attributeLocation + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(i * sizeof(glm::vec4)));
+        glVertexAttribDivisor(attributeLocation + i, 1);
+      }
     }
-
     glBindVertexArray(0);
   }
 }

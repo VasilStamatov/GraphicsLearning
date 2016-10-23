@@ -54,6 +54,12 @@ namespace GameEngine
 
       m_needsMatrixUpdate = true;
     }
+    void SetDirection(const glm::vec3& _direction)
+    {
+      m_direction = _direction;
+
+      m_needsMatrixUpdate = true;
+    }
     /** \brief offsets the orientation of the camera
     * \param _horizontal - the horizontal offset (degrees)
     * \param _vertical - the vertical offset (degrees)
@@ -78,14 +84,14 @@ namespace GameEngine
     * - DOWN - - translates towards the -y axis by speed * deltaTime
     * \param _fps - the current fps
     */
-    void Move(const MoveState& _ms, float _fps);
+    void Move(const MoveState& _ms, float _deltaTime);
 
     /** \brief rotates the camera either horizontally or vertically
     * \param _xrel - the value by which the camera rotates horizontally
     * \param _yrel - the value by which the camera rotates vertically
     * \param _fps - the current fps
     */
-    void Rotate(float _xrel, float _yrel, float _fps);
+    void Rotate(float _xrel, float _yrel, float _deltaTime);
 
     /** \brief Changes the FoV of the projection matrix and updates it
     * \param _value - the new FoV value
@@ -102,7 +108,7 @@ namespace GameEngine
         m_initialFoV = 120.0f;
       }
       printf("fov: %f \n", m_initialFoV);
-      m_projectionMatrix = glm::perspective(m_initialFoV, GetAspectRatio(), 0.1f, 100.0f);
+      m_projectionMatrix = glm::perspective(glm::radians(m_initialFoV), GetAspectRatio(), 0.1f, 100.0f);
     }
 
     /** \brief Increase (or decreases) the mouse sensitivity
@@ -190,11 +196,12 @@ namespace GameEngine
     bool m_needsMatrixUpdate{ true };
 
     /// Initial Field of View
-    float m_initialFoV{ 45.0f };
+    float m_initialFoV{ 60.0f };
 
-    float m_speed{ 4.0f }; ///< speed of 3 units / second
+    //the movement speed of the camera 
+    float m_speed{ 0.1f }; ///< speed of 10.0f units / second
 
-    float m_mouseSpeed{ 0.5f }; ///< mouse speed/sensitivity
+    float m_mouseSpeed{ 0.01f }; ///< mouse speed/sensitivity
 
     int m_screenWidth{ 500 }; ///< The width of the sdl screen
     int m_screenHeight{ 500 }; ///< The height of the sdl screen

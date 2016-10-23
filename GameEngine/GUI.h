@@ -9,6 +9,8 @@ namespace GameEngine
   class GUI
   {
   public:
+				GUI() {};
+				~GUI() { if (!m_freed) DestroyGUI(); };
     //initialize the gui
     void Init(const std::string& _resourceDirectory);
     //destroy the gui
@@ -45,6 +47,7 @@ namespace GameEngine
     CEGUI::GUIContext* m_context{ nullptr };
     CEGUI::Window* m_root{ nullptr };
     unsigned int m_lastTime{ 0 };
+				bool m_freed{ false };
   };
 }
 

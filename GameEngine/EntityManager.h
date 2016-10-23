@@ -22,7 +22,7 @@ namespace GameEngine
 
     void Refresh();
 
-    Entity& AddEntity();
+    Entity* AddEntity();
 
     void AddToGroup(Entity* _entity, std::size_t _group)
     {
@@ -37,6 +37,7 @@ namespace GameEngine
     //An entity manager contains numerous components
     //Therefore the components will be stored in an std::vector as unique pointers to allow polymorphism
     std::vector<std::unique_ptr<Entity>> m_entities;
+    std::vector<std::unique_ptr<Entity>> m_toAdd;
     std::array<std::vector<Entity*>, MAX_GROUPS> m_groupedEntities;
   };
 }

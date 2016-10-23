@@ -52,16 +52,19 @@ namespace GameEngine
       return !_entity->IsAlive();
     }),
       std::end(m_entities));
+
+    for (auto& entity : m_toAdd)
+    {
+      m_entities.emplace_back(std::move(entity));
+    }
+    m_toAdd.clear();
   }
 
-  Entity& EntityManager::AddEntity()
+  Entity* EntityManager::AddEntity()
   {
     //create the new entity unique pointer
-    Entity* e(new Entity(*this));
-    std::unique_ptr<Entity> entity{ e };
-    //Add the entity to the vector (std::move is required as unique pointers cannot be copied)
-    m_entities.emplace_back(std::move(entity));
+    m_toAdd.emplace_back(std::make_unique<Entity>(*this));
     //return a reference of the new entity so that the user may use it for something
-    return *e;
+    return m_toAdd.back().get();
   }
 }

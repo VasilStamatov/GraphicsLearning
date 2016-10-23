@@ -29,6 +29,7 @@ namespace GameEngine
     {
       //begins the frame
       limiter.BeginFrame();
+
       //updates the key map
       inputManager.Update();
       // Call the custom update and draw method
@@ -41,6 +42,7 @@ namespace GameEngine
         //swaps the buffer
         m_window.SwapBuffer();
       }
+      m_deltaTime = limiter.GetCurrentDT();
     }
 
     SDL_GL_DeleteContext(m_window.GetGLContext());

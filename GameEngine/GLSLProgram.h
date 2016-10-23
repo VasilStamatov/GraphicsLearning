@@ -1,38 +1,17 @@
 #pragma once
+#include "GLTexture.h"
 
 #include <string>
 #include <GL/glew.h>
-#include <vector>
-#include <map>
 #include <unordered_map>
+#include <glm\mat4x4.hpp>
 
 namespace GameEngine
 {
   using AttribLocation = GLuint;
   using UniformLocation = GLuint;
   using ProgramID = GLuint;
-  /** Shader structure to define a single shader object */
-  struct Shader
-  {
-    /** Shader constructor needs only 3 values, because its ID is given to it by OpenGL
-     * \param[in] _type The enum types: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, or GL_GEOMETRY_SHADER.
-     * \param[in] _filePath The file path to the shader file
-     * \param[in] _name The name of the shader (can be anything, but preferably something to help you differentiate them)
-     */
-    Shader(GLenum _type, const std::string& _filePath, const std::string& _name)
-    {
-      type = _type;
-      filePath = _filePath;
-      name = _name;
-    }
-    Shader()
-    {
-    }
-    GLenum type; ///< GLenum types: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, or GL_GEOMETRY_SHADER. 
-    ProgramID shaderID{ 0 }; ///< The ID of the shader which is gotten when it's created by glCreateShader
-    std::string filePath{ "Default" }; ///< the filepath of the shader
-    std::string name{ "Default" }; ///< the name of the shader which is declared from the user
-  };
+  using ShaderID = GLuint;
 
   /** This class handles the compilation, linking, and usage of a GLSL shader program. */
   class GLSLProgram
@@ -42,17 +21,14 @@ namespace GameEngine
     ~GLSLProgram();
 
     /** Compiles the passed shaders
-     * \param[in] _shaders The shaders passed to the main program in order to be compiled
-     */
-    void CompileShaders(const std::vector<Shader>& _shaders);
+    * \param[in] _shaders The shaders passed to the main program in order to be compiled
+    */
+    void CompileShaders(const std::string& _vsFilePath, const std::string& _fsFilePath, const std::string& _gsFilePath = "");
 
     /** Compiling vertex and fragment shaders from source
-     * \param[in] _vertexSource, _fragmentSource the source code of the vertex and fragment shader
-     */
-    void CompileShadersFromSource(const char* _vertexSource, const char* _fragmentSource);
-
-    /** Links the shaders together */
-    void LinkShaders();
+    * \param[in] _vertexSource, _fragmentSource the source code of the vertex and fragment shader
+    */
+    void CompileShadersFromSource(const char* _vertexSource, const char* _fragmentSource, const char* _geometrySource = nullptr);
 
     /** Returns the index of the named uniform block specified by uniformBlockName associated with the shader program.
     * If uniformBlockName is not a valid uniform block of the shader program, GL_INVALID_INDEX is returned
@@ -102,23 +78,23 @@ namespace GameEngine
     void GetActiveUniformsIndexValues(GLsizei _numUniforms, GLuint * _uniformIndices, GLenum _pname, GLint * _attribute);
 
     /* Returns the location of the subroutine uniform named _name in the current shader program object for the shading stage specified by _shaderType.
-    * \param[in] _shaderType Must be one of: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, or GL_GEOMETRY_SHADER.    
+    * \param[in] _shaderType Must be one of: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, or GL_GEOMETRY_SHADER.
     * \param[in] _name The name of the uniform variable (null-terminated cstring
     * \return the location of the subroutine uniform named _name
     */
     GLint GetSubroutineUniformLocation(GLenum _shaderType, const std::string& _name);
 
     /* Determine the indices of the subroutines inside the shader
-    * \param[in] _shaderType Must be one of: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, or GL_GEOMETRY_SHADER.    
+    * \param[in] _shaderType Must be one of: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, or GL_GEOMETRY_SHADER.
     * \param[in] _name The name of the uniform variable (null-terminated cstring
     * \return the index of the shader function associated with _name from current shader program for the shading stage specified by _shaderType
     */
     GLuint GetSubroutineIndex(GLenum _shaderType, const std::string& _name);
 
     /* Specify which subroutine should be executed in the shader. All active subroutine uniforms for a shader stage must be initialized.
-    * \param[in] _shaderType Must be one of: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, or GL_GEOMETRY_SHADER.    
+    * \param[in] _shaderType Must be one of: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, or GL_GEOMETRY_SHADER.
     * \param[in] _numSubrUniforms The number of subroutine uniforms
-    * \param[in] _indices The values which the shader subroutine uniforms are set to. The i'th subroutine uniform will be assigned the value indices[i]. 
+    * \param[in] _indices The values which the shader subroutine uniforms are set to. The i'th subroutine uniform will be assigned the value indices[i].
     */
     void UniformSubroutinesuiv(GLenum _shaderType, GLsizei _numSubrUniforms, const GLuint * _indices);
 
@@ -134,16 +110,26 @@ namespace GameEngine
     void RegisterAttribute(const std::string& _attrib);
     // Registers the location of a uniform in this shader (must be called after linking)
     void RegisterUniform(const std::string& _uniform);
-    ///accesses elements : shaders/uniforms;
+    //accesses elements : shaders/uniforms;
     AttribLocation GetAttribLocation(const std::string& _attrib);
     UniformLocation GetUniformLocation(const std::string& _uniform);
+
+    void UploadValue(const std::string& _uniformName, const glm::mat4& _matrix);
+    void UploadValue(const std::string& _uniformName, const float& _float);
+    void UploadValue(const std::string& _uniformName, const int& _int);
+    void UploadValue(const std::string& _uniformName, const glm::vec2& _vec2);
+    void UploadValue(const std::string& _uniformName, const glm::vec3& _vec3);
+    void UploadValue(const std::string& _uniformName, const glm::vec4& _vec4);
+    void UploadValue(const std::string& _uniformName, const int& _slot, const GLTexture& _texture);
+    void UploadValue(const std::string& _uniformName, const int& _slot, const GLCubemap& _cubemap);
 
   private:
     /// The number of attributes in a shader (the in values)
     //int m_numAttributes;
     /// Compile a single shader program
     void CompileShader(const char* _source, const std::string& _name, GLuint _id);
-
+    /** Links the shaders together */
+    void LinkShaders();
     /** Gets the location of a specific attribute in the shader program
     * \param[in] _attributeName The name of the searched attribute
     * \return the GLint location of the specified attribute
@@ -156,11 +142,14 @@ namespace GameEngine
     */
     UniformLocation GetUniformLoc(const std::string& _uniformName);
 
-    /// The program ID of the whole shader program
+    // The program ID of the whole shader program
     ProgramID m_programID{ 0 };
-    /// A vector containing all the shaders of 1 GLSL program object
-    std::vector<Shader> m_shaders;
+    // The Id's of each shader
+    ShaderID m_vertexShaderID{ 0 };
+    ShaderID m_fragmentShaderID{ 0 };
+    ShaderID m_geometryShaderID{ 0 };
 
+    // a map of the locations in the shader for ease of access
     std::unordered_map<std::string, AttribLocation> m_attribList;
     std::unordered_map<std::string, UniformLocation> m_unifLocationList;
   };

@@ -1,6 +1,9 @@
 #include <SDL\SDL.h>
 #include <GL\glew.h>
+#include <iostream>
+
 #include "GameEngine.h"
+#include "GameEngineErrors.h"
 
 namespace GameEngine
 {

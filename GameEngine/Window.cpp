@@ -44,7 +44,8 @@ namespace GameEngine
     {
       FatalError("SDL_GL context could not be created!");
     }
-    //Set up glew (optional but recommended)
+
+    //Set up glew
     GLenum error = glewInit();
     if (error != GLEW_OK)
     {
@@ -69,6 +70,30 @@ namespace GameEngine
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    //Enable face culling
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
+    glCullFace(GL_BACK);
+
+    //Enable depth testing
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    //Enable multisampling
+    glEnable(GL_MULTISAMPLE);
+
+    //Enable gamma correction
+    //glEnable(GL_FRAMEBUFFER_SRGB);
+
+    //Enable stencil testing
+    //glEnable(GL_STENCIL_TEST);
+    //glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    //glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
+    //glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_REPLACE);
+    //glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_KEEP);
+
+    // Enable depth clamping
+    // glEnable(GL_DEPTH_CLAMP);
     return 0;
   }
   void Window::SwapBuffer()

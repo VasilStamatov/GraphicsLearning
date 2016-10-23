@@ -15,10 +15,10 @@ namespace GameEngine
     virtual ~Component() {}
 
     //Let the component have an init function so it can be used as a constructor
-    virtual void Init() {}
+    virtual void Init() = 0;
     //Usually game components will have an Update and Draw function
-    virtual void Update(float _deltaTime) {}
-    virtual void Draw() {}
+    virtual void Update(float _deltaTime) = 0;
+    virtual void Draw() = 0;
 
     //Store the parent entity containing this component in a pointer due to forward declaration
     Entity* m_entity{ nullptr };

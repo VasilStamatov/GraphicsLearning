@@ -1,3 +1,3 @@
 #pragma once
 
-const int SCREEN_INDEX_GAMEPLAY = 0;
+constexpr int SCREEN_INDEX_GAMEPLAY = 0;

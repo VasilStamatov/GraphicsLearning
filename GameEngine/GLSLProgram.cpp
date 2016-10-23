@@ -3,8 +3,7 @@
 #include "IOManager.h"
 
 #include <fstream>
-#include <vector>
-
+#include <glm\gtc\type_ptr.hpp>
 namespace GameEngine
 {
   //inoitialize all the variables to 0
@@ -22,95 +21,112 @@ namespace GameEngine
   }
 
   //Compiles the shaders into a form that your GPU can understand
-  void GLSLProgram::CompileShaders(const std::vector<Shader>& _shaders)
+  void GLSLProgram::CompileShaders(const std::string& _vsFilePath, const std::string& _fsFilePath, const std::string& _gsFilePath/* = ""*/)
   {
-    /* vertext and fragment shaders are successfully compiled
-    * now it's time to link them together into a program.
-    * get a program object */
-    m_programID = glCreateProgram();
+    std::string vsSource;
+    std::string fsSource;
+    std::string gsSource;
 
-    m_shaders = _shaders;
-
-    //Iterate until the last shader is Compiled
-    for (Shader shader : m_shaders)
+    IOManager::ReadFileToBuffer(_vsFilePath, vsSource);
+    IOManager::ReadFileToBuffer(_fsFilePath, fsSource);
+    if (_gsFilePath != "")
     {
-      shader.shaderID = glCreateShader(shader.type);
-
-      if (shader.shaderID == 0)
-      {
-        FatalError(shader.name + " failed to be created!");
-      }
-
-      std::string shaderSource;
-
-      IOManager::ReadFileToBuffer(shader.filePath, shaderSource);
-
-      CompileShader(shaderSource.c_str(), shader.name, shader.shaderID);
-
-      glAttachShader(m_programID, shader.shaderID);
+      IOManager::ReadFileToBuffer(_gsFilePath, gsSource);
+      CompileShadersFromSource(vsSource.c_str(), fsSource.c_str(), gsSource.c_str());
+    }
+    else
+    {
+      CompileShadersFromSource(vsSource.c_str(), fsSource.c_str());
     }
   }
 
-  void GLSLProgram::CompileShadersFromSource(const char* _vertexSource, const char* _fragmentSource)
+  void GLSLProgram::CompileShadersFromSource(const char* _vertexSource, const char* _fragmentSource, const char* _geometrySource /*= nullptr*/)
   {
+    //Create the GLSL program ID
+    m_programID = glCreateProgram();
+
     //Create the vertex shader object, and store its ID
-
-    m_shaders = 
+    m_vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+    if (m_vertexShaderID == 0)
     {
-      { GL_VERTEX_SHADER, _vertexSource, "Vertex Shader" },
-      { GL_FRAGMENT_SHADER, _fragmentSource, "Fragment Shader" },
-    };
-
-    for (Shader shader : m_shaders)
-    {
-      shader.shaderID = glCreateShader(shader.type);
-
-      if (shader.shaderID == 0)
-      {
-        FatalError(shader.name + " failed to be created!");
-      }
-
-      CompileShader(shader.filePath.c_str(), shader.name, shader.shaderID);
-
-      glAttachShader(m_programID, shader.shaderID);
+      FatalError("Vertex shader failed to be created!");
     }
+
+    //Create the fragment shader object, and store its ID
+    m_fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+    if (m_fragmentShaderID == 0) 
+    {
+      FatalError("Fragment shader failed to be created!");
+    }
+
+    //Check if there is a geometry shader
+    if (_geometrySource != nullptr)
+    {
+      //Create the geometry shader object, and store its ID
+      m_geometryShaderID = glCreateShader(GL_GEOMETRY_SHADER);
+      if (m_geometryShaderID == 0)
+      {
+        FatalError("Geometry shader failed to be created!");
+      }
+    }
+
+    //Compile each shader
+    CompileShader(_vertexSource, "Vertex Shader", m_vertexShaderID);
+    if (_geometrySource != nullptr)
+    {
+      CompileShader(_geometrySource, "Geometry Shader", m_geometryShaderID);
+    }
+    CompileShader(_fragmentSource, "Fragment Shader", m_fragmentShaderID);
+    
+    LinkShaders();
   }
 
   void GLSLProgram::LinkShaders()
   {
+    //Attach our shaders to our program
+    glAttachShader(m_programID, m_vertexShaderID);
+    glAttachShader(m_programID, m_fragmentShaderID);
+    if (m_geometryShaderID != 0)
+    {
+      glAttachShader(m_programID, m_geometryShaderID);
+    }
     //link our program
     glLinkProgram(m_programID);
 
     //note the different functions here: glGetProgram* instead of glGetShader*
     GLint isLinked = 0;
     glGetProgramiv(m_programID, GL_LINK_STATUS, (int *)&isLinked);
+
     if (isLinked == GL_FALSE)
     {
       GLint maxLength = 0;
+      //get the size of the string (maxlength)
       glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &maxLength);
+
       //The maxLength includes the null char
       std::vector<char> errorLog(maxLength);
       glGetProgramInfoLog(m_programID, maxLength, &maxLength, &errorLog[0]);
+
       //we don't need this program anymore
       glDeleteProgram(m_programID);
-      //dont leak shaders either
 
-      for (Shader shader : m_shaders)
-      {
-        glDeleteShader(shader.shaderID);
-        shader.shaderID = 0;
-      }
+      //dont leak shaders either
+      //Don't leak shaders either.
+      glDeleteShader(m_vertexShaderID);
+      glDeleteShader(m_fragmentShaderID);
+      glDeleteShader(m_geometryShaderID);
 
       //print the error log and quit
       std::printf("%s\n", &errorLog[0]);
       FatalError("Shaders failed to link!");
     }
     //Always detach shaders after a successful link.
-    for (Shader shader : m_shaders)
-    {
-      glDetachShader(m_programID, shader.shaderID);
-      glDeleteShader(shader.shaderID);
-    }
+    glDetachShader(m_programID, m_vertexShaderID);
+    glDetachShader(m_programID, m_fragmentShaderID);
+    glDetachShader(m_programID, m_geometryShaderID);
+    glDeleteShader(m_vertexShaderID);
+    glDeleteShader(m_fragmentShaderID);
+    glDeleteShader(m_geometryShaderID);
   }
 
   GLuint GLSLProgram::GetUniformBlockIndex(const std::string& _uniformBlockName)
@@ -193,21 +209,12 @@ namespace GameEngine
   void GLSLProgram::Use()
   {
     glUseProgram(m_programID);
-    /*for (int i = 0; i < m_numAttributes; i++)
-    {
-      glEnableVertexAttribArray(i);
-    }*/
   }
 
   //disable the shader
   void GLSLProgram::UnUse()
   {
     glUseProgram(0);
-    //for (int i = 0; i < m_numAttributes; i++)
-    //{
-    //  glDisableVertexAttribArray(i);
-    //}
-    //m_numAttributes = 0; // reset the num attributes
   }
 
   void GLSLProgram::Dispose()
@@ -215,8 +222,6 @@ namespace GameEngine
     //deletes the program ID if there is one (not 0)
     if (m_programID) glDeleteProgram(m_programID);
     m_programID = 0;
-    //clears the shader vector
-    m_shaders.clear();
   }
 
   void GLSLProgram::RegisterAttribute(const std::string& _attrib)
@@ -263,6 +268,56 @@ namespace GameEngine
       RegisterUniform(_uniform);
       return m_unifLocationList.at(_uniform);
     }
+  }
+
+  void GLSLProgram::UploadValue(const std::string & _uniformName, const glm::mat4 & _matrix)
+  {
+    glUniformMatrix4fv(GetUniformLocation(_uniformName), 1, GL_FALSE, glm::value_ptr(_matrix));
+  }
+
+  void GLSLProgram::UploadValue(const std::string & _uniformName, const float & _float)
+  {
+    glUniform1f(GetUniformLocation(_uniformName), _float);
+  }
+
+  void GLSLProgram::UploadValue(const std::string & _uniformName, const int & _int)
+  {
+    glUniform1i(GetUniformLocation(_uniformName), _int);
+  }
+
+  void GLSLProgram::UploadValue(const std::string & _uniformName, const glm::vec2 & _vec2)
+  {
+    glUniform2fv(GetUniformLocation(_uniformName), 1, glm::value_ptr(_vec2));
+  }
+
+  void GLSLProgram::UploadValue(const std::string & _uniformName, const glm::vec3 & _vec3)
+  {
+    glUniform3fv(GetUniformLocation(_uniformName), 1, glm::value_ptr(_vec3));
+  }
+
+  void GLSLProgram::UploadValue(const std::string & _uniformName, const glm::vec4 & _vec4)
+  {
+    glUniform4fv(GetUniformLocation(_uniformName), 1, glm::value_ptr(_vec4));
+  }
+
+  void GLSLProgram::UploadValue(const std::string & _uniformName, const int & _slot, const GLTexture& _texture)
+  {
+    //activate the texture
+    glActiveTexture(GL_TEXTURE0 + _slot);
+    //Bind it
+    glBindTexture(GL_TEXTURE_2D, _texture.id);
+    // Now set the sampler to the correct texture unit
+    glUniform1i(GetUniformLocation(_uniformName), _slot);
+  }
+
+  void GLSLProgram::UploadValue(const std::string & _uniformName, const int & _slot, const GLCubemap & _cubemap)
+  {
+    //activate the texture
+    glActiveTexture(GL_TEXTURE0 + _slot);
+    //Bind it
+    glBindTexture(GL_TEXTURE_CUBE_MAP, _cubemap.id);
+    // Now set the sampler to the correct texture unit
+    glUniform1i(GetUniformLocation(_uniformName), _slot);
   }
 
   //Compiles a single shader file

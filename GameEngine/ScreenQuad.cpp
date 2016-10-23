@@ -29,13 +29,13 @@ namespace GameEngine
     GLfloat vertices[] = 
     {
       // Positions   // TexCoords
-      -1.0f, 1.0f, 0.0f, 1.0f,
+      -1.0f, 1.0f,  0.0f, 1.0f,
       -1.0f, -1.0f, 0.0f, 0.0f,
-      1.0f, -1.0f, 1.0f, 0.0f,
+       1.0f, -1.0f, 1.0f, 0.0f,
 
-      -1.0f, 1.0f, 0.0f, 1.0f,
-      1.0f, -1.0f, 1.0f, 0.0f,
-      1.0f, 1.0f, 1.0f, 1.0f
+      -1.0f, 1.0f,  0.0f, 1.0f,
+       1.0f, -1.0f, 1.0f, 0.0f,
+       1.0f, 1.0f,  1.0f, 1.0f
     };
 
     glBindVertexArray(m_VAO);
@@ -80,7 +80,8 @@ namespace GameEngine
   {
     glBindVertexArray(m_VAO);
 
-    glBindTexture(GL_TEXTURE_2D, _textureID);
+    /*glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _textureID);*/
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glBindVertexArray(0);

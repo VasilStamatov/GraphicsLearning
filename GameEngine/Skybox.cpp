@@ -1,6 +1,5 @@
 #include "Skybox.h"
-
-#include <glm\gtc\type_ptr.hpp>
+#include "ResourceManager.h"
 
 namespace GameEngine
 {
@@ -14,107 +13,55 @@ namespace GameEngine
     Dispose();
   }
 
-  void Skybox::Init(const GLCubemap& _cubemap)
+  void Skybox::Init(std::unique_ptr<GLCubemap> _cubemap, std::unique_ptr<GLSLProgram> _shader, std::weak_ptr<Camera3D> _camera, bool _isSphere)
   {
-    m_cubemap = _cubemap;
+    m_cubemap = std::move(_cubemap);
+    m_shader = std::move(_shader);
+    m_camera = _camera;
 
-    GLfloat skyboxVertices[] = 
+    m_model = std::make_unique<StaticModel>();
+
+    if (_isSphere)
     {
-      // Positions          
-      -1.0f, 1.0f, -1.0f,
-      -1.0f, -1.0f, -1.0f,
-      1.0f, -1.0f, -1.0f,
-      1.0f, -1.0f, -1.0f,
-      1.0f, 1.0f, -1.0f,
-      -1.0f, 1.0f, -1.0f,
-
-      -1.0f, -1.0f, 1.0f,
-      -1.0f, -1.0f, -1.0f,
-      -1.0f, 1.0f, -1.0f,
-      -1.0f, 1.0f, -1.0f,
-      -1.0f, 1.0f, 1.0f,
-      -1.0f, -1.0f, 1.0f,
-
-      1.0f, -1.0f, -1.0f,
-      1.0f, -1.0f, 1.0f,
-      1.0f, 1.0f, 1.0f,
-      1.0f, 1.0f, 1.0f,
-      1.0f, 1.0f, -1.0f,
-      1.0f, -1.0f, -1.0f,
-
-      -1.0f, -1.0f, 1.0f,
-      -1.0f, 1.0f, 1.0f,
-      1.0f, 1.0f, 1.0f,
-      1.0f, 1.0f, 1.0f,
-      1.0f, -1.0f, 1.0f,
-      -1.0f, -1.0f, 1.0f,
-
-      -1.0f, 1.0f, -1.0f,
-      1.0f, 1.0f, -1.0f,
-      1.0f, 1.0f, 1.0f,
-      1.0f, 1.0f, 1.0f,
-      -1.0f, 1.0f, 1.0f,
-      -1.0f, 1.0f, -1.0f,
-
-      -1.0f, -1.0f, -1.0f,
-      -1.0f, -1.0f, 1.0f,
-      1.0f, -1.0f, -1.0f,
-      1.0f, -1.0f, -1.0f,
-      -1.0f, -1.0f, 1.0f,
-      1.0f, -1.0f, 1.0f
-    };
-    //Setup the skybox ----------
-    if (m_VAO == 0)
-    {
-      glGenVertexArrays(1, &m_VAO);
+      ResourceManager::GetStaticModel("Assets/Sphere/sphere.obj", m_model.get());
     }
-    if (m_VBO == 0)
+    else
     {
-      glGenBuffers(1, &m_VBO);
+      ResourceManager::GetStaticModel("Assets/Box/box2.obj", m_model.get());
     }
-
-    glBindVertexArray(m_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(skyboxVertices), &skyboxVertices[0]);
-
-    //Tell opengl how to upload the vertex info to the shader
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-
-    glBindVertexArray(0);
   }
 
   void Skybox::Dispose()
   {
     //delete the vao's and vbo's and reset them to 0
-    if (m_VAO != 0)
-    {
-      glDeleteVertexArrays(1, &m_VAO);
-      m_VAO = 0;
-    }
-
-    if (m_VBO != 0)
-    {
-      glDeleteBuffers(1, &m_VBO);
-      m_VBO = 0;
-    }
+    m_model->Dispose();
   }
 
   void Skybox::Render()
   {
+    m_shader->Use();
+
+    GLint oldCullMode{ 0 };
+    glGetIntegerv(GL_CULL_FACE_MODE, &oldCullMode);
+    GLint oldDepthFunc{ 0 };
+    glGetIntegerv(GL_DEPTH_FUNC, &oldDepthFunc);
+
+    glCullFace(GL_FRONT);
     glDepthFunc(GL_LEQUAL);
 
     // skybox cube
-    glBindVertexArray(m_VAO);
+    m_shader->UploadValue("view", m_camera._Get()->GetViewMatrix());
+    m_shader->UploadValue("projection", m_camera._Get()->GetProjectionMatrix());
+    m_shader->UploadValue("skybox", 0, *m_cubemap);
 
-    m_cubemap.Bind(GL_TEXTURE0);
-    //glUniform1i(m_skyboxShader.GetUniformLocation("skybox"), 0);
+    m_model->SetScale(glm::vec3(20.0f));
+    m_model->SetPosition(m_camera._Get()->GetPosition());
+    m_model->SetRotation(glm::vec3(0.0, 0.0f, 0.0f));
+    m_model->Draw(*m_shader);
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindVertexArray(0);
+    glCullFace(oldCullMode);
+    glDepthFunc(oldDepthFunc);
 
-    glDepthFunc(GL_LESS);
+    m_shader->UnUse();
   }
-
 }

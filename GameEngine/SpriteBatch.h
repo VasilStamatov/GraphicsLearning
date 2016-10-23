@@ -84,10 +84,6 @@ namespace GameEngine
     void CreateVertexArray();
     // Sorts glyphs according to _sortType
     void SortGlyphs();
-    // Comparators used by sortGlyphs()
-    static bool CompareFrontToBack(Glyph* a, Glyph* b);
-    static bool CompareBackToFront(Glyph* a, Glyph* b);
-    static bool CompareTexture(Glyph* a, Glyph* b);
 
     GLuint m_vbo{ 0 };
     GLuint m_vao{ 0 };

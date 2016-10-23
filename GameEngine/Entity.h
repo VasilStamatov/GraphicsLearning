@@ -15,8 +15,6 @@ namespace GameEngine
   //using ComponentArray = std::array<Component*, MAX_COMPONENTS>;
 
   //The entity class is used to contain components and to Update and Draw them
-  class EntityManager;
-
   class Entity
   {
   public:
@@ -52,7 +50,6 @@ namespace GameEngine
     }
 
     void DelGroup(std::size_t _group) noexcept { m_groupBitset[_group] = false; }
-
 
     /** \brief Add components to this element of any type
     * \param[in] T is the component type

@@ -42,8 +42,19 @@ namespace GameEngine
     //Return a copy of the texture data
     return texture;
   }
-  GLCubemap ImageLoader::LoadCubemap(const std::vector<std::string>& _faces)
+  GLCubemap ImageLoader::LoadCubemap(const std::string& _directory, const std::string& _posXFilename, const std::string& _negXFilename,
+    const std::string& _posYFilename, const std::string& _negYFilename, const std::string& _posZFilename, const std::string& _negZFilename)
   {
+    std::array<std::string, 6> faces =
+    {
+      _posXFilename,
+      _negXFilename,
+      _posYFilename,
+      _negYFilename,
+      _posZFilename,
+      _negZFilename
+    };
+
     GLCubemap cubeMap = {};
 
     glGenTextures(1, &(cubeMap.id));
@@ -53,9 +64,9 @@ namespace GameEngine
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap.id);
 
-    for (GLuint i = 0; i < _faces.size(); i++)
+    for (GLuint i = 0; i < 6; i++)
     {
-      image = SOIL_load_image(_faces.at(i).c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+      image = SOIL_load_image((_directory + faces.at(i)).c_str(), &width, &height, 0, SOIL_LOAD_RGB);
 
       glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
       SOIL_free_image_data(image);
@@ -63,9 +74,9 @@ namespace GameEngine
       GLTexture texture;
       texture.width = width;
       texture.height = height;
-      texture.filePath = _faces.at(i);
+      texture.filePath = _directory + faces.at(i);
 
-      cubeMap.textures.push_back(texture);
+      cubeMap.textures.at(i) = texture;
     }
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
