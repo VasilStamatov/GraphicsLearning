@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 namespace GameEngine
 {
@@ -13,22 +14,22 @@ namespace GameEngine
     ScreenList(IMainGame* _game);
     ~ScreenList();
     //goes to the next screen index
-    IGameScreen* MoveNext();
+    std::weak_ptr<IGameScreen> MoveNext();
     //goes to the previous screen index
-    IGameScreen* MovePrevious();
+				std::weak_ptr<IGameScreen> MovePrevious();
     //sets the current screen index
     void SetScreen(int _nextScreen);
     //adds a screen
-    void AddScreen(IGameScreen* _newScreen);
+    void AddScreen(std::shared_ptr<IGameScreen> _newScreen);
     //destrous all the screens and resizes the screens vector to 0
     void Destroy();
 
     //gets the current screen index
-    IGameScreen* GetCurrent();
+				std::shared_ptr<IGameScreen> GetCurrent();
 
   protected:
     IMainGame* m_game{ nullptr };
-    std::vector<IGameScreen*> m_screens;
+    std::vector<std::shared_ptr<IGameScreen>> m_screens;
     int m_currentScreenIndex{ -1 };
   };
 }

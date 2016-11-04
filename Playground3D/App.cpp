@@ -17,7 +17,7 @@ void App::OnInit()
   m_gameName = "3D Playground";
   m_screenWidth = 960;
   m_screenHeight = 540;
-  m_currentFlags = 0;
+  m_windowFlags = GameEngine::WindowCreationFlags::RESIZABLE;
   
 }
 // called when exiting
@@ -28,9 +28,7 @@ void App::OnExit()
 // used to add screens
 void App::AddScreens()
 {
-  m_gamePlayScreen = std::make_unique<GameplayScreen>(&m_window);
-
-  m_screenList->AddScreen(m_gamePlayScreen.get());
-
-  m_screenList->SetScreen(m_gamePlayScreen->GetScreenIndex());
+  m_gamePlayScreen = std::make_shared<GameplayScreen>(&m_window);
+		m_screenList->SetScreen(m_gamePlayScreen->GetScreenIndex());
+  m_screenList->AddScreen(std::move(m_gamePlayScreen));
 }

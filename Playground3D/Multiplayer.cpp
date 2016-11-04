@@ -72,7 +72,7 @@ void Multiplayer::Loop()
 
   iResult = recv(m_connectSocket, m_recvbuf, m_recvbuflen, 0);
 
-  for (size_t i = 0; i < iResult; i++)
+  for (int i = 0; i < iResult; i++)
   {
     if (m_recvbuf[i] != '\n')
     {

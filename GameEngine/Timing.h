@@ -51,6 +51,10 @@ namespace GameEngine
     (if the timer has been stopped it returns from the start to stop time)*/
     float Seconds() const;
 
+				/* /brief returns the elapsed time in milliseconds
+				(if the timer has been stopped it returns from the start to stop time) */
+				float Milli() const;
+
     /* /brief Returns the flag if the timer is active*/
     const bool& IsActive() const noexcept { return m_isActive; }
 

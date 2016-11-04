@@ -63,33 +63,33 @@ void GameplayScreen::OnEntry()
   m_pointLightShader.CompileShaders("Shaders/PointLighting.vert", "Shaders/PointLighting.frag");
 
   /////////Set up the framebuffers for some post-processing
-  m_framebuffer.Init(m_window->GetScreenWidth(), m_window->GetScreenHeight());
-  m_framebuffer.Bind(GL_FRAMEBUFFER);
-  m_framebuffer.AttachTexture2D(false, false, true);
-  m_framebuffer.AttachRenderbuffer(true, true, true);
+  m_framebuffer.Init();
+  m_framebuffer.Bind(GL_FRAMEBUFFER, m_window->GetScreenWidth(), m_window->GetScreenHeight());
+  m_framebuffer.AttachTexture2D(m_window->GetScreenWidth(), m_window->GetScreenHeight(), false, false, true);
+  m_framebuffer.AttachRenderbuffer(m_window->GetScreenWidth(), m_window->GetScreenHeight(), true, true, true);
   if (!m_framebuffer.CheckFramebufferStatus())
   {
     std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
   }
-  m_framebuffer.Unbind(GL_FRAMEBUFFER);
+  m_framebuffer.Unbind(GL_FRAMEBUFFER, m_window->GetScreenWidth(), m_window->GetScreenHeight());
 
-  m_intermediateFB.Init(m_window->GetScreenWidth(), m_window->GetScreenHeight());
-  m_intermediateFB.Bind(GL_FRAMEBUFFER);
-  m_intermediateFB.AttachTexture2D(false, false, false);
+  m_intermediateFB.Init();
+  m_intermediateFB.Bind(GL_FRAMEBUFFER, m_window->GetScreenWidth(), m_window->GetScreenHeight());
+  m_intermediateFB.AttachTexture2D(m_window->GetScreenWidth(), m_window->GetScreenHeight(), false, false, false);
   if (!m_intermediateFB.CheckFramebufferStatus())
   {
     std::cout << "ERROR::FRAMEBUFFER:: Intermediate Framebuffer is not complete!" << std::endl;
   }
-  m_intermediateFB.Unbind(GL_FRAMEBUFFER);
+  m_intermediateFB.Unbind(GL_FRAMEBUFFER, m_window->GetScreenWidth(), m_window->GetScreenHeight());
 
-  m_depthMap.Init(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+  m_depthMap.Init();
   m_depthMap.Bind(GL_FRAMEBUFFER);
   m_depthMap.AttachDepthCubemap();
   if (!m_depthMap.CheckFramebufferStatus())
   {
     std::cout << "ERROR::FRAMEBUFFER:: Intermediate Framebuffer is not complete!" << std::endl;
   }
-  m_depthMap.Unbind(GL_FRAMEBUFFER);
+  m_depthMap.Unbind(GL_FRAMEBUFFER, m_window->GetScreenWidth(), m_window->GetScreenHeight());
 
   //GameEngine::ResourceManager::GetSkinnedModel("Assets/MD5/Bob.md5mesh", &m_villager);
   GameEngine::ResourceManager::GetStaticModel("Assets/Quad/quad2.obj", &m_quad);
@@ -97,7 +97,7 @@ void GameplayScreen::OnEntry()
 
   m_pointLight.Init(glm::vec3(0.0f, 0.0f, 0.0f), 0.3f, 0.8f, 1.0f, 1.0f, 0.09f, 0.032f);
   m_pointLight.SetColor(glm::vec3(1.0f));
-  m_lightCamera.InitForPointLight(90.0f, m_depthMap.GetDepthMapWidth(), m_depthMap.GetDepthMapHeight(), 1.0f, 25.0f, m_pointLight.GetPosition());
+  m_lightCamera.InitForPointLight(90.0f, 1024, 1024, 1.0f, 25.0f, m_pointLight.GetPosition());
 
   std::unique_ptr<GameEngine::GLCubemap> skyboxCube = std::make_unique<GameEngine::GLCubemap>(GameEngine::ResourceManager::GetCubemap("Assets/Skybox/",
     "right.png",
@@ -126,8 +126,13 @@ void GameplayScreen::OnExit()
 void GameplayScreen::Update()
 {
   CheckInput();
-  SDL_SetWindowTitle(m_window->GetWindow(), std::to_string(m_game->GetDT()).c_str());
-
+  SDL_SetWindowTitle(m_window->GetWindow(), std::to_string(m_game->GetFPS()).c_str());
+		if (m_window->WasResized())
+		{
+				//reset projection
+				m_camera->Resize(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+				m_window->ResizeHandled();
+		}
   m_camera->Update();
   //m_villager.Update(m_timer.Seconds());
  /* m_flashLight.SetDirection(m_camera.GetDirection());
@@ -155,24 +160,30 @@ void GameplayScreen::Draw()
   glDisable(GL_CULL_FACE);
   m_cube.Draw(m_cubemapShader);
   glEnable(GL_CULL_FACE);
+
   //Cubes
   m_cube.SetScale(glm::vec3(1.0f));
   m_cube.SetPosition(glm::vec3(4.0f, -3.5f, 0.0));
   m_cube.Draw(m_cubemapShader);
+
   m_cube.SetScale(glm::vec3(1.5f));
   m_cube.SetPosition(glm::vec3(2.0f, 3.0f, 1.0));
   m_cube.Draw(m_cubemapShader);
+
   m_cube.SetScale(glm::vec3(1.0f));
   m_cube.SetPosition(glm::vec3(-3.0f, -1.0f, 0.0));
   m_cube.Draw(m_cubemapShader);
+
   m_cube.SetScale(glm::vec3(1.0f));
   m_cube.SetPosition(glm::vec3(-1.5f, 1.0f, 1.5));
   m_cube.Draw(m_cubemapShader);
+
   m_cube.SetScale(glm::vec3(1.5f));
   m_cube.SetPosition(glm::vec3(-1.5f, 2.0f, -3.0));
   m_cube.SetRotation(glm::vec3(60.0f, 0.0f, 60.0f));
   m_cube.Draw(m_cubemapShader);
-  m_depthMap.Unbind(GL_FRAMEBUFFER);
+
+  m_depthMap.Unbind(GL_FRAMEBUFFER, m_window->GetScreenWidth(), m_window->GetScreenHeight());
   m_cubemapShader.UnUse();
 
   // 2. Render scene as normal 
@@ -198,19 +209,24 @@ void GameplayScreen::Draw()
   m_cube.SetScale(glm::vec3(1.0f));
   m_cube.SetPosition(glm::vec3(4.0f, -3.5f, 0.0));
   m_cube.Draw(m_pointLightShader);
+
   m_cube.SetScale(glm::vec3(1.5f));
   m_cube.SetPosition(glm::vec3(2.0f, 3.0f, 1.0));
   m_cube.Draw(m_pointLightShader);
+
   m_cube.SetScale(glm::vec3(1.0f));
   m_cube.SetPosition(glm::vec3(-3.0f, -1.0f, 0.0));
   m_cube.Draw(m_pointLightShader);
+
   m_cube.SetScale(glm::vec3(1.0f));
   m_cube.SetPosition(glm::vec3(-1.5f, 1.0f, 1.5));
   m_cube.Draw(m_pointLightShader);
+
   m_cube.SetScale(glm::vec3(1.5f));
   m_cube.SetPosition(glm::vec3(-1.5f, 2.0f, -3.0));
   m_cube.SetRotation(glm::vec3(60.0f, 0.0f, 60.0f));
   m_cube.Draw(m_pointLightShader);
+
   m_pointLightShader.UnUse();
 
   m_lampShader.Use();
@@ -266,18 +282,15 @@ void GameplayScreen::CheckInput()
 
   if (m_game->inputManager.IsKeyDown(SDLK_1))
   {
-    m_window->ChangeWindowType(GameEngine::WindowFlags::FULLSCREEN);
-    m_camera->SetScreenDims(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+    m_window->ChangeFullscreenState(GameEngine::FullscreenState::FULLSCREEN);
   }
   if (m_game->inputManager.IsKeyDown(SDLK_2))
   {
-    m_window->ChangeWindowType(GameEngine::WindowFlags::BORDERLESS);
-    m_camera->SetScreenDims(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+    m_window->ChangeFullscreenState(GameEngine::FullscreenState::BORDERLESS);
   }
   if (m_game->inputManager.IsKeyDown(SDLK_3))
   {
-    m_window->ChangeWindowType(GameEngine::WindowFlags::WINDOWED);
-    m_camera->SetScreenDims(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+    m_window->ChangeFullscreenState(GameEngine::FullscreenState::WINDOWED);
   }
   if (m_game->inputManager.IsKeyDown(SDLK_ESCAPE))
   {
@@ -323,6 +336,6 @@ void GameplayScreen::CheckInput()
   if (m_game->inputManager.GetMouseWheelValue().y != 0)
   {
     m_camera->ChangeFoV(5.0f * m_game->inputManager.GetMouseWheelValue().y);
-    m_game->inputManager.SetMouseWheel(0.0f, 0.0f);
+    m_game->inputManager.SetMouseWheel(0, 0);
   }
 }

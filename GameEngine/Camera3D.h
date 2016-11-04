@@ -139,12 +139,12 @@ namespace GameEngine
     * \param _screenWidth - the new width
     * \param _screenHeight - the new height
     */
-    void SetScreenDims(int _screenWidth, int _screenHeight)
+    void Resize(int _screenWidth, int _screenHeight)
     {
-      m_screenWidth = _screenWidth;
-      m_screenHeight = _screenHeight;
-
-      m_projectionMatrix = glm::perspective(m_initialFoV, GetAspectRatio(), 0.1f, 100.0f);
+						m_screenWidth = _screenWidth;
+						m_screenHeight = _screenHeight;
+						//projection matrix
+						m_projectionMatrix = glm::perspective(glm::radians(m_initialFoV), GetAspectRatio(), 0.1f, 100.0f);
     }
 
     /** \brief Gets the projection matrix of the camera

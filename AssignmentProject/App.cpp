@@ -18,7 +18,7 @@ void App::OnInit()
   m_gameName = "Platformer Maker";
   m_screenWidth = 1080;
   m_screenHeight = 768;
-  m_currentFlags = 0;
+  m_windowFlags = GameEngine::WindowCreationFlags::NONE;
 }
 // called when exiting
 void App::OnExit()
@@ -28,17 +28,17 @@ void App::OnExit()
 // used to add screens
 void App::AddScreens()
 {
-  m_mainMenuScreen = std::make_unique<MainMenuScreen>(&m_window);
-  m_gamePlayScreen = std::make_unique<GameplayScreen>(&m_window);
-  m_editorScreen   = std::make_unique<EditorScreen>(&m_window);
-  m_gameOverScreen = std::make_unique<GameOverScreen>(&m_window);
-  m_levelClearedScreen = std::make_unique<LevelClearedScreen>(&m_window);
-
-  m_screenList->AddScreen(m_mainMenuScreen.get());
-  m_screenList->AddScreen(m_gamePlayScreen.get());
-  m_screenList->AddScreen(m_editorScreen.get());
-  m_screenList->AddScreen(m_gameOverScreen.get());
-  m_screenList->AddScreen(m_levelClearedScreen.get());
+  m_mainMenuScreen = std::make_shared<MainMenuScreen>(&m_window);
+  m_gamePlayScreen = std::make_shared<GameplayScreen>(&m_window);
+  m_editorScreen   = std::make_shared<EditorScreen>(&m_window);
+  m_gameOverScreen = std::make_shared<GameOverScreen>(&m_window);
+  m_levelClearedScreen = std::make_shared<LevelClearedScreen>(&m_window);
 
   m_screenList->SetScreen(m_mainMenuScreen->GetScreenIndex());
+
+  m_screenList->AddScreen(std::move(m_mainMenuScreen));
+  m_screenList->AddScreen(std::move(m_gamePlayScreen));
+  m_screenList->AddScreen(std::move(m_editorScreen));
+  m_screenList->AddScreen(std::move(m_gameOverScreen));
+  m_screenList->AddScreen(std::move(m_levelClearedScreen));
 }

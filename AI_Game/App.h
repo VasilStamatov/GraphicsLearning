@@ -1,5 +1,4 @@
 #pragma once
-
 #include <GameEngine\IMainGame.h>
 
 #include "GameScreen.h"
@@ -19,5 +18,5 @@ public:
 
 private:
 		//unique pointer of all the screens
-		std::unique_ptr<GameScreen> m_gameScreen = nullptr;
+		std::shared_ptr<GameScreen> m_gameScreen = nullptr;
 };

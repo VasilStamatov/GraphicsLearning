@@ -58,7 +58,7 @@ namespace GameEngine
 
     ScreenState GetState() const noexcept { return m_currentState; }
 
-    /// Sets m_game to the parent game
+    // Sets m_game to the parent game
     void SetParentGame(IMainGame* _game) { m_game = _game; }
 
   protected:

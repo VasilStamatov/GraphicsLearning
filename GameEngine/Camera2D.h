@@ -17,6 +17,8 @@ namespace GameEngine
     //updates the camera matrix if needed
     void Update();
 
+				void Resize(int _screenWidth, int _screenHeight);
+
     //converts from screen space (0,0 topleft to SW,SH botright) to world space (0,0 in the middle and pos is relative to the cam)
     glm::vec2 ConvertScreenToWorld(glm::vec2 _screenCords);
 

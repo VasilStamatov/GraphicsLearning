@@ -23,11 +23,11 @@ public:
 
 private:
   //unique pointer of all the screens
-  std::unique_ptr<GameplayScreen> m_gamePlayScreen = nullptr;
-  std::unique_ptr<MainMenuScreen> m_mainMenuScreen = nullptr;
-  std::unique_ptr<EditorScreen> m_editorScreen = nullptr;
-  std::unique_ptr<GameOverScreen> m_gameOverScreen = nullptr;
-  std::unique_ptr<LevelClearedScreen> m_levelClearedScreen = nullptr;
+  std::shared_ptr<GameplayScreen> m_gamePlayScreen = nullptr;
+  std::shared_ptr<MainMenuScreen> m_mainMenuScreen = nullptr;
+  std::shared_ptr<EditorScreen> m_editorScreen = nullptr;
+  std::shared_ptr<GameOverScreen> m_gameOverScreen = nullptr;
+  std::shared_ptr<LevelClearedScreen> m_levelClearedScreen = nullptr;
 };
 
 #endif

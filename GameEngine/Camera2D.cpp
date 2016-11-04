@@ -38,6 +38,10 @@ namespace GameEngine
       m_needsMatrixUpdate = false;
     }
   }
+		void Camera2D::Resize(int _screenWidth, int _screenHeight)
+		{
+				Init(_screenWidth, _screenHeight);
+		}
   glm::vec2 Camera2D::ConvertScreenToWorld(glm::vec2 _screenCords)
   {
     //invert y direction

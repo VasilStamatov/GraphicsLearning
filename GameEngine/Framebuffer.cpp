@@ -12,10 +12,8 @@ namespace GameEngine
     Destroy();
   }
 
-  void Framebuffer::Init(int _screenWidth, int _screenHeight)
+  void Framebuffer::Init()
   {
-    m_screenWidth = _screenWidth;
-    m_screenHeight = _screenHeight;
     if (m_fboID == 0)
     {
       glGenFramebuffers(1, &m_fboID);
@@ -42,7 +40,7 @@ namespace GameEngine
     m_quad.Dispose();
   }
 
-  void Framebuffer::Bind(GLenum _target)
+  void Framebuffer::Bind(GLenum _target, int _bufferWidth, int _bufferHeight)
   {
     if (m_fboID != 0)
     {
@@ -50,17 +48,17 @@ namespace GameEngine
     }
   }
 
-  void Framebuffer::Unbind(GLenum _target)
+  void Framebuffer::Unbind(GLenum _target, int _bufferWidth, int _bufferHeight)
   {
     glBindFramebuffer(_target, 0);
   }
 
-  void Framebuffer::Blit(GLbitfield _mask, GLenum _filter)
+  void Framebuffer::Blit(GLbitfield _mask, GLenum _filter, int _bufferWidth, int _bufferHeight)
   {
-    glBlitFramebuffer(0, 0, m_screenWidth, m_screenHeight, 0, 0, m_screenWidth, m_screenHeight, _mask, _filter);
+    glBlitFramebuffer(0, 0, _bufferWidth, _bufferHeight, 0, 0, _bufferWidth, _bufferHeight, _mask, _filter);
   }
 
-  void Framebuffer::AttachTexture2D(GLboolean _depth, GLboolean _stencil, GLboolean _multisampled, GLint _samples)
+  void Framebuffer::AttachTexture2D(int _bufferWidth, int _bufferHeight, bool _depth, bool _stencil, bool _multisampled, int _samples/* = 4*/)
   {
     GLenum attachmentType;
     if (_depth && _stencil)
@@ -85,7 +83,7 @@ namespace GameEngine
     if (_multisampled)
     {
       glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_textureBuffer.id);
-      glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, _samples, attachmentType, m_screenWidth, m_screenHeight, GL_TRUE);
+      glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, _samples, attachmentType, _bufferWidth, _bufferHeight, GL_TRUE);
       glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_textureBuffer.id, 0);
     }
@@ -94,11 +92,11 @@ namespace GameEngine
       glBindTexture(GL_TEXTURE_2D, m_textureBuffer.id);
       if (attachmentType == GL_DEPTH24_STENCIL8)
       {
-        glTexImage2D(GL_TEXTURE_2D, 0, attachmentType, m_screenWidth, m_screenHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, attachmentType, _bufferWidth, _bufferHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
       }
       else
       {
-        glTexImage2D(GL_TEXTURE_2D, 0, attachmentType, m_screenWidth, m_screenHeight, 0, attachmentType, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, attachmentType, _bufferWidth, _bufferHeight, 0, attachmentType, GL_UNSIGNED_BYTE, nullptr);
       }
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -107,7 +105,7 @@ namespace GameEngine
     }
   }
 
-  void Framebuffer::AttachRenderbuffer(GLboolean _depth, GLboolean _stencil, GLboolean _multisampled, GLint _samples)
+  void Framebuffer::AttachRenderbuffer(int _bufferWidth, int _bufferHeight, bool _depth, bool _stencil, bool _multisampled, int _samples/* = 4*/)
   {
     GLenum attachmentType;
     if (_depth && _stencil)
@@ -132,11 +130,11 @@ namespace GameEngine
 
     if (_multisampled)
     {
-      glRenderbufferStorageMultisample(GL_RENDERBUFFER, _samples, attachmentType, m_screenWidth, m_screenHeight);
+      glRenderbufferStorageMultisample(GL_RENDERBUFFER, _samples, attachmentType, _bufferWidth, _bufferHeight);
     }
     else
     {
-      glRenderbufferStorage(GL_RENDERBUFFER, attachmentType, m_screenWidth, m_screenHeight);
+      glRenderbufferStorage(GL_RENDERBUFFER, attachmentType, _bufferWidth, _bufferHeight);
     }
 
     glBindRenderbuffer(GL_RENDERBUFFER, 0);

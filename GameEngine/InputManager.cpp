@@ -43,7 +43,7 @@ namespace GameEngine
     m_relativeMouseMotion.x = _xrel;
     m_relativeMouseMotion.y = _yrel;
   }
-  void InputManager::SetMouseWheel(float _xVal, float _yVal)
+  void InputManager::SetMouseWheel(int32_t _xVal, int32_t _yVal)
   {
     m_mouseWheel.x = _xVal;
     m_mouseWheel.y = _yVal;

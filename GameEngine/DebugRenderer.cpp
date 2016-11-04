@@ -64,10 +64,10 @@ void DebugRenderer::Init()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 		//enable the vertex attrib array on index 0
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, m_position));
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, DebugVertex::m_position));
 		//enable the vertex attrib array on index 1
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, m_color));
+		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, DebugVertex::m_color));
 		//unbind the vao
 		glBindVertexArray(0);
 }

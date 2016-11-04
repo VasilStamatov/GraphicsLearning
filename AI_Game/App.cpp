@@ -1,6 +1,6 @@
 #include "App.h"
-#include <GameEngine\ScreenList.h>
 
+#include <GameEngine\ScreenList.h>
 
 App::App()
 {
@@ -18,7 +18,7 @@ void App::OnInit()
 		m_gameName = "AI Game";
 		m_screenWidth = 1408;
 		m_screenHeight = 792;
-		m_currentFlags = 0;
+		m_windowFlags = GameEngine::WindowCreationFlags::RESIZABLE;
 }
 // called when exiting
 void App::OnExit()
@@ -28,9 +28,7 @@ void App::OnExit()
 // used to add screens
 void App::AddScreens()
 {
-		m_gameScreen = std::make_unique<GameScreen>(&m_window);
-
-		m_screenList->AddScreen(m_gameScreen.get());
-
+		m_gameScreen = std::make_shared<GameScreen>(&m_window);
 		m_screenList->SetScreen(m_gameScreen->GetScreenIndex());
+		m_screenList->AddScreen(std::move(m_gameScreen));
 }

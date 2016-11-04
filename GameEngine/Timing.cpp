@@ -128,4 +128,13 @@ namespace GameEngine
     float elapsedMilli = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(m_stop - m_start).count();
     return elapsedMilli / 1000.0f;
   }
+
+		float HRTimer::Milli() const
+		{
+				if (m_isActive)
+				{
+						return std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(HRTimePoint::clock::now() - m_start).count();
+				}
+				return std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(m_stop - m_start).count();
+		}
 }

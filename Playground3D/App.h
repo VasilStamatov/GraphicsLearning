@@ -18,6 +18,6 @@ public:
 
 private:
   //unique pointer of all the screens
-  std::unique_ptr<GameplayScreen> m_gamePlayScreen = nullptr;
+  std::shared_ptr<GameplayScreen> m_gamePlayScreen = nullptr;
 };
 
