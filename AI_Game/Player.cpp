@@ -3,8 +3,8 @@
 
 
 Player::Player(float _speed, float _health, const glm::vec2& _startPos, GameEngine::InputManager* _inputManager,
-		GameEngine::Camera2D* _camera, const GameEngine::GLTexture& _texture, GameEngine::ColorRGBA8& _color, std::weak_ptr<Grid> _grid) :
-		Agent(_speed, _health, _startPos, _texture, _color, _grid), m_inputManager(_inputManager), m_camera(_camera)
+		GameEngine::Camera2D* _camera, const GameEngine::GLTexture& _texture, GameEngine::ColorRGBA8& _color, std::weak_ptr<World> _world) :
+		Agent(_speed, _health, _startPos, _texture, _color, _world), m_inputManager(_inputManager), m_camera(_camera)
 {
 }
 
@@ -20,7 +20,7 @@ Player::~Player()
 }
 
 void Player::Init(float _speed, float _health, const glm::vec2 & _startPos, GameEngine::InputManager * _inputManager,
-		GameEngine::Camera2D * _camera, const GameEngine::GLTexture& _texture, GameEngine::ColorRGBA8& _color, std::weak_ptr<Grid> _grid)
+		GameEngine::Camera2D * _camera, const GameEngine::GLTexture& _texture, GameEngine::ColorRGBA8& _color, std::weak_ptr<World> _world)
 {
 		m_movementSpeed = _speed;
 		m_health = _health;
@@ -29,7 +29,7 @@ void Player::Init(float _speed, float _health, const glm::vec2 & _startPos, Game
 		m_camera = _camera;
 		m_texture = _texture;
 		m_color = _color;
-		m_grid = _grid;
+		m_world = _world;
 }
 
 void Player::Update(float _deltaTime)

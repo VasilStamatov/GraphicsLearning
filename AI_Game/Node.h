@@ -20,8 +20,8 @@ enum class Diagonal : size_t
 struct Node
 {
 		Node() {}
-		Node(const glm::vec2& _worldPos, const glm::ivec2& _index,  bool _walkable) :
-				worldPos(_worldPos), nodeIndex(_index) , walkable(_walkable), inOpenSet(false), inClosedSet(false) {}
+		Node(const glm::vec2& _worldPos, const glm::ivec2& _index, bool _walkable) :
+				worldPos(_worldPos), nodeIndex(_index), walkable(_walkable), inOpenSet(false), inClosedSet(false) {}
 		~Node() { }
 
 		bool operator== (Node& _rhs)
@@ -88,7 +88,7 @@ struct Node
 		//return true if lhs has higher priority than rhs
 		bool operator> (Node* _rhs)
 		{
-				if (f() == _rhs->f())
+				if (this->f() == _rhs->f())
 				{
 						return !(h > _rhs->h);
 				}
@@ -101,6 +101,7 @@ struct Node
 		glm::vec2 worldPos{ 0.0f, 0.0f }; ///< world coordinate (center of node)
 		glm::ivec2 nodeIndex{ -1 }; ///< the index of the node in the nodemap vector for the grid
 
+		int terrainCost{ 0 };
 		int g{ 0 }; ///< distance from start to current node
 		int h{ 0 }; ///< distance from end to current node
 		int f() { return g + h; }; ///< g + h
@@ -114,9 +115,10 @@ struct Node
 		GameEngine::ColorRGBA8 color;
 };
 
+//Comparator for priority queues
 struct ComparePriority
 {
-		bool operator()(Node & _lhs, Node & _rhs)
+		bool operator()( Node & _lhs,  Node & _rhs) const noexcept
 		{
 				// return "true" if "_lhs" is ordered before "_rhs" (_lhs has less priority)
 				if (_lhs.f() == _rhs.f())
@@ -129,7 +131,7 @@ struct ComparePriority
 				}
 		}
 
-		bool operator()(std::weak_ptr<Node> _lhs, std::weak_ptr<Node> _rhs)
+		bool operator()( std::weak_ptr<Node> _lhs,  std::weak_ptr<Node> _rhs) const noexcept
 		{
 				// return "true" if "_lhs" is ordered before "_rhs" (_lhs has less priority)
 				if (_lhs.lock()->f() == _rhs.lock()->f())
@@ -142,7 +144,7 @@ struct ComparePriority
 				}
 		}
 
-		bool operator()(Node * _lhs, Node * _rhs)
+		bool operator()(Node * _lhs, Node * _rhs) const noexcept
 		{
 				// return "true" if "_lhs" is ordered before "_rhs" (_lhs has less priority)
 				if (_lhs->f() == _rhs->f())
@@ -153,5 +155,33 @@ struct ComparePriority
 				{
 						return (_lhs->f() > _rhs->f());
 				}
+		}
+};
+
+// custom hash can be a standalone function object:
+// http://en.cppreference.com/w/cpp/utility/hash
+struct NodeHasher
+{
+		std::size_t operator()(Node const& _node) const noexcept
+		{
+				//hash the world pos and node index (both are different for every node)
+				std::size_t hash0 = std::hash<int>{}(_node.nodeIndex.x);
+				std::size_t hash1 = std::hash<int>{}(_node.nodeIndex.y);
+
+				std::size_t hash2 = std::hash<float>{}(_node.worldPos.x);
+				std::size_t hash3 = std::hash<float>{}(_node.worldPos.y);
+
+				return (hash0 ^ hash1) ^ ((hash2 ^ hash3) << 1); // or use boost::hash_combine
+		}
+		std::size_t operator()(std::weak_ptr<Node> _node) const noexcept
+		{
+				//hash the world pos and node index (both are different for every node)
+				std::size_t hash0 = std::hash<int>{}(_node.lock()->nodeIndex.x);
+				std::size_t hash1 = std::hash<int>{}(_node.lock()->nodeIndex.y);
+
+				std::size_t hash2 = std::hash<float>{}(_node.lock()->worldPos.x);
+				std::size_t hash3 = std::hash<float>{}(_node.lock()->worldPos.y);
+
+				return (hash0 ^ hash1) ^ ((hash2 ^ hash3) << 1); // or use boost::hash_combine		}
 		}
 };

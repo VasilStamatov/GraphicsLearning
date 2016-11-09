@@ -9,11 +9,11 @@ class Player : public Agent
 public:
 		Player();
 		Player(float _speed, float _health, const glm::vec2& _startPos, GameEngine::InputManager* _inputManager,
-				GameEngine::Camera2D* _camera, const GameEngine::GLTexture& _texture, GameEngine::ColorRGBA8& _color, std::weak_ptr<Grid> _grid);
+				GameEngine::Camera2D* _camera, const GameEngine::GLTexture& _texture, GameEngine::ColorRGBA8& _color, std::weak_ptr<World> _world);
 		~Player();
 
 		void Init(float _speed, float _health, const glm::vec2& _startPos, GameEngine::InputManager* _inputManager,
-				GameEngine::Camera2D* _camera, const GameEngine::GLTexture& _texture, GameEngine::ColorRGBA8& _color, std::weak_ptr<Grid> _grid);
+				GameEngine::Camera2D* _camera, const GameEngine::GLTexture& _texture, GameEngine::ColorRGBA8& _color, std::weak_ptr<World> _world);
 
 		virtual void Update(float _deltaTime) override;
 

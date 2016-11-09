@@ -1,5 +1,4 @@
 #include "Agent.h"
-
 #include <algorithm>
 
 Agent::Agent()
@@ -7,8 +6,8 @@ Agent::Agent()
 }
 
 Agent::Agent(float _speed, float _health, const glm::vec2 & _startPos,
-		const GameEngine::GLTexture & _texture, GameEngine::ColorRGBA8 & _color, std::weak_ptr<Grid> _grid) :
-		m_movementSpeed(_speed), m_health(_health), m_worldPos(_startPos), m_texture(_texture), m_color(_color), m_grid(_grid)
+		const GameEngine::GLTexture & _texture, GameEngine::ColorRGBA8 & _color, std::weak_ptr<World> _world) :
+		m_movementSpeed(_speed), m_health(_health), m_worldPos(_startPos), m_texture(_texture), m_color(_color), m_world(_world)
 {
 }
 
@@ -74,13 +73,8 @@ bool Agent::CollideWithAgent(Agent* _agent)
 		// Minimum distance before there is a collision
 		constexpr float MIN_DISTANCE = AGENT_RADIUS * 2.0f;
 
-		// Center position of this agent
-		glm::vec2 centerPosA = m_worldPos + glm::vec2(AGENT_RADIUS);
-		// Center position of the parameter agent
-		glm::vec2 centerPosB = _agent->GetPosition() + glm::vec2(AGENT_RADIUS);
-
-		// direction vector between the two agents
-		glm::vec2 direction = centerPosA - centerPosB;
+		// direction vector between the two agents (center of this agent minus center of other agent)
+		glm::vec2 direction = GetCenterPos() - _agent->GetCenterPos();
 
 		// Length of the direction vector
 		float distance = glm::length(direction);
@@ -111,7 +105,7 @@ void Agent::ApplyDamage(float _damage)
 void Agent::CheckTilePosition(std::vector<glm::vec2>& _collideTilePositions, float _x, float _y)
 {
 		//Get the node/tile at this agent's world pos
-		std::weak_ptr<Node> node = m_grid.lock()->GetNodeAt(glm::vec2(_x, _y));
+		std::weak_ptr<Node> node = m_world.lock()->GetWorldGrid().lock()->GetNodeAt(glm::vec2(_x, _y));
 		//if this is not a walkable tile, then collide with it
 		if (!node.lock()->walkable)
 		{

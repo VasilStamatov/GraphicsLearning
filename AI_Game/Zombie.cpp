@@ -1,33 +1,33 @@
 #include "Zombie.h"
-#include "AStar.h"
 Zombie::Zombie()
 {
 }
 
 Zombie::Zombie(float _speed, float _health, const glm::vec2 & _startPos, const GameEngine::GLTexture & _texture,
-		GameEngine::ColorRGBA8 & _color, std::weak_ptr<Grid> _grid) :
-		Agent(_speed, _health, _startPos, _texture, _color, _grid)
+		GameEngine::ColorRGBA8 & _color, std::weak_ptr<World> _world, std::weak_ptr<Player> _player, std::weak_ptr<PathRequestManager> _prManager) :
+		Agent(_speed, _health, _startPos, _texture, _color, _world), m_player(_player), m_prManager(_prManager)
 {
-	 m_finishedPath = true;
-		m_pathFinder = std::make_unique<AStar>(m_grid);
+		m_finishedPath = true;
 }
 
 
 Zombie::~Zombie()
 {
+		m_pathToTake.clear();
 }
 
 void Zombie::Init(float _speed, float _health, const glm::vec2 & _startPos, const GameEngine::GLTexture & _texture,
-		GameEngine::ColorRGBA8 & _color, std::weak_ptr<Grid> _grid)
+		GameEngine::ColorRGBA8 & _color, std::weak_ptr<World> _world, std::weak_ptr<Player> _player, std::weak_ptr<PathRequestManager> _prManager)
 {
 		m_movementSpeed = _speed;
 		m_health = _health;
 		m_worldPos = _startPos;
 		m_texture = _texture;
 		m_color = _color;
-		m_grid = _grid;
+		m_world = _world;
 		m_finishedPath = true;
-		m_pathFinder = std::make_unique<AStar>(m_grid);
+		m_prManager = _prManager;
+		m_player = _player;
 }
 
 void Zombie::Update(float _deltaTime)
@@ -36,23 +36,38 @@ void Zombie::Update(float _deltaTime)
 		{
 				FollowPath(_deltaTime);
 		}
+		else
+		{
+				if (!m_requestedPath)
+				{
+						FindPlayer();
+				}
+		}
 
 		// Do collision
 		CollideWithLevel();
 }
 
-void Zombie::FindPlayer(const glm::vec2& _playerPos)
+void Zombie::FindPlayer()
 {
-		m_pathToTake = m_pathFinder->FindPath(GetCenterPos(), _playerPos);
-		m_finishedPath = false;
-		m_waypointIndex = 0;
+		m_prManager.lock()->RequestPath(GetCenterPos(), m_player.lock()->GetCenterPos(), Algorithm::BEST_FIRST, [this](std::vector<glm::vec2>& _path, bool _success)
+		{
+				if (_success)
+				{
+						m_pathToTake = _path;
+						m_finishedPath = false;
+						m_requestedPath = false;
+						m_waypointIndex = 0;
+				}
+		});
+		m_requestedPath = true;
 }
 
 void Zombie::FollowPath(float _deltaTime)
 {
 		glm::vec2 currentWaypoint = m_pathToTake.at(m_waypointIndex);
 
-		if (m_grid.lock()->GetNodeAt(m_worldPos).lock() == m_grid.lock()->GetNodeAt(m_pathToTake.at(m_waypointIndex)).lock())
+		if (m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_worldPos).lock() == m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.at(m_waypointIndex)).lock())
 		{
 				if (++m_waypointIndex >= m_pathToTake.size())
 				{

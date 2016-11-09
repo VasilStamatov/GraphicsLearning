@@ -84,6 +84,18 @@ public:
 		* \param _walkable - the flag whether to set it to walkable or not
 		*/
 		void SetWalkableAt(const glm::ivec2& _index, bool _walkable);
+		
+		/** \brief Sets the terrain cost of node at set world coordinate to _cost
+		* \param _worldPos - the world coordinate of the node
+		* \param _cost - the terrain cost
+		*/
+		void SetTerrainCost(const glm::vec2& _worldPos, int _cost);
+
+		/** \brief Sets the terrain cost of node at set index to _cost
+		* \param _index - the index of the node in the vector
+		* \param _cost - the terrain cost
+		*/
+		void SetTerrainCost(const glm::ivec2& _index, int _cost);
 
 		/** \brief Gets all the available neighbors of the certain node
 		* \param _node - pointer to the node to be checked

@@ -40,37 +40,41 @@ void GameScreen::OnEntry()
 		/* Initialize the spritebatch */
 		m_spriteBatch.Init();
 
-		/* Initialize the first level */
-		m_levels.push_back(std::make_unique<Level>("Levels/level1.txt"));
-		m_currentLevel = 0;
-
 		/* Initialize the shaders */
 		m_shader.CompileShaders("Shaders/textureShading.vert", "Shaders/textureShading.frag");
 
+		/* Initialize the first level */
+		m_gameWorlds.push_back(std::make_shared<World>());
+		m_gameWorlds.back()->LoadTerrainFromFile("Levels/level1.txt");
+		m_currentLevel = 0;
+		m_pathRequestManger = std::make_shared<PathRequestManager>(m_gameWorlds.at(m_currentLevel)->GetWorldGrid());
+		
 		/* Initialize the player */
-		m_player = std::make_shared<Player>(3.0f, 100.0f, m_levels.at(m_currentLevel)->GetStartPlayerPos(),
+		m_player = std::make_shared<Player>(3.0f, 100.0f, m_gameWorlds.at(m_currentLevel)->GetStartPlayerPos(),
 				&m_game->inputManager, &m_camera, GameEngine::ResourceManager::GetTexture("Textures/player.png"),
-				GameEngine::ColorRGBA8(255, 255), m_levels.at(m_currentLevel)->GetLevelGrid());
+				GameEngine::ColorRGBA8(255, 255), m_gameWorlds.at(m_currentLevel));
 		// Add the zombies
-		const std::vector<glm::vec2>& zombiePositions = m_levels[m_currentLevel]->GetZombieStartPositions();
+		const std::vector<glm::vec2>& zombiePositions = m_gameWorlds.at(m_currentLevel)->GetZombieStartPositions();
 		for (size_t i = 0; i < zombiePositions.size(); i++)
 		{
 				m_zombies.push_back(std::make_unique<Zombie>(4.5f, 150.0f, zombiePositions.at(i), GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
-						GameEngine::ColorRGBA8(255, 255), m_levels.at(m_currentLevel)->GetLevelGrid()));
+						GameEngine::ColorRGBA8(255, 255), m_gameWorlds.at(m_currentLevel), m_player, m_pathRequestManger));
 		}
-		for (size_t i = 0; i < m_zombies.size(); i++)
+		/*for (size_t i = 0; i < m_zombies.size(); i++)
 		{
 				m_timer.Start();
-				m_zombies.at(i)->FindPlayer(m_player->GetCenterPos());
+				m_zombies.at(i)->FindPlayer();
 				m_timer.Stop();
 				std::cout << "Elapsed milli: " << m_timer.Seconds() * 1000 << std::endl;
-		}
-		pathFinder = std::make_unique<AStar>(m_levels.at(0)->GetLevelGrid());
+		}*/
 }
 
 void GameScreen::OnExit()
 {
+		m_shader.Dispose();
 		m_spriteBatch.Dispose();
+		m_zombies.clear();
+		m_gameWorlds.clear();
 }
 
 void GameScreen::Update()
@@ -81,11 +85,21 @@ void GameScreen::Update()
 				m_window->ResizeHandled();
 		}
 		CheckInput();
-		end = m_camera.ConvertScreenToWorld(m_game->inputManager.GetMouseCoords());
 		m_player->Update(m_game->GetDT());
+		m_pathRequestManger->Update();
 		for (size_t i = 0; i < m_zombies.size(); i++)
 		{
 				m_zombies.at(i)->Update(m_game->GetDT());
+				//collide with all other zombies
+				for (size_t j = i + 1; j < m_zombies.size(); j++)
+				{
+						m_zombies.at(i)->CollideWithAgent(m_zombies.at(j).get());
+				}
+				//collide with player
+				if (m_zombies.at(i)->CollideWithAgent(m_player.get()))
+				{
+						//handle collision
+				}
 		}
 		m_camera.SetPosition(m_player->GetCenterPos());
 		m_camera.Update();
@@ -100,18 +114,11 @@ void GameScreen::Draw()
 		// Clear the color and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//m_levels.at(m_currentLevel)->GetLevelGrid()->DrawDebug(m_camera.GetCameraMatrix());
-		/*if (findPath)
-		{
-				m_timer.Start();
-				std::vector<glm::vec2> path = pathFinder->FindPath(start, end);
-				m_timer.Stop();
-				std::cout << "Elapsed milli: " << m_timer.Seconds() * 1000 << std::endl;
-				m_levels.at(m_currentLevel)->GetLevelGrid()->DrawPath(path, m_camera.GetCameraMatrix());
-		}*/
+		//m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->DrawGrid(m_camera.GetCameraMatrix());
+		
 		for (size_t i = 0; i < m_zombies.size(); i++)
 		{
-				m_levels.at(m_currentLevel)->GetLevelGrid().lock()->DrawPath(m_zombies.at(i)->GetPath(), m_camera.GetCameraMatrix());
+				m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->DrawPath(m_zombies.at(i)->GetPath(), m_camera.GetCameraMatrix());
 		}
 		m_shader.Use();
 
@@ -136,7 +143,7 @@ void GameScreen::Draw()
 		m_spriteBatch.RenderBatch();
 
 		// Draw the level
-		m_levels[m_currentLevel]->Draw();
+		m_gameWorlds.at(m_currentLevel)->Draw();
 
 		m_shader.UnUse();
 }
@@ -168,18 +175,16 @@ void GameScreen::CheckInput()
 		if (m_game->inputManager.IsKeyDown(SDLK_d))
 		{
 				m_camera.OffsetPosition(glm::vec2(m_game->GetDT() * 5.0f, 0.0f));
-		}
-		if (m_game->inputManager.IsKeyPressed(SDL_BUTTON_LEFT))
+		}*/
+		/*if (m_game->inputManager.IsKeyPressed(SDL_BUTTON_LEFT))
 		{
 				glm::ivec2 screenCoords;
 				SDL_GetMouseState(&screenCoords.x, &screenCoords.y);
 				glm::vec2 worldCoords = m_camera.ConvertScreenToWorld(screenCoords);
-				start = worldCoords;
-				Node* node = m_levels[m_currentLevel]->GetLevelGrid()->GetNodeAt(worldCoords);
+				std::weak_ptr<Node> node = m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->GetNodeAt(worldCoords);
 				std::cout << "Clicked node info: " << std::endl;
-				node->color = GameEngine::ColorRGBA8(0, 0, 255, 255);
-				m_camera.SetPosition(node->worldPos);
-				if (node->walkable)
+				node.lock()->color = GameEngine::ColorRGBA8(0, 0, 255, 255);
+				if (node.lock()->walkable)
 				{
 						std::cout << "\twalkable: " << "true" << std::endl;
 				}
@@ -187,22 +192,22 @@ void GameScreen::CheckInput()
 				{
 						std::cout << "\twalkable: " << "false" << std::endl;
 				}
-				std::cout << "\tcoordinate x: " << node->worldPos.x << std::endl;
-				std::cout << "\tcoordinate y: " << node->worldPos.y << std::endl;
-				std::cout << "\tindex x: " << node->nodeIndex.x << std::endl;
-				std::cout << "\tindex y: " << node->nodeIndex.y << std::endl;
+				std::cout << "\tcoordinate x: " << node.lock()->worldPos.x << std::endl;
+				std::cout << "\tcoordinate y: " << node.lock()->worldPos.y << std::endl;
+				std::cout << "\tindex x: " << node.lock()->nodeIndex.x << std::endl;
+				std::cout << "\tindex y: " << node.lock()->nodeIndex.y << std::endl;
 				std::cout << "\tworld coordinate x: " << worldCoords.x << std::endl;
 				std::cout << "\tworld coordinate y: " << worldCoords.y << std::endl;
 		}*/
-		if (m_game->inputManager.IsKeyPressed(SDLK_SPACE))
-		{
-				//findPath = !findPath;
-				for (size_t i = 0; i < m_zombies.size(); i++)
-				{
-						m_timer.Start();
-						m_zombies.at(i)->FindPlayer(m_player->GetCenterPos());
-						m_timer.Stop();
-						std::cout << "Elapsed milli: " << m_timer.Seconds() * 1000 << std::endl;
-				}
-		}
+		//if (m_game->inputManager.IsKeyPressed(SDLK_SPACE))
+		//{
+		//		//findPath = !findPath;
+		//		for (size_t i = 0; i < m_zombies.size(); i++)
+		//		{
+		//				m_timer.Start();
+		//				m_zombies.at(i)->FindPlayer();
+		//				m_timer.Stop();
+		//				std::cout << "Elapsed milli: " << m_timer.Seconds() * 1000 << std::endl;
+		//		}
+		//}
 }

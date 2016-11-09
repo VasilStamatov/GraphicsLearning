@@ -5,10 +5,10 @@
 #include <GameEngine\Camera2D.h>
 #include <GameEngine\GLSLProgram.h>
 #include <GameEngine\Timing.h>
-#include "Level.h"
-#include "AStar.h"
+#include "World.h"
 #include "Player.h"
 #include "Zombie.h"
+#include "PathRequestManager.h"
 // Our custom gameplay screen that inherits from the IGameScreen
 class GameScreen : public GameEngine::IGameScreen
 {
@@ -34,10 +34,7 @@ public:
 private:
 		void CheckInput();
 
-		glm::vec2 start{ 0.f, 0.f };
-		glm::vec2 end{ 0.0f, 0.0f };
-		std::unique_ptr<PathFinder> pathFinder = nullptr;
-		bool findPath{ false };
+		std::shared_ptr<PathRequestManager> m_pathRequestManger;
 		//Pointer to the window this screen belongs to
 		GameEngine::Window* m_window{ nullptr };
 
@@ -57,6 +54,6 @@ private:
 		GameEngine::HRTimer m_timer;
 
 		//vector of all levels
-		std::vector<std::unique_ptr<Level>> m_levels;
+		std::vector<std::shared_ptr<World>> m_gameWorlds;
 		int m_currentLevel{ -1 };
 };

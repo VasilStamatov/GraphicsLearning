@@ -127,27 +127,28 @@
   <ItemGroup>
     <ClInclude Include="Agent.h" />
     <ClInclude Include="App.h" />
-    <ClInclude Include="AStar.h" />
     <ClInclude Include="GameScreen.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Heap.h" />
-    <ClInclude Include="Level.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="PathFinder.h" />
+    <ClInclude Include="PathRequestManager.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="ScreenIndices.h" />
+    <ClInclude Include="Terrain.h" />
+    <ClInclude Include="World.h" />
     <ClInclude Include="Zombie.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="AStar.cpp" />
     <ClCompile Include="GameScreen.cpp" />
     <ClCompile Include="Grid.cpp" />
-    <ClCompile Include="Level.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PathFinder.cpp" />
+    <ClCompile Include="PathRequestManager.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="World.cpp" />
     <ClCompile Include="Zombie.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

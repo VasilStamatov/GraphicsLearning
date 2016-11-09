@@ -1,13 +1,15 @@
-﻿  Skipping... (no relevant changes detected)
-  Zombie.cpp
-  PathFinder.cpp
-  Main.cpp
-  GameScreen.cpp
-  App.cpp
-  AStar.cpp
-GameEngine.lib(stb_image_aug.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'GameEngine.lib(stb_image_aug.obj)' or at 'C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\vc120.pdb'; linking object as if no debug info
-GameEngine.lib(SOIL.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'GameEngine.lib(SOIL.obj)' or at 'C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\vc120.pdb'; linking object as if no debug info
-GameEngine.lib(image_helper.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'GameEngine.lib(image_helper.obj)' or at 'C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\vc120.pdb'; linking object as if no debug info
-GameEngine.lib(image_DXT.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'GameEngine.lib(image_DXT.obj)' or at 'C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\vc120.pdb'; linking object as if no debug info
+﻿  PathFinder.cpp
+c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec4.hpp(42): warning C4201: nonstandard extension used: nameless struct/union
+  c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec4.hpp(269): note: see reference to class template instantiation 'glm::tvec4<T,P>' being compiled
+c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec4.hpp(43): warning C4201: nonstandard extension used: nameless struct/union
+c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec4.hpp(44): warning C4201: nonstandard extension used: nameless struct/union
+c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec2.hpp(42): warning C4201: nonstandard extension used: nameless struct/union
+  c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec2.hpp(203): note: see reference to class template instantiation 'glm::tvec2<T,P>' being compiled
+c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec2.hpp(43): warning C4201: nonstandard extension used: nameless struct/union
+c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec2.hpp(44): warning C4201: nonstandard extension used: nameless struct/union
+c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec3.hpp(42): warning C4201: nonstandard extension used: nameless struct/union
+  c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec3.hpp(224): note: see reference to class template instantiation 'glm::tvec3<T,P>' being compiled
+c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec3.hpp(43): warning C4201: nonstandard extension used: nameless struct/union
+c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec3.hpp(44): warning C4201: nonstandard extension used: nameless struct/union
   AI_Game.vcxproj -> C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\AI_Game.exe
   AI_Game.vcxproj -> C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\AI_Game.pdb (Partial PDB)

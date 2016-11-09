@@ -7,6 +7,7 @@ Grid::Grid()
 
 Grid::~Grid()
 {
+		m_nodeMap.clear();
 }
 
 Grid::Grid(const glm::vec2& _gridWorldSize, float _nodeDiameter, std::vector<bool>& _walkableMatrix) :
@@ -108,12 +109,20 @@ void Grid::SetWalkableAt(const glm::ivec2 & _index, bool _walkable)
 {
 		GetNodeAt(_index).lock()->walkable = _walkable;
 }
+void Grid::SetTerrainCost(const glm::vec2 & _worldPos, int _cost)
+{
+		GetNodeAt(_worldPos).lock()->terrainCost = _cost;
+}
+void Grid::SetTerrainCost(const glm::ivec2 & _index, int _cost)
+{
+		GetNodeAt(_index).lock()->terrainCost = _cost;
+}
 std::vector<std::weak_ptr<Node>> Grid::GetNeighbors(std::weak_ptr<Node> _node, const Diagonal & _diagonal)
 {
 		/**
 		* Get the neighbors of the given node.
 		*
-		*     offsets      diagonalOffsets:
+		*     sides											diagonals:
 		*  +---+---+---+    +---+---+---+
 		*  |   | 0 |   |    | 0 |   | 1 |
 		*  +---+---+---+    +---+---+---+
@@ -121,10 +130,6 @@ std::vector<std::weak_ptr<Node>> Grid::GetNeighbors(std::weak_ptr<Node> _node, c
 		*  +---+---+---+    +---+---+---+
 		*  |   | 2 |   |    | 3 |   | 2 |
 		*  +---+---+---+    +---+---+---+
-		*
-		*  When allowDiagonal is true, if offsets[i] is valid, then
-		*  diagonalOffsets[i] and
-		*  diagonalOffsets[(i + 1) % 4] is valid.
 		*/
 		std::vector<std::weak_ptr<Node>> neighbors;
 		bool side0 = false;
@@ -326,10 +331,12 @@ void Grid::CreateGrid(std::vector<bool>& _walkableMatrix)
 }
 void Grid::CreateGrid()
 {
-		m_nodeMap.reserve(m_numXNodes * m_numYNodes);
+		size_t nodeMapSize = m_numXNodes * m_numYNodes;
+		m_nodeMap.reserve(nodeMapSize);
+
 		glm::vec2 worldBottomLeft{ 0.0f, 0.0f };
 
-		for (size_t i = 0; i < m_nodeMap.size(); i++)
+		for (size_t i = 0; i < nodeMapSize; i++)
 		{
 				int x = i % m_numXNodes;
 				int y = i / m_numXNodes;

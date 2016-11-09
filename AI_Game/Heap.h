@@ -67,6 +67,11 @@ public:
 				m_container.erase(std::remove(m_container.begin(), m_container.end(), _item), m_container.end());
 		}
 
+		void Clear()
+		{
+				m_container.clear();
+		}
+
 		/** \brief heapifies the container (needed if some internal values/priorities have changed) */
 		void UpdateHeap()
 		{
