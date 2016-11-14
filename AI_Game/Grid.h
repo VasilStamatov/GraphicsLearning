@@ -8,6 +8,7 @@
 class Grid
 {
 public:
+		Grid(const Grid& _obj);
 		Grid();
 		~Grid();
 
@@ -103,6 +104,9 @@ public:
 		* \return std::vector<Node*> - a vector of all available neighbors
 		*/
 		std::vector<std::weak_ptr<Node>> GetNeighbors(std::weak_ptr<Node> _node, const Diagonal& _diagonal);
+		std::vector<Node> GetNeighbors(const Node& _node, const Diagonal& _diagonal);
+
+		std::vector<std::shared_ptr<Node>> GetNodemap() const noexcept { return m_nodeMap; }
 
 		/** \brief Render the outlines of the nodes as rectangles for debugging
 		* \param _projection - the projection matrix to be used in the shader

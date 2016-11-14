@@ -91,15 +91,15 @@ void GameScreen::Update()
 		{
 				m_zombies.at(i)->Update(m_game->GetDT());
 				//collide with all other zombies
-				for (size_t j = i + 1; j < m_zombies.size(); j++)
+				/*for (size_t j = i + 1; j < m_zombies.size(); j++)
 				{
 						m_zombies.at(i)->CollideWithAgent(m_zombies.at(j).get());
-				}
+				}*/
 				//collide with player
-				if (m_zombies.at(i)->CollideWithAgent(m_player.get()))
-				{
-						//handle collision
-				}
+				//if (m_zombies.at(i)->CollideWithAgent(m_player.get()))
+				//{
+				//		//handle collision
+				//}
 		}
 		m_camera.SetPosition(m_player->GetCenterPos());
 		m_camera.Update();

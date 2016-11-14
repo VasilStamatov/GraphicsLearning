@@ -1,5 +1,14 @@
 #include "Grid.h"
 
+Grid::Grid(const Grid & _obj)
+{
+		m_nodeMap							=	_obj.m_nodeMap;
+		m_gridWorldSize = _obj.m_gridWorldSize; 
+		m_nodeDiameter  = _obj.m_nodeDiameter;
+		m_numXNodes					= _obj.m_numXNodes;
+		m_numYNodes					= _obj.m_numYNodes;
+}
+
 Grid::Grid()
 {
 }
@@ -225,6 +234,127 @@ std::vector<std::weak_ptr<Node>> Grid::GetNeighbors(std::weak_ptr<Node> _node, c
 		if (diagonal3 && IsWalkableAt(glm::ivec2(_node.lock()->nodeIndex.x - 1, _node.lock()->nodeIndex.y - 1)))
 		{
 				neighbors.push_back(GetNodeAt(glm::ivec2(_node.lock()->nodeIndex.x - 1, _node.lock()->nodeIndex.y - 1)));
+		}
+
+		return neighbors;
+}
+
+std::vector<Node> Grid::GetNeighbors(const Node & _node, const Diagonal & _diagonal)
+{
+		/**
+		* Get the neighbors of the given node.
+		*
+		*     sides											diagonals:
+		*  +---+---+---+    +---+---+---+
+		*  |   | 0 |   |    | 0 |   | 1 |
+		*  +---+---+---+    +---+---+---+
+		*  | 3 |   | 1 |    |   |   |   |
+		*  +---+---+---+    +---+---+---+
+		*  |   | 2 |   |    | 3 |   | 2 |
+		*  +---+---+---+    +---+---+---+
+		*/
+		std::vector<Node> neighbors;
+		bool side0 = false;
+		bool side1 = false;
+		bool side2 = false;
+		bool side3 = false;
+
+		bool diagonal0 = false;
+		bool diagonal1 = false;
+		bool diagonal2 = false;
+		bool diagonal3 = false;
+
+		//check if the node above is walkable
+		if (IsWalkableAt(glm::ivec2(_node.nodeIndex.x, _node.nodeIndex.y + 1)))
+		{
+				//if the node ^above^ is walkable then push it to the neighbors
+				Node neighbor = *GetNodeAt(glm::ivec2(_node.nodeIndex.x, _node.nodeIndex.y + 1)).lock();
+				neighbors.push_back(neighbor);
+				side0 = true;
+		}
+		if (IsWalkableAt(glm::ivec2(_node.nodeIndex.x + 1, _node.nodeIndex.y)))
+		{
+				//if the node >To the right> is walkable then push it to the neighbors
+				Node neighbor = *GetNodeAt(glm::ivec2(_node.nodeIndex.x + 1, _node.nodeIndex.y)).lock();
+				neighbors.push_back(neighbor);
+				side1 = true;
+		}
+		if (IsWalkableAt(glm::ivec2(_node.nodeIndex.x, _node.nodeIndex.y - 1)))
+		{
+				//if the node \/below\/ is walkable then push it to the neighbors
+				Node neighbor = *GetNodeAt(glm::ivec2(_node.nodeIndex.x, _node.nodeIndex.y - 1)).lock();
+				neighbors.push_back(neighbor);
+				side2 = true;
+		}
+		if (IsWalkableAt(glm::ivec2(_node.nodeIndex.x - 1, _node.nodeIndex.y)))
+		{
+				//if the node <to the left< is walkable then push it to the neighbors
+				Node neighbor = *GetNodeAt(glm::ivec2(_node.nodeIndex.x - 1, _node.nodeIndex.y)).lock();
+				neighbors.push_back(neighbor);
+				side3 = true;
+		}
+
+		//Check the diagonal movement state
+		switch (_diagonal)
+		{
+		case Diagonal::ALWAYS:
+		{
+				//always allow diagonals
+				diagonal0 = true;
+				diagonal1 = true;
+				diagonal2 = true;
+				diagonal3 = true;
+				break;
+		}
+		case Diagonal::NEVER:
+		{
+				//if it is just return the current walkable neighbors
+				return neighbors;
+		}
+		case Diagonal::IFNOWALLS:
+		{
+				//diagonals are available if the 2 tiles adjacent to it are walkable
+				diagonal0 = side0 && side3;
+				diagonal1 = side0 && side1;
+				diagonal2 = side1 && side2;
+				diagonal3 = side2 && side3;
+				break;
+		}
+		case Diagonal::IFLESSTHANTWOWALLS:
+		{
+				//diagonals are available if at least 1 of the 2 adjacent tiles are free
+				diagonal0 = side0 || side3;
+				diagonal1 = side0 || side1;
+				diagonal2 = side1 || side2;
+				diagonal3 = side2 || side3;
+				break;
+		}
+		default:
+				//error
+				break;
+		}
+
+		//add all the walkable diagonals
+
+		if (diagonal0 && IsWalkableAt(glm::ivec2(_node.nodeIndex.x - 1, _node.nodeIndex.y + 1)))
+		{
+				Node neighbor = *GetNodeAt(glm::ivec2(_node.nodeIndex.x - 1, _node.nodeIndex.y + 1)).lock();
+				neighbors.push_back(neighbor);
+		}
+		if (diagonal1 && IsWalkableAt(glm::ivec2(_node.nodeIndex.x + 1, _node.nodeIndex.y + 1)))
+		{
+				Node neighbor = *GetNodeAt(glm::ivec2(_node.nodeIndex.x + 1, _node.nodeIndex.y + 1)).lock();
+				neighbors.push_back(neighbor);
+		}
+		if (diagonal2 && IsWalkableAt(glm::ivec2(_node.nodeIndex.x + 1, _node.nodeIndex.y - 1)))
+		{
+				Node neighbor = *GetNodeAt(glm::ivec2(_node.nodeIndex.x + 1, _node.nodeIndex.y - 1)).lock();
+				neighbors.push_back(neighbor);
+		}
+		if (diagonal3 && IsWalkableAt(glm::ivec2(_node.nodeIndex.x - 1, _node.nodeIndex.y - 1)))
+		{
+				Node neighbor = *GetNodeAt(glm::ivec2(_node.nodeIndex.x - 1, _node.nodeIndex.y - 1)).lock();
+				neighbors.push_back(neighbor);
 		}
 
 		return neighbors;

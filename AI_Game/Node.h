@@ -24,77 +24,156 @@ struct Node
 				worldPos(_worldPos), nodeIndex(_index), walkable(_walkable), inOpenSet(false), inClosedSet(false) {}
 		~Node() { }
 
-		bool operator== (Node& _rhs)
+		bool operator== (const Node& _rhs) const
 		{
-				if (this->nodeIndex == _rhs.nodeIndex)
+				if (nodeIndex == _rhs.nodeIndex)
 				{
 						return true;
 				}
 				return false;
 		}
-		//return true if lhs has lower priority than rhs
-		bool operator< (Node& _rhs)
+		bool operator!= (const Node& _rhs) const
+		{
+				if (nodeIndex == _rhs.nodeIndex)
+				{
+						return false;
+				}
+				return true;
+		}
+		bool operator>  (const Node& _rhs) const
 		{
 				if (f() == _rhs.f())
 				{
-						return !(h < _rhs.h);
+						return (h < _rhs.h);
 				}
 				else
 				{
-						return !(f() < _rhs.f());
+						return (f() < _rhs.f());
 				}
 		}
-		//return true if lhs has higher priority than rhs
-		bool operator> (Node& _rhs)
+		bool operator<  (const Node& _rhs) const
 		{
 				if (f() == _rhs.f())
 				{
-						return !(h > _rhs.h);
+						return (h > _rhs.h);
 				}
 				else
 				{
-						return !(f() > _rhs.f());
+						return (f() > _rhs.f());
 				}
 		}
-		bool operator== (Node* _rhs)
+		bool operator== (Node& _rhs) const
 		{
-				if (this->nodeIndex == _rhs->nodeIndex)
+				if (nodeIndex == _rhs.nodeIndex)
 				{
 						return true;
 				}
 				return false;
 		}
-		bool operator== (std::weak_ptr<Node> _rhs)
+		bool operator!= (Node& _rhs) const
 		{
-				if (this->nodeIndex == _rhs.lock()->nodeIndex)
+				if (nodeIndex == _rhs.nodeIndex)
+				{
+						return false;
+				}
+				return true;
+		}
+		bool operator>  (Node& _rhs) const
+		{
+				if (f() == _rhs.f())
+				{
+						return (h < _rhs.h);
+				}
+				else
+				{
+						return (f() < _rhs.f());
+				}
+		}
+		bool operator<  (Node& _rhs) const
+		{
+				if (f() == _rhs.f())
+				{
+						return (h > _rhs.h);
+				}
+				else
+				{
+						return (f() > _rhs.f());
+				}
+		}
+		bool operator== (const Node* _rhs) const
+		{
+				if (nodeIndex == _rhs->nodeIndex)
 				{
 						return true;
 				}
 				return false;
 		}
-
-		//return true if lhs has lower priority than rhs
-		bool operator< (Node* _rhs)
+		bool operator!= (const Node* _rhs) const
+		{
+				if (nodeIndex == _rhs->nodeIndex)
+				{
+						return false;
+				}
+				return true;
+		}
+		bool operator<  (const Node* _rhs) const
 		{
 				if (f() == _rhs->f())
 				{
-						return !(h < _rhs->h);
+						return (h > _rhs->h);
 				}
 				else
 				{
-						return !(f() < _rhs->f());
+						return (f() > _rhs->f());
 				}
 		}
-		//return true if lhs has higher priority than rhs
-		bool operator> (Node* _rhs)
+		bool operator>  (const Node* _rhs) const
 		{
-				if (this->f() == _rhs->f())
+				if (f() == _rhs->f())
 				{
-						return !(h > _rhs->h);
+						return (h < _rhs->h);
 				}
 				else
 				{
-						return !(f() > _rhs->f());
+						return (f() < _rhs->f());
+				}
+		}
+		bool operator== (const std::weak_ptr<Node> _rhs) const
+		{
+				if (nodeIndex == _rhs.lock()->nodeIndex)
+				{
+						return true;
+				}
+				return false;
+		}
+		bool operator!= (const std::weak_ptr<Node> _rhs) const
+		{
+				if (nodeIndex == _rhs.lock()->nodeIndex)
+				{
+						return false;
+				}
+				return true;
+		}
+		bool operator>  (const std::weak_ptr<Node> _rhs) const
+		{
+				if (f() == _rhs.lock()->f())
+				{
+						return (h < _rhs.lock()->h);
+				}
+				else
+				{
+						return (f() < _rhs.lock()->f());
+				}
+		}
+		bool operator<  (const std::weak_ptr<Node> _rhs) const
+		{
+				if (f() == _rhs.lock()->f())
+				{
+						return (h > _rhs.lock()->h);
+				}
+				else
+				{
+						return (f() > _rhs.lock()->f());
 				}
 		}
 
@@ -104,7 +183,7 @@ struct Node
 		int terrainCost{ 0 };
 		int g{ 0 }; ///< distance from start to current node
 		int h{ 0 }; ///< distance from end to current node
-		int f() { return g + h; }; ///< g + h
+		int f() const { return g + h; }; ///< g + h
 
 		bool walkable{ false }; ///flag whether you can walk through this node
 		bool inOpenSet{ false }; ///Flag for a log(1) check if in open set
@@ -118,7 +197,7 @@ struct Node
 //Comparator for priority queues
 struct ComparePriority
 {
-		bool operator()( Node & _lhs,  Node & _rhs) const noexcept
+		bool operator()(Node & _lhs, Node & _rhs) const noexcept
 		{
 				// return "true" if "_lhs" is ordered before "_rhs" (_lhs has less priority)
 				if (_lhs.f() == _rhs.f())
@@ -131,7 +210,7 @@ struct ComparePriority
 				}
 		}
 
-		bool operator()( std::weak_ptr<Node> _lhs,  std::weak_ptr<Node> _rhs) const noexcept
+		bool operator()(std::weak_ptr<Node> _lhs, std::weak_ptr<Node> _rhs) const noexcept
 		{
 				// return "true" if "_lhs" is ordered before "_rhs" (_lhs has less priority)
 				if (_lhs.lock()->f() == _rhs.lock()->f())
@@ -162,7 +241,7 @@ struct ComparePriority
 // http://en.cppreference.com/w/cpp/utility/hash
 struct NodeHasher
 {
-		std::size_t operator()(Node const& _node) const noexcept
+		std::size_t operator()(const Node & _node) const noexcept
 		{
 				//hash the world pos and node index (both are different for every node)
 				std::size_t hash0 = std::hash<int>{}(_node.nodeIndex.x);
@@ -171,7 +250,7 @@ struct NodeHasher
 				std::size_t hash2 = std::hash<float>{}(_node.worldPos.x);
 				std::size_t hash3 = std::hash<float>{}(_node.worldPos.y);
 
-				return (hash0 ^ hash1) ^ ((hash2 ^ hash3) << 1); // or use boost::hash_combine
+				return (hash0 ^ hash1) ^ ((hash2 ^ hash3) << 1);
 		}
 		std::size_t operator()(std::weak_ptr<Node> _node) const noexcept
 		{
@@ -181,6 +260,17 @@ struct NodeHasher
 
 				std::size_t hash2 = std::hash<float>{}(_node.lock()->worldPos.x);
 				std::size_t hash3 = std::hash<float>{}(_node.lock()->worldPos.y);
+
+				return (hash0 ^ hash1) ^ ((hash2 ^ hash3) << 1); // or use boost::hash_combine		}
+		}
+		std::size_t operator()(Node* _node) const noexcept
+		{
+				//hash the world pos and node index (both are different for every node)
+				std::size_t hash0 = std::hash<int>{}(_node->nodeIndex.x);
+				std::size_t hash1 = std::hash<int>{}(_node->nodeIndex.y);
+
+				std::size_t hash2 = std::hash<float>{}(_node->worldPos.x);
+				std::size_t hash3 = std::hash<float>{}(_node->worldPos.y);
 
 				return (hash0 ^ hash1) ^ ((hash2 ^ hash3) << 1); // or use boost::hash_combine		}
 		}

@@ -50,15 +50,17 @@ void Zombie::Update(float _deltaTime)
 
 void Zombie::FindPlayer()
 {
-		m_prManager.lock()->RequestPath(GetCenterPos(), m_player.lock()->GetCenterPos(), Algorithm::BEST_FIRST, [this](std::vector<glm::vec2>& _path, bool _success)
+		m_prManager.lock()->RequestPath(m_worldPos, m_player.lock()->GetCenterPos(),
+				Algorithm::ASTAR, Diagonal::IFNOWALLS,
+				[this](std::vector<glm::vec2>& _path, bool _success)
 		{
 				if (_success)
 				{
 						m_pathToTake = _path;
 						m_finishedPath = false;
-						m_requestedPath = false;
 						m_waypointIndex = 0;
 				}
+						m_requestedPath = false;
 		});
 		m_requestedPath = true;
 }
@@ -74,6 +76,7 @@ void Zombie::FollowPath(float _deltaTime)
 						m_direction = glm::normalize(currentWaypoint - GetCenterPos());
 						m_worldPos += m_direction * m_movementSpeed * _deltaTime;
 						m_finishedPath = true;
+						m_pathToTake.clear();
 						return;
 				}
 				currentWaypoint = m_pathToTake.at(m_waypointIndex);
