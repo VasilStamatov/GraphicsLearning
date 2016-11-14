@@ -19,7 +19,6 @@ PathRequestManager::~PathRequestManager()
 
 void PathRequestManager::RequestPath(const glm::vec2 & _start, const glm::vec2 & _end, const Algorithm & _algo, const Diagonal& _diagonal, std::function<void(std::vector<glm::vec2>&, bool)> _callback)
 {
-		std::printf("Player pos(apparently): x: %f, y: %f \n", _end.x, _end.y);
 		m_pathRequestQueue.emplace(_start, _end, _algo, _diagonal, _callback);
 }
 

@@ -1,7 +1,7 @@
 #include "PathFinder.h"
 
 #define EMPTY_VECTOR std::vector<glm::vec2>()
-#define MAX_ITERATIONS 150u
+#define MAX_ITERATIONS 50u
 
 PathFinder::PathFinder()
 {
@@ -37,12 +37,13 @@ std::vector<glm::vec2> PathFinder::AStar(const glm::vec2 & _start, const glm::ve
 
 		m_startNode.lock()->h = m_heuristic(m_startNode.lock()->nodeIndex, m_endNode.lock()->nodeIndex);
 		m_startNode.lock()->inOpenSet = true;
-		m_openSet.Insert(m_startNode);
+		m_openSet.Push(m_startNode);
 
 		while (!m_openSet.IsEmpty())
 		{
-				std::weak_ptr<Node> currentNode = m_openSet.PopFront();
+				std::weak_ptr<Node> currentNode = m_openSet.Front();
 				currentNode.lock()->inOpenSet = false;
+				m_openSet.Pop();
 
 				currentNode.lock()->inClosedSet = true;
 				m_closedSet.insert(currentNode);
@@ -85,7 +86,7 @@ std::vector<glm::vec2> PathFinder::AStar(const glm::vec2 & _start, const glm::ve
 										neighbor.lock()->inClosedSet = false;
 										m_closedSet.erase(neighbor);
 										neighbor.lock()->inOpenSet = true;
-										m_openSet.Insert(neighbor);
+										m_openSet.Push(neighbor);
 								}
 						}
 						else
@@ -94,7 +95,7 @@ std::vector<glm::vec2> PathFinder::AStar(const glm::vec2 & _start, const glm::ve
 								neighbor.lock()->h = m_heuristic(neighbor.lock()->nodeIndex, m_endNode.lock()->nodeIndex);
 								neighbor.lock()->parent = currentNode;
 								neighbor.lock()->inOpenSet = true;
-								m_openSet.Insert(neighbor);
+								m_openSet.Push(neighbor);
 						}
 				}
 				counter++;
@@ -131,12 +132,13 @@ std::vector<glm::vec2> PathFinder::BestFirst(const glm::vec2 & _start, const glm
 
 		m_startNode.lock()->h = m_heuristic(m_startNode.lock()->nodeIndex, m_endNode.lock()->nodeIndex);
 		m_startNode.lock()->inOpenSet = true;
-		m_openSet.Insert(m_startNode);
+		m_openSet.Push(m_startNode);
 
 		while (!m_openSet.IsEmpty())
 		{
-				std::weak_ptr<Node> currentNode = m_openSet.PopFront();
+				std::weak_ptr<Node> currentNode = m_openSet.Front();
 				currentNode.lock()->inOpenSet = false;
+				m_openSet.Pop();
 
 				currentNode.lock()->inClosedSet = true;
 				m_closedSet.insert(currentNode);
@@ -170,7 +172,7 @@ std::vector<glm::vec2> PathFinder::BestFirst(const glm::vec2 & _start, const glm
 								{
 										neighbor.lock()->inOpenSet = true;
 										//add and sort the newly added neighbor
-										m_openSet.Insert(neighbor);
+										m_openSet.Push(neighbor);
 								}
 								else
 								{
@@ -203,11 +205,12 @@ std::vector<glm::vec2> PathFinder::BreadthFirst(const glm::vec2 & _start, const 
 				return EMPTY_VECTOR;
 		}
 		m_startNode.lock()->inOpenSet = true;
-		m_openSet.Insert(m_startNode);
+		m_openSet.Push(m_startNode);
 
 		while (!m_openSet.IsEmpty())
 		{
-				std::weak_ptr<Node> currentNode = m_openSet.PopFront();
+				std::weak_ptr<Node> currentNode = m_openSet.Front();
+				m_openSet.Pop();
 				currentNode.lock()->inOpenSet = false;
 
 				currentNode.lock()->inClosedSet = true;
@@ -230,7 +233,7 @@ std::vector<glm::vec2> PathFinder::BreadthFirst(const glm::vec2 & _start, const 
 						}
 						neighbor.lock()->inOpenSet = true;
 						neighbor.lock()->parent = currentNode;
-						m_openSet.Insert(neighbor);
+						m_openSet.Push(neighbor);
 				}
 				counter++;
 				if (counter > MAX_ITERATIONS)
@@ -287,7 +290,7 @@ std::vector<glm::vec2> PathFinder::Backtrace(std::weak_ptr<Node> _startNode, std
 				path.push_back(currentNode.lock()->worldPos);
 				currentNode = currentNode.lock()->parent;
 		}
-		std::reverse(path.begin(), path.end());
+		//std::reverse(path.begin(), path.end());
 		return path;
 }
 

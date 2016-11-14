@@ -91,10 +91,10 @@ void GameScreen::Update()
 		{
 				m_zombies.at(i)->Update(m_game->GetDT());
 				//collide with all other zombies
-				/*for (size_t j = i + 1; j < m_zombies.size(); j++)
+				for (size_t j = i + 1; j < m_zombies.size(); j++)
 				{
 						m_zombies.at(i)->CollideWithAgent(m_zombies.at(j).get());
-				}*/
+				}
 				//collide with player
 				//if (m_zombies.at(i)->CollideWithAgent(m_player.get()))
 				//{
@@ -199,15 +199,13 @@ void GameScreen::CheckInput()
 				std::cout << "\tworld coordinate x: " << worldCoords.x << std::endl;
 				std::cout << "\tworld coordinate y: " << worldCoords.y << std::endl;
 		}*/
-		//if (m_game->inputManager.IsKeyPressed(SDLK_SPACE))
-		//{
-		//		//findPath = !findPath;
-		//		for (size_t i = 0; i < m_zombies.size(); i++)
-		//		{
-		//				m_timer.Start();
-		//				m_zombies.at(i)->FindPlayer();
-		//				m_timer.Stop();
-		//				std::cout << "Elapsed milli: " << m_timer.Seconds() * 1000 << std::endl;
-		//		}
-		//}
+		/*if (m_game->inputManager.IsKeyPressed(SDLK_SPACE))
+		{
+				std::cout << "PLayer: x: " << m_player->GetCenterPos().x << " y: " << m_player->GetCenterPos().y << std::endl;
+
+				for (int i = m_zombies.at(0)->GetPath().size() - 1; i >= 0; i--)
+				{
+						std::cout << "Path: " << i << " x: " << m_zombies.at(0)->GetPath().at(i).x << " y: " << m_zombies.at(0)->GetPath().at(i).y << std::endl;
+				}
+		}*/
 }

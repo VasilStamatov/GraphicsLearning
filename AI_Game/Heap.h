@@ -47,19 +47,17 @@ public:
 		}
 		
 		/** \brief Adds an item to the container and heapifies it */
-		void Insert(const T& _item)
+		void Push(const T& _item)
 		{
 				m_container.push_back(_item);
 				std::push_heap(m_container.begin(), m_container.end(), m_comparator);
 		}
 
 		/** \brief Removes an item from the container and heapifies it */
-		T& PopFront()
+		void Pop()
 		{
-				T& front = m_container.front();
 				std::pop_heap(m_container.begin(), m_container.end(), m_comparator);
 				m_container.pop_back();
-				return front;
 		}
 
 		void Remove(const T& _item)

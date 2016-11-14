@@ -7,7 +7,6 @@ Zombie::Zombie(float _speed, float _health, const glm::vec2 & _startPos, const G
 		GameEngine::ColorRGBA8 & _color, std::weak_ptr<World> _world, std::weak_ptr<Player> _player, std::weak_ptr<PathRequestManager> _prManager) :
 		Agent(_speed, _health, _startPos, _texture, _color, _world), m_player(_player), m_prManager(_prManager)
 {
-		m_finishedPath = true;
 }
 
 
@@ -25,25 +24,26 @@ void Zombie::Init(float _speed, float _health, const glm::vec2 & _startPos, cons
 		m_texture = _texture;
 		m_color = _color;
 		m_world = _world;
-		m_finishedPath = true;
 		m_prManager = _prManager;
 		m_player = _player;
 }
 
 void Zombie::Update(float _deltaTime)
 {
-		if (!m_finishedPath && !m_pathToTake.empty())
+		if (!CollideWithAgent(m_player.lock().get()))
 		{
-				FollowPath(_deltaTime);
-		}
-		else
-		{
-				if (!m_requestedPath)
+				if (!m_pathToTake.empty())
 				{
-						FindPlayer();
+						FollowPath(_deltaTime);
+				}
+				else
+				{
+						if (!m_requestedPath)
+						{
+								FindPlayer();
+						}
 				}
 		}
-
 		// Do collision
 		CollideWithLevel();
 }
@@ -57,8 +57,6 @@ void Zombie::FindPlayer()
 				if (_success)
 				{
 						m_pathToTake = _path;
-						m_finishedPath = false;
-						m_waypointIndex = 0;
 				}
 						m_requestedPath = false;
 		});
@@ -67,19 +65,18 @@ void Zombie::FindPlayer()
 
 void Zombie::FollowPath(float _deltaTime)
 {
-		glm::vec2 currentWaypoint = m_pathToTake.at(m_waypointIndex);
+		glm::vec2 currentWaypoint = m_pathToTake.back();
 
-		if (m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_worldPos).lock() == m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.at(m_waypointIndex)).lock())
+		if (m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_worldPos).lock() == m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.back()).lock())
 		{
-				if (++m_waypointIndex >= m_pathToTake.size())
+				m_pathToTake.pop_back();
+				if (m_pathToTake.empty())
 				{
 						m_direction = glm::normalize(currentWaypoint - GetCenterPos());
 						m_worldPos += m_direction * m_movementSpeed * _deltaTime;
-						m_finishedPath = true;
-						m_pathToTake.clear();
 						return;
 				}
-				currentWaypoint = m_pathToTake.at(m_waypointIndex);
+				currentWaypoint = m_pathToTake.back();
 		}
 		m_direction = glm::normalize(currentWaypoint - GetCenterPos());
 		m_worldPos += m_direction * m_movementSpeed * _deltaTime;

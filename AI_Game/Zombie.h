@@ -26,8 +26,6 @@ private:
 		std::weak_ptr<Player> m_player;
 		std::weak_ptr<PathRequestManager> m_prManager;
 		std::vector<glm::vec2> m_pathToTake;
-		size_t m_waypointIndex{ 0 };
-		bool m_finishedPath{ true };
 		bool m_requestedPath{ false };
 };
 
