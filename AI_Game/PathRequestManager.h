@@ -7,7 +7,7 @@ enum class Algorithm : size_t
 {
 		BEST_FIRST,
 		ASTAR,
-		DIJKSTRA,
+		ASTARe,
 		BREADTH_FIRST
 };
 

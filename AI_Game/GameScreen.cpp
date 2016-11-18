@@ -48,7 +48,7 @@ void GameScreen::OnEntry()
 		m_gameWorlds.back()->LoadTerrainFromFile("Levels/level1.txt");
 		m_currentLevel = 0;
 		m_pathRequestManger = std::make_shared<PathRequestManager>(m_gameWorlds.at(m_currentLevel)->GetWorldGrid());
-		
+
 		/* Initialize the player */
 		m_player = std::make_shared<Player>(3.0f, 100.0f, m_gameWorlds.at(m_currentLevel)->GetStartPlayerPos(),
 				&m_game->inputManager, &m_camera, GameEngine::ResourceManager::GetTexture("Textures/player.png"),
@@ -104,7 +104,7 @@ void GameScreen::Update()
 		m_camera.SetPosition(m_player->GetCenterPos());
 		m_camera.Update();
 		SDL_SetWindowTitle(m_window->GetWindow(), std::to_string(m_game->GetFPS()).c_str());
-		
+
 }
 
 void GameScreen::Draw()
@@ -114,8 +114,11 @@ void GameScreen::Draw()
 		// Clear the color and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->DrawGrid(m_camera.GetCameraMatrix());
-		
+		if (m_debugMode)
+		{
+				m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->DrawGrid(m_camera.GetCameraMatrix());
+		}
+
 		for (size_t i = 0; i < m_zombies.size(); i++)
 		{
 				m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->DrawPath(m_zombies.at(i)->GetPath(), m_camera.GetCameraMatrix());
@@ -159,6 +162,10 @@ void GameScreen::CheckInput()
 		if (m_game->inputManager.IsKeyDown(SDLK_ESCAPE))
 		{
 				m_currentState = GameEngine::ScreenState::EXIT_APPLICATION;
+		}
+		if (m_game->inputManager.IsKeyPressed(SDLK_F1))
+		{
+				m_debugMode = !m_debugMode;
 		}
 		/*if (m_game->inputManager.IsKeyDown(SDLK_w))
 		{

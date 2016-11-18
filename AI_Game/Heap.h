@@ -35,9 +35,11 @@ public:
 		 *		\return the first element */
 	 T& Front() { return m_container.front(); }
 
+	 T& At(const std::size_t& _index) { return m_container.at(_index); }
+
 		/** \brief Checks if the container constains a specific item
 	 	*		\return true if the item is found in the container */
-		bool Contains(const T& _item)
+		bool Contains(const T& _item) 
 		{
 				if (std::find(m_container.begin(), m_container.end(), _item) != m_container.end())
 				{
@@ -63,6 +65,10 @@ public:
 		void Remove(const T& _item)
 		{
 				m_container.erase(std::remove(m_container.begin(), m_container.end(), _item), m_container.end());
+		}
+		void Remove(const std::size_t& _position)
+		{
+				m_container.erase(m_container.begin() + _position);
 		}
 
 		void Clear()

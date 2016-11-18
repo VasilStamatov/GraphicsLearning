@@ -1,4 +1,7 @@
 #include "Zombie.h"
+
+#define PENALIZE_COST 250
+
 Zombie::Zombie()
 {
 }
@@ -41,6 +44,7 @@ void Zombie::Update(float _deltaTime)
 						if (!m_requestedPath)
 						{
 								FindPlayer();
+								PenalizePath();
 						}
 				}
 		}
@@ -58,7 +62,7 @@ void Zombie::FindPlayer()
 				{
 						m_pathToTake = _path;
 				}
-						m_requestedPath = false;
+				m_requestedPath = false;
 		});
 		m_requestedPath = true;
 }
@@ -66,9 +70,13 @@ void Zombie::FindPlayer()
 void Zombie::FollowPath(float _deltaTime)
 {
 		glm::vec2 currentWaypoint = m_pathToTake.back();
-
 		if (m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_worldPos).lock() == m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.back()).lock())
 		{
+				//Remove the penalizing after exiting this waypoint
+				std::weak_ptr<Node> nodeToLeave = m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.back());
+				nodeToLeave.lock()->terrainCost =
+						m_world.lock()->GetTile(nodeToLeave.lock()->nodeIndex.x, nodeToLeave.lock()->nodeIndex.y).lock()->MovementCost();
+
 				m_pathToTake.pop_back();
 				if (m_pathToTake.empty())
 				{
@@ -80,4 +88,12 @@ void Zombie::FollowPath(float _deltaTime)
 		}
 		m_direction = glm::normalize(currentWaypoint - GetCenterPos());
 		m_worldPos += m_direction * m_movementSpeed * _deltaTime;
+}
+
+void Zombie::PenalizePath()
+{
+		for (size_t i = 0; i < m_pathToTake.size(); i++)
+		{
+				m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.at(i)).lock()->terrainCost = PENALIZE_COST;
+		}
 }

@@ -9,7 +9,7 @@
 constexpr float AGENT_RADIUS = 14.0f;
 constexpr float AGENT_DIAMETER = AGENT_RADIUS * 2.0f;
 
-//Base class for conscious entities
+//Base class for conscious entities.
 class Agent
 {
 public:

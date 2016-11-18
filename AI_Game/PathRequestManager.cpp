@@ -65,10 +65,19 @@ void PathRequestManager::Update()
 								}
 								break;
 						}
-						case Algorithm::DIJKSTRA:
+						case Algorithm::ASTARe:
 						{
-								printf("Algorith not implemented");
-								break;
+								std::vector<glm::vec2> pathResult = m_pathFinder->AStarEpsilon(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
+								if (pathResult.empty())
+								{
+										//Failed to find path
+										currentPathRequest.m_callback(pathResult, false);
+								}
+								else
+								{
+										//Successfully found path
+										currentPathRequest.m_callback(pathResult, true);
+								}								break;
 						}
 						case Algorithm::BREADTH_FIRST:
 						{

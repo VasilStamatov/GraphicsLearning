@@ -56,4 +56,6 @@ private:
 		//vector of all levels
 		std::vector<std::shared_ptr<World>> m_gameWorlds;
 		int m_currentLevel{ -1 };
+
+		bool m_debugMode{ false };
 };

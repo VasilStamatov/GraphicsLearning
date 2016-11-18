@@ -22,6 +22,7 @@ public:
 
 private:
 		void FollowPath(float _deltaTime);
+		void PenalizePath();
 private:
 		std::weak_ptr<Player> m_player;
 		std::weak_ptr<PathRequestManager> m_prManager;

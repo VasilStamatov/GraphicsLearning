@@ -396,26 +396,25 @@ void Grid::DrawGrid(const glm::mat4& _projection)
 
 void Grid::DrawPath(const std::vector<glm::vec2>& _path, const glm::mat4& _projection)
 {
-		for (size_t i = 0; i < _path.size(); i++)
+		if (!_path.empty())
 		{
-				std::weak_ptr<Node> currentNode = GetNodeAt(_path.at(i));
+				for (size_t i = 0; i < _path.size() - 1; i++)
+				{
+						std::weak_ptr<Node> currentNode = GetNodeAt(_path.at(i));
+						std::weak_ptr<Node> nextNode = GetNodeAt(_path.at(i + 1));
 
-				float radius = m_nodeDiameter / 2.0f;
+						GameEngine::ColorRGBA8 color;
 
-				//set the position minus the radius, because the world space position of the node is at the center, while we want to render it from the bottom left
-				glm::vec4 destRect(currentNode.lock()->worldPos.x - radius, currentNode.lock()->worldPos.y - radius, m_nodeDiameter - 1.0f, m_nodeDiameter - 1.0f);
+						color.r = 0;
+						color.g = 0;
+						color.b = 0;
+						color.a = 255;
 
-				GameEngine::ColorRGBA8 color;
-
-				color.r = 0;
-				color.g = 0;
-				color.b = 0;
-				color.a = 255;
-
-				m_debugRenderer.DrawBox(destRect, color, 0.0f);
+						m_debugRenderer.DrawLine(currentNode.lock()->worldPos, nextNode.lock()->worldPos, color);
+				}
+				m_debugRenderer.End();
+				m_debugRenderer.Render(_projection, 3.0f);
 		}
-		m_debugRenderer.End();
-		m_debugRenderer.Render(_projection, 1.0f);
 }
 
 void Grid::CleanGrid()
