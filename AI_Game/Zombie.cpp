@@ -55,7 +55,7 @@ void Zombie::Update(float _deltaTime)
 void Zombie::FindPlayer()
 {
 		m_prManager.lock()->RequestPath(m_worldPos, m_player.lock()->GetCenterPos(),
-				Algorithm::ASTAR, Diagonal::IFNOWALLS,
+				Algorithm::ASTARe, Diagonal::IFNOWALLS,
 				[this](std::vector<glm::vec2>& _path, bool _success)
 		{
 				if (_success)

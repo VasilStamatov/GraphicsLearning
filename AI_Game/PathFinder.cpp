@@ -2,7 +2,7 @@
 
 #define EMPTY_VECTOR std::vector<glm::vec2>()
 
-#define MAX_ITERATIONS 50u
+#define MAX_ITERATIONS 450u
 
 #define EPSILON 1.3f
 
