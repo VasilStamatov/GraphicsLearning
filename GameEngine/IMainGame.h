@@ -32,6 +32,9 @@ namespace GameEngine
     const float GetFPS() const noexcept { return m_fps; }
     const float GetDT()  const noexcept { return m_deltaTime; }
 
+				const bool GetPaused() const	noexcept { return m_paused; }
+				void SetPause(bool _paused)  noexcept { m_paused = _paused; }
+
     InputManager inputManager;
 
   protected:

@@ -36,9 +36,14 @@ void GameScreen::OnEntry()
 {
 		/* Initialize the camera */
 		m_camera.Init(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+		m_hudCamera.Init(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+		m_hudCamera.SetPosition(glm::vec2(m_window->GetScreenWidth() / 2.0f, m_window->GetScreenHeight() / 2.0f));
 
 		/* Initialize the spritebatch */
 		m_spriteBatch.Init();
+		m_hudSpriteBatch.Init();
+		/* Initialize the spritefont */
+		m_spriteFont.init("Fonts/chintzy.ttf", 32);
 
 		/* Initialize the shaders */
 		m_shader.CompileShaders("Shaders/textureShading.vert", "Shaders/textureShading.frag");
@@ -60,19 +65,16 @@ void GameScreen::OnEntry()
 				m_zombies.push_back(std::make_unique<Zombie>(4.5f, 150.0f, zombiePositions.at(i), GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
 						GameEngine::ColorRGBA8(255, 255), m_gameWorlds.at(m_currentLevel), m_player, m_pathRequestManger));
 		}
-		/*for (size_t i = 0; i < m_zombies.size(); i++)
-		{
-				m_timer.Start();
-				m_zombies.at(i)->FindPlayer();
-				m_timer.Stop();
-				std::cout << "Elapsed milli: " << m_timer.Seconds() * 1000 << std::endl;
-		}*/
+		//Generate the seed for rng
+		m_random.GenSeed(GameEngine::SeedType::CLOCK_TICKS);
 }
 
 void GameScreen::OnExit()
 {
 		m_shader.Dispose();
 		m_spriteBatch.Dispose();
+		m_hudSpriteBatch.Dispose();
+		m_spriteFont.dispose();
 		m_zombies.clear();
 		m_gameWorlds.clear();
 }
@@ -85,6 +87,13 @@ void GameScreen::Update()
 				m_window->ResizeHandled();
 		}
 		CheckInput();
+		/*if (m_timer.Seconds() > 10.0f)
+		{
+				const std::vector<glm::vec2>& zombiePositions = m_gameWorlds.at(m_currentLevel)->GetZombieStartPositions();
+				m_zombies.push_back(std::make_unique<Zombie>(4.5f, 150.0f, zombiePositions.at(m_random.GenRandInt(0, zombiePositions.size() - 1)), GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
+						GameEngine::ColorRGBA8(255, 255), m_gameWorlds.at(m_currentLevel), m_player, m_pathRequestManger));
+				m_timer.Start();
+		}*/
 		m_player->Update(m_game->GetDT());
 		m_pathRequestManger->Update();
 		for (size_t i = 0; i < m_zombies.size(); i++)
@@ -103,8 +112,8 @@ void GameScreen::Update()
 		}
 		m_camera.SetPosition(m_player->GetCenterPos());
 		m_camera.Update();
+		m_hudCamera.Update();
 		SDL_SetWindowTitle(m_window->GetWindow(), std::to_string(m_game->GetFPS()).c_str());
-
 }
 
 void GameScreen::Draw()
@@ -123,16 +132,18 @@ void GameScreen::Draw()
 		{
 				m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->DrawPath(m_zombies.at(i)->GetPath(), m_camera.GetCameraMatrix());
 		}
+
 		m_shader.Use();
 
 		glActiveTexture(GL_TEXTURE0);
 
 		// Make sure the shader uses texture 0
-		GLint textureUniform = m_shader.GetUniformLocation("diffuseTexture");
-		glUniform1i(textureUniform, 0);
+		glUniform1i(m_shader.GetUniformLocation("diffuseTexture"), 0);
+
+		DrawUI(m_shader);
 
 		// upload the camera matrix
-		m_shader.UploadValue("P", m_camera.GetCameraMatrix());
+		m_shader.UploadValue("projection", m_camera.GetCameraMatrix());
 
 		m_spriteBatch.Begin();
 
@@ -147,7 +158,6 @@ void GameScreen::Draw()
 
 		// Draw the level
 		m_gameWorlds.at(m_currentLevel)->Draw();
-
 		m_shader.UnUse();
 }
 
@@ -158,7 +168,10 @@ void GameScreen::CheckInput()
 		{
 				m_game->OnSDLEvent(evnt);
 		}
-
+		if (m_game->inputManager.IsKeyPressed(SDLK_F9))
+		{
+				m_game->SetPause(!m_game->GetPaused());
+		}
 		if (m_game->inputManager.IsKeyDown(SDLK_ESCAPE))
 		{
 				m_currentState = GameEngine::ScreenState::EXIT_APPLICATION;
@@ -167,52 +180,93 @@ void GameScreen::CheckInput()
 		{
 				m_debugMode = !m_debugMode;
 		}
-		/*if (m_game->inputManager.IsKeyDown(SDLK_w))
+		if (m_game->inputManager.IsKeyPressed(SDLK_SPACE))
 		{
-				m_camera.OffsetPosition(glm::vec2(0.0f, m_game->GetDT() * 5.0f));
-		}
-		if (m_game->inputManager.IsKeyDown(SDLK_a))
-		{
-				m_camera.OffsetPosition(glm::vec2(m_game->GetDT() * -5.0f, 0.0f));
-		}
-		if (m_game->inputManager.IsKeyDown(SDLK_s))
-		{
-				m_camera.OffsetPosition(glm::vec2(0.0f, m_game->GetDT() * -5.0f));
-		}
-		if (m_game->inputManager.IsKeyDown(SDLK_d))
-		{
-				m_camera.OffsetPosition(glm::vec2(m_game->GetDT() * 5.0f, 0.0f));
-		}*/
-		/*if (m_game->inputManager.IsKeyPressed(SDL_BUTTON_LEFT))
-		{
-				glm::ivec2 screenCoords;
-				SDL_GetMouseState(&screenCoords.x, &screenCoords.y);
-				glm::vec2 worldCoords = m_camera.ConvertScreenToWorld(screenCoords);
-				std::weak_ptr<Node> node = m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->GetNodeAt(worldCoords);
-				std::cout << "Clicked node info: " << std::endl;
-				node.lock()->color = GameEngine::ColorRGBA8(0, 0, 255, 255);
-				if (node.lock()->walkable)
+				int rand = m_random.GenRandInt(0, 6);
+				Algorithm algoToUse;
+				switch (rand)
 				{
-						std::cout << "\twalkable: " << "true" << std::endl;
+						case 0:
+						{
+								algoToUse = Algorithm::ASTAR;
+								m_currentAlgo = "ASTAR";
+								break;
+						}
+						case 1:
+						{
+								algoToUse = Algorithm::ASTARe;
+								m_currentAlgo = "ASTARe";
+								break;
+						}
+						case 2:
+						{
+								algoToUse = Algorithm::BEST_FIRST;
+								m_currentAlgo = "BEST.FIRST";
+								break;
+						}
+						case 3:
+						{
+								algoToUse = Algorithm::BREADTH_FIRST;
+								m_currentAlgo = "BREADTH.FIRST";
+								break;
+						}
+						case 4:
+						{
+								algoToUse = Algorithm::DEPTH_FIRST;
+								m_currentAlgo = "DEPTH.FIRST";
+								break;
+						}
+						case 5:
+						{
+								algoToUse = Algorithm::DIJKSTRA;
+								m_currentAlgo = "DIJKSTRA";
+								break;
+						}
+						case 6:
+						{
+								algoToUse = Algorithm::GREEDY_BEST_FIRST;
+								m_currentAlgo = "GREEDY.BEST.FIRST";
+								break;
+						}
+						default:
+						{
+								break;
+						}
 				}
-				else
+				for (auto& zombie : m_zombies)
 				{
-						std::cout << "\twalkable: " << "false" << std::endl;
+						zombie->SetPFAlgo(algoToUse);
 				}
-				std::cout << "\tcoordinate x: " << node.lock()->worldPos.x << std::endl;
-				std::cout << "\tcoordinate y: " << node.lock()->worldPos.y << std::endl;
-				std::cout << "\tindex x: " << node.lock()->nodeIndex.x << std::endl;
-				std::cout << "\tindex y: " << node.lock()->nodeIndex.y << std::endl;
-				std::cout << "\tworld coordinate x: " << worldCoords.x << std::endl;
-				std::cout << "\tworld coordinate y: " << worldCoords.y << std::endl;
-		}*/
-		/*if (m_game->inputManager.IsKeyPressed(SDLK_SPACE))
+		}
+		
+		if (m_game->inputManager.IsKeyPressed(SDLK_LSHIFT))
 		{
-				std::cout << "PLayer: x: " << m_player->GetCenterPos().x << " y: " << m_player->GetCenterPos().y << std::endl;
+				const std::vector<glm::vec2>& zombiePositions = m_gameWorlds.at(m_currentLevel)->GetZombieStartPositions();
+				m_zombies.push_back(std::make_unique<Zombie>(4.5f, 150.0f, zombiePositions.at(m_random.GenRandInt(0, zombiePositions.size() - 1)), GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
+						GameEngine::ColorRGBA8(255, 255), m_gameWorlds.at(m_currentLevel), m_player, m_pathRequestManger));
+		}
 
-				for (int i = m_zombies.at(0)->GetPath().size() - 1; i >= 0; i--)
+		if (m_game->inputManager.IsKeyPressed(SDL_BUTTON_LEFT))
+		{
+				if (m_debugMode)
 				{
-						std::cout << "Path: " << i << " x: " << m_zombies.at(0)->GetPath().at(i).x << " y: " << m_zombies.at(0)->GetPath().at(i).y << std::endl;
+						glm::ivec2 screenCoords;
+						SDL_GetMouseState(&screenCoords.x, &screenCoords.y);
+						glm::vec2 worldCoords = m_camera.ConvertScreenToWorld(screenCoords);
+						std::weak_ptr<Node> node = m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->GetNodeAt(worldCoords);
+						std::cout << node << std::endl;
 				}
-		}*/
+		}
+}
+
+void GameScreen::DrawUI( GameEngine::GLSLProgram& _shader)
+{
+		_shader.UploadValue("projection", m_hudCamera.GetCameraMatrix());
+
+		m_hudSpriteBatch.Begin();
+
+		m_spriteFont.draw(m_hudSpriteBatch, m_currentAlgo.c_str(), glm::vec2(1, 1), glm::vec2(1.0f), 0.0, GameEngine::ColorRGBA8(255, 255, 255, 255));
+
+		m_hudSpriteBatch.End();
+		m_hudSpriteBatch.RenderBatch();
 }

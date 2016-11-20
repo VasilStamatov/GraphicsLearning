@@ -32,7 +32,22 @@ namespace GameEngine
 						//updates the key map
 						inputManager.Update();
 						// Call the custom update and draw method
-						Update();
+						if (!m_paused)
+						{
+								Update();
+						}
+						else
+						{
+								SDL_Event evnt;
+								while (SDL_PollEvent(&evnt))
+								{
+										OnSDLEvent(evnt);
+								}
+								if (inputManager.IsKeyPressed(SDLK_F9))
+								{
+										m_paused = !m_paused;
+								}
+						}
 						if (m_isRunning && !m_window.IsMinimized())
 						{
 								Draw();

@@ -114,8 +114,10 @@ public:
 		void DrawGrid(const glm::mat4& _projection);
 		void DrawPath(const std::vector<glm::vec2>& _path, const glm::mat4& _projection);
 
+		/** \brief Cleans the values of the nodes in the grid (except for terrain cost) */
 		void CleanGrid();
 
+		/** \brief Gets the total number of nodes in the node map */
 		int GetNumNodes();
 
 private:

@@ -1,15 +1,16 @@
-﻿  Zombie.cpp
-c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec2.hpp(42): warning C4201: nonstandard extension used: nameless struct/union
-  c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec2.hpp(203): note: see reference to class template instantiation 'glm::tvec2<T,P>' being compiled
-c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec2.hpp(43): warning C4201: nonstandard extension used: nameless struct/union
-c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec2.hpp(44): warning C4201: nonstandard extension used: nameless struct/union
-c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec3.hpp(42): warning C4201: nonstandard extension used: nameless struct/union
-  c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec3.hpp(224): note: see reference to class template instantiation 'glm::tvec3<T,P>' being compiled
-c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec3.hpp(43): warning C4201: nonstandard extension used: nameless struct/union
-c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec3.hpp(44): warning C4201: nonstandard extension used: nameless struct/union
-c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec4.hpp(42): warning C4201: nonstandard extension used: nameless struct/union
-  c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec4.hpp(269): note: see reference to class template instantiation 'glm::tvec4<T,P>' being compiled
-c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec4.hpp(43): warning C4201: nonstandard extension used: nameless struct/union
-c:\users\vasil\projects\graphicslearning\deps\include\glm\detail\type_vec4.hpp(44): warning C4201: nonstandard extension used: nameless struct/union
+﻿  PathRequestManager.cpp
+  PathFinder.cpp
+c:\users\vasil\projects\graphicslearning\ai_game\pathfinder.cpp(611): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Grid.cpp
+  GameScreen.cpp
+  Generating Code...
+  Compiling...
+  Zombie.cpp
+  World.cpp
+  Player.cpp
+  Main.cpp
+  App.cpp
+  Agent.cpp
+  Generating Code...
   AI_Game.vcxproj -> C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\AI_Game.exe
   AI_Game.vcxproj -> C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\AI_Game.pdb (Partial PDB)

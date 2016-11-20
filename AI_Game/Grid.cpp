@@ -439,6 +439,7 @@ void Grid::CreateGrid(std::vector<bool>& _walkableMatrix)
 		size_t nodeMapSize = m_numXNodes * m_numYNodes;
 		m_nodeMap.reserve(nodeMapSize);
 
+		//The bottom left is always 0.0f, 0.0f here because the tile generation starts at origin position (0.0f, 0.0f)
 		glm::vec2 worldBottomLeft{ 0.0f, 0.0f };
 
 		for (size_t i = 0; i < nodeMapSize; i++)

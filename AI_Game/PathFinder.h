@@ -6,16 +6,26 @@
 #include <functional>
 #include <unordered_set>
 
+/** \brief The pathfinder class to contain the algorithms */
 class PathFinder
 {
 public:
 		PathFinder();
 		~PathFinder();
 
+		/** \brief All pathfinding algorithms this finder supports.
+		 *  \param _start				- start position in world space 
+			*  \param _end				 	- end position in world space 
+			*  \param _grid				 - the grid to be used 
+			*  \param _diagonal - state of diagonal allowing */
+
 		std::vector<glm::vec2> AStar						 (const glm::vec2& _start, const glm::vec2& _end, std::weak_ptr<Grid> _grid, const Diagonal& _diagonal);
 		std::vector<glm::vec2> AStarEpsilon(const glm::vec2& _start, const glm::vec2& _end, std::weak_ptr<Grid> _grid, const Diagonal& _diagonal);
 		std::vector<glm::vec2> BestFirst		 (const glm::vec2& _start, const glm::vec2& _end, std::weak_ptr<Grid> _grid, const Diagonal& _diagonal);
 		std::vector<glm::vec2> BreadthFirst(const glm::vec2& _start, const glm::vec2& _end, std::weak_ptr<Grid> _grid, const Diagonal& _diagonal);
+		std::vector<glm::vec2> DepthFirst  (const glm::vec2& _start, const glm::vec2& _end, std::weak_ptr<Grid> _grid, const Diagonal& _diagonal);
+		std::vector<glm::vec2> Dijkstra    (const glm::vec2& _start, const glm::vec2& _end, std::weak_ptr<Grid> _grid, const Diagonal& _diagonal);
+		std::vector<glm::vec2> GreedyBFirst(const glm::vec2& _start, const glm::vec2& _end, std::weak_ptr<Grid> _grid, const Diagonal& _diagonal);
 
 private:
 		/* Heuristics */
@@ -33,6 +43,7 @@ private:
 		//std::vector<glm::vec2> BiBacktrace	(std::weak_ptr<Node> _startNode, std::weak_ptr<Node> _endNode);
 
 private:
-		std::function<int(const glm::ivec2& _nodeAIndex, const glm::ivec2& _nodeBIndex)> m_heuristic;
+		/** \brief function pointer to the heuristic function to be used */
+		std::function<int(const glm::ivec2& _nodeAIndex, const glm::ivec2& _nodeBIndex)> m_heuristic; 
 };
 

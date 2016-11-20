@@ -3,7 +3,6 @@
 #include <SDL\SDL.h>
 #include <GL\glew.h>
 #include <string>
-#include <memory>
 namespace GameEngine
 {
   enum WindowCreationFlags : unsigned int

@@ -11,12 +11,12 @@ out VS_OUT
 	vec2 uv;
 } vs_out;
 
-uniform mat4 P;
+uniform mat4 projection;
 
 void main() 
 {
     //transform the world space coordinates from the spritebatch to clip coordinates with the ortho projection matrix
-    gl_Position.xy = (P * vec4(position.xy, 0.0, 1.0)).xy;
+    gl_Position.xy = (projection * vec4(position.xy, 0.0, 1.0)).xy;
     //the z position is zero since we are in 2D
     gl_Position.z = 0.0;
     

@@ -2,9 +2,11 @@
 
 #include <GameEngine\GLTexture.h>
 
+/** \brief immutable terrain data to be used for the tiles in the world */
 class Terrain
 {
 public:
+		/** \brief default constructor where all the terain data is set */
 		Terrain(int movementCost, bool isWater, bool isWalkable, const GameEngine::GLTexture& texture) :
 				m_movementCost(movementCost), m_isWater(isWater), m_isWalkable(isWalkable), m_texture(texture)
 		{}

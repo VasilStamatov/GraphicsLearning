@@ -3,15 +3,19 @@
 
 #include "PathFinder.h"
 
+/** \brief all supported algorithms */
 enum class Algorithm : size_t
 {
 		BEST_FIRST,
 		ASTAR,
 		ASTARe,
-		BREADTH_FIRST
+		BREADTH_FIRST,
+		DEPTH_FIRST,
+		DIJKSTRA,
+		GREEDY_BEST_FIRST
 };
 
-//Path request data
+/** \brief Path request data */
 struct PathRequest
 {
 		PathRequest() {}
@@ -26,6 +30,7 @@ struct PathRequest
 		std::function<void(std::vector<glm::vec2>&, bool)> m_callback;
 };
 
+/** \brief Path request manager which finds 1 path per frame */
 class PathRequestManager
 {
 public:
@@ -33,21 +38,19 @@ public:
 		PathRequestManager(std::weak_ptr<Grid> _grid);
 		~PathRequestManager();
 
-		//Emplace a path in the queue
+		/** \brief Emplace a path in the queue */
 		void RequestPath(const glm::vec2& _start, const glm::vec2& _end, const Algorithm& _algo,
 				const Diagonal& _diagonal, std::function<void(std::vector<glm::vec2>&, bool)> _callback);
+		/** \brief Emplace a path in the queue */
 		void RequestPath(const PathRequest& _request);
-		//Called every frame to find 1 path on the top of the queue
+		/** \brief Called every frame to find 1 path on the top of the queue */
 		void Update();
 
 private:
-		//The queue of all path requests
-		std::queue<PathRequest> m_pathRequestQueue;
+		std::queue<PathRequest> m_pathRequestQueue; ///< The queue of all path requests
 
-		//The pathfinder class to find the paths!
-		std::unique_ptr<PathFinder> m_pathFinder;
+		std::unique_ptr<PathFinder> m_pathFinder;   ///< The pathfinder class to find the paths
 
-		//reference (weak pointer) to the grid of the world
-		std::weak_ptr<Grid> m_grid;
+		std::weak_ptr<Grid> m_grid; ///< reference (weak pointer) to the grid of the world
 };
 

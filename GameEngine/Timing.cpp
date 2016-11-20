@@ -102,12 +102,12 @@ namespace GameEngine
 
   void HRTimer::Start(bool _reset /*= true*/)
   {
+				if (_reset)
+				{
+						m_start = HRTimePoint::clock::now();
+				}
     if (!m_isActive)
     {
-      if (_reset)
-      {
-        m_start = HRTimePoint::clock::now();
-      }
       m_isActive = true;
     }
   }

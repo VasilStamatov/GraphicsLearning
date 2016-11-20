@@ -62,15 +62,18 @@ public:
 				m_container.pop_back();
 		}
 
+		/** \brief Removes a specific item from the container */
 		void Remove(const T& _item)
 		{
 				m_container.erase(std::remove(m_container.begin(), m_container.end(), _item), m_container.end());
 		}
+		/** \brief Removes an item on index _position from the container */
 		void Remove(const std::size_t& _position)
 		{
 				m_container.erase(m_container.begin() + _position);
 		}
 
+		/** \brief Clears the container */
 		void Clear()
 		{
 				m_container.clear();

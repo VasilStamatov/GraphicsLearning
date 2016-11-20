@@ -21,6 +21,7 @@ struct Node
 				worldPos(_worldPos), nodeIndex(_index), walkable(_walkable), inOpenSet(false), inClosedSet(false) {}
 		~Node() { }
 
+		/** All operator overloads */
 		bool operator== (const Node& _rhs) const
 		{
 				if (nodeIndex == _rhs.nodeIndex)
@@ -135,11 +136,32 @@ struct Node
 						return (f() > _rhs.lock()->f());
 				}
 		}
+		friend std::ostream &operator<<(std::ostream &out, const std::weak_ptr<Node>& _node)
+		{
+				out << "Clicked node info: " << std::endl;
+				if (_node.lock()->walkable)
+				{
+						out << "\twalkable: " << "true" << std::endl;
+				}
+				else
+				{
+						out << "\twalkable: " << "false" << std::endl;
+				}
+				out << "\tcoordinate x: " << _node.lock()->worldPos.x << std::endl;
+				out << "\tcoordinate y: " << _node.lock()->worldPos.y << std::endl;
+				out << "\tindex x: " << _node.lock()->nodeIndex.x << std::endl;
+				out << "\tindex y: " << _node.lock()->nodeIndex.y << std::endl;
+				out << "\tg cost: " << _node.lock()->g << std::endl;
+				out << "\th cost: " << _node.lock()->h << std::endl;
+				out << "\tf cost: " << _node.lock()->f() << std::endl;
+				out << "\tterrain cost: " << _node.lock()->terrainCost << std::endl;
+				return out;
+		}
 
 		glm::vec2 worldPos{ 0.0f, 0.0f }; ///< world coordinate (center of node)
 		glm::ivec2 nodeIndex{ -1 }; ///< the index of the node in the nodemap vector for the grid
 
-		int terrainCost{ 0 };
+		int terrainCost{ 0 }; ///< the terrain cost of the node
 		int g{ 0 }; ///< distance from start to current node
 		int h{ 0 }; ///< distance from end to current node
 		int f() const noexcept { return g + h; }; ///< g + h
@@ -151,7 +173,7 @@ struct Node
 		std::weak_ptr<Node> parent;
 };
 
-//Comparator for priority queues
+/** \brief Comparator for priority queues */
 struct ComparePriority
 {
 		bool operator()(const std::weak_ptr<Node> _lhs, const std::weak_ptr<Node> _rhs) const noexcept
@@ -196,6 +218,7 @@ struct ComparePriority
 		}
 };
 
+/** \brief Secondary comparator for Astar epsilon */
 struct SecondaryComparator
 {
 		bool operator()(const std::weak_ptr<Node> _lhs, const std::weak_ptr<Node> _rhs) const noexcept
@@ -243,6 +266,7 @@ struct SecondaryComparator
 
 // custom hash can be a standalone function object:
 // http://en.cppreference.com/w/cpp/utility/hash
+/** \brief Hasher for the nodes to use in unordered sets */
 struct NodeHasher
 {
 		std::size_t operator()(const Node & _node) const noexcept
@@ -280,7 +304,7 @@ struct NodeHasher
 		}
 };
 
-//The comparator to be used for the unordered set, it must return true of var a == var b
+/** \brief The comparator to be used for the unordered set, it must return true for var a == var b*/
 struct HashComparator
 {
 		bool operator()(const std::weak_ptr<Node> _lhs, const std::weak_ptr<Node> _rhs) const noexcept

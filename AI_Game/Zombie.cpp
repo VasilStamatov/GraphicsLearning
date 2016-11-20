@@ -1,6 +1,6 @@
 #include "Zombie.h"
 
-#define PENALIZE_COST 250
+#define PENALIZE_COST 25
 
 Zombie::Zombie()
 {
@@ -10,6 +10,7 @@ Zombie::Zombie(float _speed, float _health, const glm::vec2 & _startPos, const G
 		GameEngine::ColorRGBA8 & _color, std::weak_ptr<World> _world, std::weak_ptr<Player> _player, std::weak_ptr<PathRequestManager> _prManager) :
 		Agent(_speed, _health, _startPos, _texture, _color, _world), m_player(_player), m_prManager(_prManager)
 {
+		m_algoToUse = Algorithm::ASTAR;
 }
 
 
@@ -29,6 +30,7 @@ void Zombie::Init(float _speed, float _health, const glm::vec2 & _startPos, cons
 		m_world = _world;
 		m_prManager = _prManager;
 		m_player = _player;
+		m_algoToUse = Algorithm::ASTAR;
 }
 
 void Zombie::Update(float _deltaTime)
@@ -44,7 +46,6 @@ void Zombie::Update(float _deltaTime)
 						if (!m_requestedPath)
 						{
 								FindPlayer();
-								PenalizePath();
 						}
 				}
 		}
@@ -55,12 +56,13 @@ void Zombie::Update(float _deltaTime)
 void Zombie::FindPlayer()
 {
 		m_prManager.lock()->RequestPath(m_worldPos, m_player.lock()->GetCenterPos(),
-				Algorithm::ASTARe, Diagonal::IFNOWALLS,
+				m_algoToUse, Diagonal::IFNOWALLS,
 				[this](std::vector<glm::vec2>& _path, bool _success)
 		{
 				if (_success)
 				{
 						m_pathToTake = _path;
+						PenalizePath();
 				}
 				m_requestedPath = false;
 		});
@@ -94,6 +96,6 @@ void Zombie::PenalizePath()
 {
 		for (size_t i = 0; i < m_pathToTake.size(); i++)
 		{
-				m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.at(i)).lock()->terrainCost = PENALIZE_COST;
+				m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.at(i)).lock()->terrainCost += PENALIZE_COST;
 		}
 }

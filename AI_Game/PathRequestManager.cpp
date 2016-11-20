@@ -33,65 +33,42 @@ void PathRequestManager::Update()
 		{
 				PathRequest currentPathRequest = m_pathRequestQueue.front();
 				m_pathRequestQueue.pop();
+				std::vector<glm::vec2> pathResult;
 				switch (currentPathRequest.m_algorithm)
 				{
 						case Algorithm::BEST_FIRST:
 						{
-								std::vector<glm::vec2> pathResult = m_pathFinder->BestFirst(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
-								if (pathResult.empty())
-								{
-										//Failed to find path
-										currentPathRequest.m_callback(pathResult, false);
-								}
-								else
-								{
-										//Successfully found path
-										currentPathRequest.m_callback(pathResult, true);
-								}
+								pathResult = m_pathFinder->BestFirst(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
 								break;
 						}
 						case Algorithm::ASTAR:
 						{
-								std::vector<glm::vec2> pathResult = m_pathFinder->AStar(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
-								if (pathResult.empty())
-								{
-										//Failed to find path
-										currentPathRequest.m_callback(pathResult, false);
-								}
-								else
-								{
-										//Successfully found path
-										currentPathRequest.m_callback(pathResult, true);
-								}
+								pathResult = m_pathFinder->AStar(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
 								break;
 						}
 						case Algorithm::ASTARe:
 						{
-								std::vector<glm::vec2> pathResult = m_pathFinder->AStarEpsilon(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
-								if (pathResult.empty())
-								{
-										//Failed to find path
-										currentPathRequest.m_callback(pathResult, false);
-								}
-								else
-								{
-										//Successfully found path
-										currentPathRequest.m_callback(pathResult, true);
-								}								break;
+								pathResult = m_pathFinder->AStarEpsilon(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
+								break;
 						}
 						case Algorithm::BREADTH_FIRST:
 						{
-								std::vector<glm::vec2> pathResult = m_pathFinder->BreadthFirst(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
-								if (pathResult.empty())
-								{
-										//Failed to find path
-										currentPathRequest.m_callback(pathResult, false);
-								}
-								else
-								{
-										//Successfully found path
-										currentPathRequest.m_callback(pathResult, true);
-								}
+								pathResult = m_pathFinder->BreadthFirst(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
+								break;
+						}
+						case Algorithm::DEPTH_FIRST:
+						{
+								pathResult = m_pathFinder->DepthFirst(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
+								break;
+						}
+						case Algorithm::DIJKSTRA:
+						{
+								pathResult = m_pathFinder->Dijkstra(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
+								break;
+						}
+						case Algorithm::GREEDY_BEST_FIRST:
+						{
+								pathResult = m_pathFinder->GreedyBFirst(currentPathRequest.m_start, currentPathRequest.m_end, m_grid, currentPathRequest.m_diagonal);
 								break;
 						}
 						default:
@@ -99,6 +76,16 @@ void PathRequestManager::Update()
 								printf("Algorith not implemented");
 								break;
 						}
+				}
+				if (pathResult.empty())
+				{
+						//Failed to find path
+						currentPathRequest.m_callback(pathResult, false);
+				}
+				else
+				{
+						//Successfully found path
+						currentPathRequest.m_callback(pathResult, true);
 				}
 		}
 }

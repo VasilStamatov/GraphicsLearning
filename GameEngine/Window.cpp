@@ -82,25 +82,21 @@ namespace GameEngine
 						case SDL_WINDOWEVENT_SHOWN:
 						{
 								//window is shown
-								std::cout << "SDL_WINDOWEVENT_SHOWN" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_HIDDEN:
 						{
 								//window is hidden
-								std::cout << "SDL_WINDOWEVENT_HIDDEN" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_EXPOSED:
 						{
 								//the window is visible again, make it render !
-								std::cout << "SDL_WINDOWEVENT_EXPOSED" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_MOVED:
 						{
 								//window has been moved
-								std::cout << "SDL_WINDOWEVENT_MOVED" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_RESIZED:
@@ -110,8 +106,6 @@ namespace GameEngine
 								m_screenHeight = _event.window.data2;
 								glViewport(0, 0, m_screenWidth, m_screenHeight);
 								m_wasResized = true;
-								std::cout << "SDL_WINDOWEVENT_RESIZED" << std::endl;
-								printf("width: %d, height %d \n", m_screenWidth, m_screenHeight);
 								break;
 						}
 						case SDL_WINDOWEVENT_SIZE_CHANGED:
@@ -121,63 +115,53 @@ namespace GameEngine
 								m_screenHeight = _event.window.data2;
 								glViewport(0, 0, m_screenWidth, m_screenHeight);
 								m_wasResized = true;
-								std::cout << "SDL_WINDOWEVENT_SIZE_CHANGED" << std::endl;
-								printf("width: %d, height %d \n", m_screenWidth, m_screenHeight);
 								break;
 						}
 						case SDL_WINDOWEVENT_MINIMIZED:
 						{
 								//window was minimized
 								m_minimized = true;
-								std::cout << "SDL_WINDOWEVENT_MINIMIZED" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_MAXIMIZED:
 						{
 								//window was maximized
 								m_minimized = false;
-								std::cout << "SDL_WINDOWEVENT_MAXIMIZED" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_RESTORED:
 						{
 								//window has been restored
 								m_minimized = false;
-								std::cout << "SDL_WINDOWEVENT_RESTORED" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_ENTER:
 						{
 								//mouse entered the window
 								m_mouseFocus = true;
-								std::cout << "SDL_WINDOWEVENT_ENTER" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_LEAVE:
 						{
 								//mouse left the window
 								m_mouseFocus = false;
-								std::cout << "SDL_WINDOWEVENT_LEAVE" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_GAINED:
 						{
 								//window gained keyboard access/focus
 								m_keyboardFocus = true;
-								std::cout << "SDL_WINDOWEVENT_FOCUS_GAINED" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_LOST:
 						{
 								//window lost keyboard access/focus
 								m_keyboardFocus = false;
-								std::cout << "SDL_WINDOWEVENT_FOCUS_LOST" << std::endl;
 								break;
 						}
 						case SDL_WINDOWEVENT_CLOSE:
 						{
 								//window has been closed
-								std::cout << "SDL_WINDOWEVENT_CLOSE" << std::endl;
 								break;
 						}
 #if SDL_VERSION_ATLEAST(2, 0, 5)
@@ -197,7 +181,6 @@ namespace GameEngine
 						default:
 						{
 								//IMPOSSIBLE!
-								std::cout << "default" << std::endl;
 								break;
 						}
 				}
