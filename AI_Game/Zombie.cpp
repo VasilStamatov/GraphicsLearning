@@ -1,16 +1,17 @@
 #include "Zombie.h"
-
-#define PENALIZE_COST 25
+#include "PatrolState.h"
 
 Zombie::Zombie()
 {
 }
 
 Zombie::Zombie(float _speed, float _health, const glm::vec2 & _startPos, const GameEngine::GLTexture & _texture,
-		GameEngine::ColorRGBA8 & _color, std::weak_ptr<World> _world, std::weak_ptr<Player> _player, std::weak_ptr<PathRequestManager> _prManager) :
-		Agent(_speed, _health, _startPos, _texture, _color, _world), m_player(_player), m_prManager(_prManager)
+		GameEngine::ColorRGBA8 & _color, std::weak_ptr<World> _world, std::weak_ptr<Player> _player,
+		std::weak_ptr<PathRequestManager> _prManager, const std::vector<glm::vec2>& _patrolWaypoints) :
+		Agent(_speed, _health, _startPos, _texture, _color, _world), m_player(_player), m_prManager(_prManager), m_patrolWaypoints(_patrolWaypoints)
 {
 		m_algoToUse = Algorithm::ASTAR;
+		m_stateManager.SetState(new PatrolState(this));
 }
 
 
@@ -20,7 +21,8 @@ Zombie::~Zombie()
 }
 
 void Zombie::Init(float _speed, float _health, const glm::vec2 & _startPos, const GameEngine::GLTexture & _texture,
-		GameEngine::ColorRGBA8 & _color, std::weak_ptr<World> _world, std::weak_ptr<Player> _player, std::weak_ptr<PathRequestManager> _prManager)
+		GameEngine::ColorRGBA8 & _color, std::weak_ptr<World> _world, std::weak_ptr<Player> _player,
+		std::weak_ptr<PathRequestManager> _prManager, const std::vector<glm::vec2>& _patrolWaypoints)
 {
 		m_movementSpeed = _speed;
 		m_health = _health;
@@ -31,71 +33,12 @@ void Zombie::Init(float _speed, float _health, const glm::vec2 & _startPos, cons
 		m_prManager = _prManager;
 		m_player = _player;
 		m_algoToUse = Algorithm::ASTAR;
+		m_patrolWaypoints = _patrolWaypoints;
 }
 
 void Zombie::Update(float _deltaTime)
 {
-		if (!CollideWithAgent(m_player.lock().get()))
-		{
-				if (!m_pathToTake.empty())
-				{
-						FollowPath(_deltaTime);
-				}
-				else
-				{
-						if (!m_requestedPath)
-						{
-								FindPlayer();
-						}
-				}
-		}
+		m_stateManager.Update(_deltaTime);
 		// Do collision
 		CollideWithLevel();
-}
-
-void Zombie::FindPlayer()
-{
-		m_prManager.lock()->RequestPath(m_worldPos, m_player.lock()->GetCenterPos(),
-				m_algoToUse, Diagonal::IFNOWALLS,
-				[this](std::vector<glm::vec2>& _path, bool _success)
-		{
-				if (_success)
-				{
-						m_pathToTake = _path;
-						PenalizePath();
-				}
-				m_requestedPath = false;
-		});
-		m_requestedPath = true;
-}
-
-void Zombie::FollowPath(float _deltaTime)
-{
-		glm::vec2 currentWaypoint = m_pathToTake.back();
-		if (m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_worldPos).lock() == m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.back()).lock())
-		{
-				//Remove the penalizing after exiting this waypoint
-				std::weak_ptr<Node> nodeToLeave = m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.back());
-				nodeToLeave.lock()->terrainCost =
-						m_world.lock()->GetTile(nodeToLeave.lock()->nodeIndex.x, nodeToLeave.lock()->nodeIndex.y).lock()->MovementCost();
-
-				m_pathToTake.pop_back();
-				if (m_pathToTake.empty())
-				{
-						m_direction = glm::normalize(currentWaypoint - GetCenterPos());
-						m_worldPos += m_direction * m_movementSpeed * _deltaTime;
-						return;
-				}
-				currentWaypoint = m_pathToTake.back();
-		}
-		m_direction = glm::normalize(currentWaypoint - GetCenterPos());
-		m_worldPos += m_direction * m_movementSpeed * _deltaTime;
-}
-
-void Zombie::PenalizePath()
-{
-		for (size_t i = 0; i < m_pathToTake.size(); i++)
-		{
-				m_world.lock()->GetWorldGrid().lock()->GetNodeAt(m_pathToTake.at(i)).lock()->terrainCost += PENALIZE_COST;
-		}
 }

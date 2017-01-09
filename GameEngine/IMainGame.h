@@ -56,7 +56,7 @@ namespace GameEngine
     bool m_paused{ false };
 
     float m_deltaTime{ 1.0f };
-    float m_fps{ 0.0f };
+    float m_fps{ 60.0f };
     //the window
     Window m_window;
     std::string m_gameName{ "Default" };

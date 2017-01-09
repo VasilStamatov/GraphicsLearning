@@ -47,6 +47,10 @@ namespace GameEngine
 								{
 										m_paused = !m_paused;
 								}
+								if (inputManager.IsKeyPressed(SDLK_ESCAPE))
+								{
+										ExitGame();
+								}
 						}
 						if (m_isRunning && !m_window.IsMinimized())
 						{

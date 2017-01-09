@@ -1,5 +1,6 @@
 #include "GameScreen.h"
 #include "ScreenIndices.h"
+#include "SmartZombie.h"
 
 #include <GameEngine\IMainGame.h>
 #include <GameEngine\ResourceManager.h>
@@ -34,6 +35,7 @@ void GameScreen::Destroy()
 
 void GameScreen::OnEntry()
 {
+		m_random.GenSeed(GameEngine::SeedType::CLOCK_TICKS);
 		/* Initialize the camera */
 		m_camera.Init(m_window->GetScreenWidth(), m_window->GetScreenHeight());
 		m_hudCamera.Init(m_window->GetScreenWidth(), m_window->GetScreenHeight());
@@ -62,11 +64,26 @@ void GameScreen::OnEntry()
 		const std::vector<glm::vec2>& zombiePositions = m_gameWorlds.at(m_currentLevel)->GetZombieStartPositions();
 		for (size_t i = 0; i < zombiePositions.size(); i++)
 		{
-				m_zombies.push_back(std::make_unique<Zombie>(4.5f, 150.0f, zombiePositions.at(i), GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
-						GameEngine::ColorRGBA8(255, 255), m_gameWorlds.at(m_currentLevel), m_player, m_pathRequestManger));
+				if (m_random.GenRandInt(0, 1) == 0)
+				{
+						m_zombies.push_back(std::make_unique<Zombie>(4.5f, 150.0f, zombiePositions.at(i),
+								GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
+								GameEngine::ColorRGBA8(255, 255),
+								m_gameWorlds.at(m_currentLevel),
+								m_player, m_pathRequestManger,
+								m_gameWorlds.at(m_currentLevel)->GetPatrolWaypoints()));
+				}
+				else
+				{
+						m_zombies.push_back(std::make_unique<SmartZombie>(4.5f, 1.0f, zombiePositions.at(i),
+								GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
+								GameEngine::ColorRGBA8(0, 255, 0, 255),
+								m_gameWorlds.at(m_currentLevel),
+								m_player, m_pathRequestManger,
+								m_gameWorlds.at(m_currentLevel)->GetPatrolWaypoints()));
+				}
 		}
 		//Generate the seed for rng
-		m_random.GenSeed(GameEngine::SeedType::CLOCK_TICKS);
 }
 
 void GameScreen::OnExit()
@@ -87,28 +104,23 @@ void GameScreen::Update()
 				m_window->ResizeHandled();
 		}
 		CheckInput();
-		/*if (m_timer.Seconds() > 10.0f)
+
+		float deltaTime = m_game->GetDT();
+		//if (deltaTime <= 0.1f)
 		{
-				const std::vector<glm::vec2>& zombiePositions = m_gameWorlds.at(m_currentLevel)->GetZombieStartPositions();
-				m_zombies.push_back(std::make_unique<Zombie>(4.5f, 150.0f, zombiePositions.at(m_random.GenRandInt(0, zombiePositions.size() - 1)), GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
-						GameEngine::ColorRGBA8(255, 255), m_gameWorlds.at(m_currentLevel), m_player, m_pathRequestManger));
-				m_timer.Start();
-		}*/
-		m_player->Update(m_game->GetDT());
+				deltaTime = 1.0f;
+		}
+
+		m_player->Update(deltaTime);
 		m_pathRequestManger->Update();
 		for (size_t i = 0; i < m_zombies.size(); i++)
 		{
-				m_zombies.at(i)->Update(m_game->GetDT());
+				m_zombies.at(i)->Update(deltaTime);
 				//collide with all other zombies
 				for (size_t j = i + 1; j < m_zombies.size(); j++)
 				{
 						m_zombies.at(i)->CollideWithAgent(m_zombies.at(j).get());
 				}
-				//collide with player
-				//if (m_zombies.at(i)->CollideWithAgent(m_player.get()))
-				//{
-				//		//handle collision
-				//}
 		}
 		m_camera.SetPosition(m_player->GetCenterPos());
 		m_camera.Update();
@@ -126,12 +138,12 @@ void GameScreen::Draw()
 		if (m_debugMode)
 		{
 				m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->DrawGrid(m_camera.GetCameraMatrix());
+				for (size_t i = 0; i < m_zombies.size(); i++)
+				{
+						m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->DrawPath(m_zombies.at(i)->GetPath(), m_camera.GetCameraMatrix());
+				}
 		}
 
-		for (size_t i = 0; i < m_zombies.size(); i++)
-		{
-				m_gameWorlds.at(m_currentLevel)->GetWorldGrid().lock()->DrawPath(m_zombies.at(i)->GetPath(), m_camera.GetCameraMatrix());
-		}
 
 		m_shader.Use();
 
@@ -186,64 +198,80 @@ void GameScreen::CheckInput()
 				Algorithm algoToUse;
 				switch (rand)
 				{
-						case 0:
-						{
-								algoToUse = Algorithm::ASTAR;
-								m_currentAlgo = "ASTAR";
-								break;
-						}
-						case 1:
-						{
-								algoToUse = Algorithm::ASTARe;
-								m_currentAlgo = "ASTARe";
-								break;
-						}
-						case 2:
-						{
-								algoToUse = Algorithm::BEST_FIRST;
-								m_currentAlgo = "BEST.FIRST";
-								break;
-						}
-						case 3:
-						{
-								algoToUse = Algorithm::BREADTH_FIRST;
-								m_currentAlgo = "BREADTH.FIRST";
-								break;
-						}
-						case 4:
-						{
-								algoToUse = Algorithm::DEPTH_FIRST;
-								m_currentAlgo = "DEPTH.FIRST";
-								break;
-						}
-						case 5:
-						{
-								algoToUse = Algorithm::DIJKSTRA;
-								m_currentAlgo = "DIJKSTRA";
-								break;
-						}
-						case 6:
-						{
-								algoToUse = Algorithm::GREEDY_BEST_FIRST;
-								m_currentAlgo = "GREEDY.BEST.FIRST";
-								break;
-						}
-						default:
-						{
-								break;
-						}
+				case 0:
+				{
+						algoToUse = Algorithm::ASTAR;
+						m_currentAlgo = "ASTAR";
+						break;
+				}
+				case 1:
+				{
+						algoToUse = Algorithm::ASTARe;
+						m_currentAlgo = "ASTARe";
+						break;
+				}
+				case 2:
+				{
+						algoToUse = Algorithm::BEST_FIRST;
+						m_currentAlgo = "BEST.FIRST";
+						break;
+				}
+				case 3:
+				{
+						algoToUse = Algorithm::BREADTH_FIRST;
+						m_currentAlgo = "BREADTH.FIRST";
+						break;
+				}
+				case 4:
+				{
+						algoToUse = Algorithm::DEPTH_FIRST;
+						m_currentAlgo = "DEPTH.FIRST";
+						break;
+				}
+				case 5:
+				{
+						algoToUse = Algorithm::DIJKSTRA;
+						m_currentAlgo = "DIJKSTRA";
+						break;
+				}
+				case 6:
+				{
+						algoToUse = Algorithm::GREEDY_BEST_FIRST;
+						m_currentAlgo = "GREEDY.BEST.FIRST";
+						break;
+				}
+				default:
+				{
+						break;
+				}
 				}
 				for (auto& zombie : m_zombies)
 				{
 						zombie->SetPFAlgo(algoToUse);
 				}
 		}
-		
+
 		if (m_game->inputManager.IsKeyPressed(SDLK_LSHIFT))
 		{
 				const std::vector<glm::vec2>& zombiePositions = m_gameWorlds.at(m_currentLevel)->GetZombieStartPositions();
-				m_zombies.push_back(std::make_unique<Zombie>(4.5f, 150.0f, zombiePositions.at(m_random.GenRandInt(0, zombiePositions.size() - 1)), GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
-						GameEngine::ColorRGBA8(255, 255), m_gameWorlds.at(m_currentLevel), m_player, m_pathRequestManger));
+				if (m_random.GenRandInt(0, 1) == 0)
+				{
+						m_zombies.push_back(std::make_unique<Zombie>(4.5f, 150.0f, zombiePositions.at(m_random.GenRandInt(0, zombiePositions.size() - 1)),
+								GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
+								GameEngine::ColorRGBA8(255, 255),
+								m_gameWorlds.at(m_currentLevel),
+								m_player, m_pathRequestManger,
+								m_gameWorlds.at(m_currentLevel)->GetPatrolWaypoints()));
+				}
+				else
+				{
+						m_zombies.push_back(std::make_unique<SmartZombie>(4.5f, 1.0f, zombiePositions.at(m_random.GenRandInt(0, zombiePositions.size() - 1)),
+								GameEngine::ResourceManager::GetTexture("Textures/zombie.png"),
+								GameEngine::ColorRGBA8(0, 255, 0, 255),
+								m_gameWorlds.at(m_currentLevel),
+								m_player, m_pathRequestManger,
+								m_gameWorlds.at(m_currentLevel)->GetPatrolWaypoints()));
+				}
 		}
 
 		if (m_game->inputManager.IsKeyPressed(SDL_BUTTON_LEFT))
@@ -259,7 +287,7 @@ void GameScreen::CheckInput()
 		}
 }
 
-void GameScreen::DrawUI( GameEngine::GLSLProgram& _shader)
+void GameScreen::DrawUI(GameEngine::GLSLProgram& _shader)
 {
 		_shader.UploadValue("projection", m_hudCamera.GetCameraMatrix());
 

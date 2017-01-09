@@ -70,9 +70,6 @@ bool Agent::CollideWithLevel()
 
 bool Agent::CollideWithAgent(Agent* _agent)
 {
-		// Minimum distance before there is a collision
-		constexpr float MIN_DISTANCE = AGENT_RADIUS * 2.0f;
-
 		// direction vector between the two agents (center of this agent minus center of other agent)
 		glm::vec2 direction = GetCenterPos() - _agent->GetCenterPos();
 
@@ -80,7 +77,7 @@ bool Agent::CollideWithAgent(Agent* _agent)
 		float distance = glm::length(direction);
 
 		// Depth of the collision
-		float collisionDepth = MIN_DISTANCE - distance;
+		float collisionDepth = AGENT_DIAMETER - distance;
 
 		// If collision depth > 0 then we did collide
 		if (collisionDepth > 0)

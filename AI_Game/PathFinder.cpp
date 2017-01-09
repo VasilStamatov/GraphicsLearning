@@ -6,7 +6,7 @@
 #ifdef _DEBUG
 #define MAX_ITERATIONS 100u
 #else
-#define MAX_ITERATIONS 450u
+#define MAX_ITERATIONS 500u
 #endif
 
 #define EPSILON 1.3f
@@ -327,19 +327,15 @@ std::vector<glm::vec2> PathFinder::BreadthFirst(const glm::vec2 & _start, const 
 				return EMPTY_VECTOR;
 		}
 		
-		std::queue<std::weak_ptr<Node>> m_openSet;
-		std::vector<std::weak_ptr<Node>> m_closedSet;
+		std::queue<std::weak_ptr<Node>> m_visited;
 		m_startNode.lock()->inOpenSet = true;
-		m_openSet.push(m_startNode);
+		m_visited.push(m_startNode);
 
-		while (!m_openSet.empty())
+		while (!m_visited.empty())
 		{
-				std::weak_ptr<Node> currentNode = m_openSet.front();
-				m_openSet.pop();
-				currentNode.lock()->inOpenSet = false;
+				std::weak_ptr<Node> currentNode = m_visited.front();
+				m_visited.pop();
 
-				currentNode.lock()->inClosedSet = true;
-				m_closedSet.push_back(currentNode);
 				//check if the end was found
 				if (currentNode.lock() == m_endNode.lock())
 				{
@@ -352,13 +348,13 @@ std::vector<glm::vec2> PathFinder::BreadthFirst(const glm::vec2 & _start, const 
 				for (auto neighbor : _grid.lock()->GetNeighbors(currentNode, _diagonal))
 				{
 						//check if the neighbor has already been inspected 
-						if (neighbor.lock()->inClosedSet || neighbor.lock()->inOpenSet)
+						if (!neighbor.lock()->inOpenSet)
 						{
-								continue;
+								//if not, add it to the visited list
+								neighbor.lock()->inOpenSet = true;
+								neighbor.lock()->parent = currentNode;
+								m_visited.push(neighbor);
 						}
-						neighbor.lock()->inOpenSet = true;
-						neighbor.lock()->parent = currentNode;
-						m_openSet.push(neighbor);
 				}
 				counter++;
 				if (counter > MAX_ITERATIONS)

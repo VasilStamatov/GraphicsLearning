@@ -126,30 +126,49 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h" />
+    <ClInclude Include="AlertState.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="ChaseState.h" />
     <ClInclude Include="GameScreen.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Heap.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="PathFinder.h" />
     <ClInclude Include="PathRequestManager.h" />
+    <ClInclude Include="PatrolState.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="RetreatState.h" />
     <ClInclude Include="ScreenIndices.h" />
+    <ClInclude Include="SmartChaseState.h" />
+    <ClInclude Include="SmartPatrolState.h" />
+    <ClInclude Include="SmartZombie.h" />
+    <ClInclude Include="State.h" />
+    <ClInclude Include="StateManager.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="Zombie.h" />
+    <ClInclude Include="ZombieState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Agent.cpp" />
+    <ClCompile Include="AlertState.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="ChaseState.cpp" />
     <ClCompile Include="GameScreen.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PathFinder.cpp" />
     <ClCompile Include="PathRequestManager.cpp" />
+    <ClCompile Include="PatrolState.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="RetreatState.cpp" />
+    <ClCompile Include="SmartChaseState.cpp" />
+    <ClCompile Include="SmartPatrolState.cpp" />
+    <ClCompile Include="SmartZombie.cpp" />
+    <ClCompile Include="StateManager.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="Zombie.cpp" />
+    <ClCompile Include="ZombieState.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

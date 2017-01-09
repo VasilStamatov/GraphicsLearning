@@ -1,16 +1,27 @@
-﻿  PathRequestManager.cpp
-  PathFinder.cpp
-c:\users\vasil\projects\graphicslearning\ai_game\pathfinder.cpp(611): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  Grid.cpp
-  GameScreen.cpp
-  Generating Code...
-  Compiling...
+﻿  ZombieState.cpp
   Zombie.cpp
   World.cpp
+  StateManager.cpp
+  SmartZombie.cpp
+  SmartPatrolState.cpp
+  SmartChaseState.cpp
+  RetreatState.cpp
   Player.cpp
+  PatrolState.cpp
+  PathRequestManager.cpp
+  PathFinder.cpp
+c:\users\vasil\projects\graphicslearning\ai_game\pathfinder.cpp(607): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   Main.cpp
+  Grid.cpp
+  GameScreen.cpp
+  ChaseState.cpp
   App.cpp
+  AlertState.cpp
   Agent.cpp
   Generating Code...
+GameEngine.lib(stb_image_aug.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'GameEngine.lib(stb_image_aug.obj)' or at 'C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\vc120.pdb'; linking object as if no debug info
+GameEngine.lib(SOIL.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'GameEngine.lib(SOIL.obj)' or at 'C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\vc120.pdb'; linking object as if no debug info
+GameEngine.lib(image_helper.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'GameEngine.lib(image_helper.obj)' or at 'C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\vc120.pdb'; linking object as if no debug info
+GameEngine.lib(image_DXT.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'GameEngine.lib(image_DXT.obj)' or at 'C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\vc120.pdb'; linking object as if no debug info
   AI_Game.vcxproj -> C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\AI_Game.exe
   AI_Game.vcxproj -> C:\Users\Vasil\Projects\GraphicsLearning\bin\Debug\AI_Game.pdb (Partial PDB)

@@ -193,6 +193,15 @@ void World::LoadTerrainFromFile(const std::string & _filePath)
 						m_zombieSpawnPositions.emplace_back(x * TILE_WIDTH, y * TILE_WIDTH);
 						break;
 				}
+				case 'p':
+				case 'P':
+				{
+						m_tiles.at(i) = m_grassTerrain;
+						m_worldGrid->SetWalkableAt(glm::ivec2(x, y), m_tiles.at(i).lock()->IsWalkable());
+						m_worldGrid->SetTerrainCost(glm::ivec2(x, y), m_tiles.at(i).lock()->MovementCost());
+						m_patrolWaypoints.emplace_back(x * TILE_WIDTH, y * TILE_WIDTH);
+						break;
+				}
 				case '.':
 				{
 						m_tiles.at(i) = m_grassTerrain;

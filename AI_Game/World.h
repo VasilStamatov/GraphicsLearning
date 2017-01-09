@@ -29,6 +29,7 @@ public:
 		const std::weak_ptr<Terrain> GetTile(int _index)								const { return m_tiles.at(_index); }
 		const glm::vec2& GetStartPlayerPos() 																			const { return m_startPlayerPos; }
 		const std::vector<glm::vec2>& GetZombieStartPositions() const { return m_zombieSpawnPositions; }
+		const std::vector<glm::vec2>& GetPatrolWaypoints()						const { return m_patrolWaypoints; }
 		std::weak_ptr<Grid> GetWorldGrid()																						const { return m_worldGrid; }
 
 private:
@@ -48,6 +49,7 @@ private:
 
 		std::vector<std::weak_ptr<Terrain>> m_tiles;   ///< set of weak pointers to the shared terrain tiles (the flyweight pattern)
 		std::vector<glm::vec2> m_zombieSpawnPositions; ///< set of world space spawn positions for the zombies
+		std::vector<glm::vec2> m_patrolWaypoints; ///< set of world space spawn positions for the zombies
 		glm::vec2 m_startPlayerPos;																				///< world space spawn position for the player
 		GameEngine::Random m_randomGenerator;										///< random number generator
 		GameEngine::SpriteBatch m_terrainBatch;							 ///< the spritebatch for the terrain(world) rendering
